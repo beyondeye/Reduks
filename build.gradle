@@ -2,26 +2,13 @@
 
 buildscript {
     ext.junit_version= '4.12'
-    ext.kotlin_version = '1.0.1'
-    ext.anko_version = '0.8.2'
+    ext.kotlin_version = '1.0.2'
     ext.kovenant_version= '3.2.2'
-    ext.support_version = '23.4.0'
-    ext.picasso_version='2.5.2'
-    ext.okhttp_version='3.0.1'
-    ext.retrofit_version='2.0.0-beta3'
     ext.rxjava_version='1.1.0'
     ext.rxandroid_version='1.1.0'
     ext.rxkotlin_version='0.55.0'
-    ext.stetho_version='1.2.0'
-    ext.realm_version='0.87.5'
-    ext.stethorealm_version='0.8.0'
-    ext.gson_version='2.6.2'
-    ext.jsoup_version='1.8.3'
-    ext.roboelectric_version='3.0'
-    ext.digits_version='1.10.2@aar'
     repositories {
         jcenter()
-        maven { url 'https://maven.fabric.io/public' }
     }
     // useful links about version to use of android plugin for gradle
     //New Build System - Android Tools Project Site
@@ -74,8 +61,6 @@ allprojects {
     }
     //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
         project.ext {
-            //Warning:Renderscript support mode is not currently supported with renderscript target 21+
-            myRenderscript_target_api=20
             myCompileSdkVersion=23
             myBuildToolsVersion="23.0.3" //String
             myMinSdkVersion=15 //Integer
@@ -90,6 +75,6 @@ task clean(type: Delete) {
 
 //task for updating gradle
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.10'
+    gradleVersion = '2.13'
 }
 

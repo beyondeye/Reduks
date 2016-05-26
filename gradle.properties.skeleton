@@ -23,4 +23,4 @@ AWS_SECRET_KEY=<YOUR SECRET KEY>
 #kotlin.incremental=true
 
 GROUP=com.plensee.libs
-POM_DESCRIPTION=LIBRARIES FOR PLENSEE ANDROID APP
+POM_DESCRIPTION=REDUKS: reduxjs for Kotlin and Android
