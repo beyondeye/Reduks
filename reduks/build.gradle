@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'kotlin'
+
+sourceCompatibility = 1.6 //I want this library to be linkable from android projects
+targetCompatibility = 1.6 //I want this library to be linkable from android projects
+//forked from https://github.com/brianegan/bansa
+//see also http://redux.js.org/
+
+repositories {
+  mavenCentral()
+  maven {
+    url "http://repository.jetbrains.com/all"
+  }
+}
+
+
+
+dependencies {
+  compile "nl.komponents.kovenant:kovenant:$kovenant_version"
+//  compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
+  compile "io.reactivex:rxjava:$rxjava_version"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.assertj:assertj-core:1.7.1'
+  testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin'
+  test.java.srcDirs += 'src/test/kotlin'
+}
+apply from: '../maven-push-javalib.gradle'

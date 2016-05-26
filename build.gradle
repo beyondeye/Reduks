@@ -1,0 +1,95 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.junit_version= '4.12'
+    ext.kotlin_version = '1.0.1'
+    ext.anko_version = '0.8.2'
+    ext.kovenant_version= '3.2.2'
+    ext.support_version = '23.4.0'
+    ext.picasso_version='2.5.2'
+    ext.okhttp_version='3.0.1'
+    ext.retrofit_version='2.0.0-beta3'
+    ext.rxjava_version='1.1.0'
+    ext.rxandroid_version='1.1.0'
+    ext.rxkotlin_version='0.55.0'
+    ext.stetho_version='1.2.0'
+    ext.realm_version='0.87.5'
+    ext.stethorealm_version='0.8.0'
+    ext.gson_version='2.6.2'
+    ext.jsoup_version='1.8.3'
+    ext.roboelectric_version='3.0'
+    ext.digits_version='1.10.2@aar'
+    repositories {
+        jcenter()
+        maven { url 'https://maven.fabric.io/public' }
+    }
+    // useful links about version to use of android plugin for gradle
+    //New Build System - Android Tools Project Site
+    //http://tools.android.com/tech-docs/new-build-system
+    //Instant Run - Android Tools Project Site
+    //http://tools.android.com/tech-docs/instant-run
+    //Android Plugin for Gradle Release Notes | Android Developers
+    //http://developer.android.com/tools/revisions/gradle-plugin.html
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
+        // The Fabric Gradle plugin uses an open ended version to react
+        // quickly to Android tooling updates
+        //classpath 'io.fabric.tools:gradle:1.+'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+
+        // used to generate a POM file
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+    }
+}
+
+allprojects {
+    group = GROUP
+    repositories {
+        maven {
+            url "s3://plensee-maven/android/releases"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY
+                secretKey AWS_SECRET_KEY
+            }
+        }
+        maven {
+            url "s3://plensee-maven/android/snapshots"
+            credentials(AwsCredentials) {
+                accessKey AWS_ACCESS_KEY
+                secretKey AWS_SECRET_KEY
+            }
+        }
+        jcenter()
+    }
+    buildscript {
+        repositories {
+            jcenter()
+            mavenCentral()
+            maven { url "http://repository.jetbrains.com/all" }
+        }
+    }
+    configurations {
+        javadocDeps
+    }
+    //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
+        project.ext {
+            //Warning:Renderscript support mode is not currently supported with renderscript target 21+
+            myRenderscript_target_api=20
+            myCompileSdkVersion=23
+            myBuildToolsVersion="23.0.3" //String
+            myMinSdkVersion=15 //Integer
+            myTargetSdkVersion=23
+        }
+}
+
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+//task for updating gradle
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
+
