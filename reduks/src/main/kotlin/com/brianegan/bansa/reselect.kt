@@ -52,7 +52,7 @@ interface Selector<S, O> : SelectorInput<S, O> {
     fun isChanged(): Boolean
     fun resetChanged()
     fun getIfChangedIn(state: S): O? {
-        var res = invoke(state)
+        val res = invoke(state)
         if (isChanged()) {
             resetChanged()
             return res
