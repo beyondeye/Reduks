@@ -4,8 +4,8 @@ buildscript {
     ext.junit_version= '4.12'
     ext.kotlin_version = '1.0.2'
     ext.kovenant_version= '3.2.2'
-    ext.rxjava_version='1.1.0'
-    ext.rxandroid_version='1.1.0'
+    ext.rxjava_version='1.1.5'
+    ext.rxandroid_version='1.2.0'
     ext.rxkotlin_version='0.55.0'
     repositories {
         jcenter()
