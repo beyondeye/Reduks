@@ -1,23 +1,40 @@
-apply plugin: 'java'
-apply plugin: 'kotlin'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
-sourceCompatibility = 1.6 //I want this library to be linkable from android projects
-targetCompatibility = 1.6 //I want this library to be linkable from android projects
 //forked from https://github.com/brianegan/bansa
 //see also http://redux.js.org/
+
+android {
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
+
+  defaultConfig {
+    minSdkVersion rootProject.ext.minSdkVersion
+  }
+
+  compileOptions {
+    sourceCompatibility rootProject.ext.sourceCompatibility
+    targetCompatibility rootProject.ext.targetCompatibility
+  }
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+  }
+}
 
 repositories {
   mavenCentral()
   maven {
     url "http://repository.jetbrains.com/all"
   }
+
 }
 
 
 
 dependencies {
   compile "nl.komponents.kovenant:kovenant:$kovenant_version"
-//  compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
+  compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
   compile "io.reactivex:rxjava:$rxjava_version"
   compile "io.reactivex:rxandroid:$rxandroid_version"
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -35,8 +52,5 @@ buildscript {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
-sourceSets {
-  main.java.srcDirs += 'src/main/kotlin'
-  test.java.srcDirs += 'src/test/kotlin'
-}
-apply from: '../maven-push-javalib.gradle'
+
+apply from: '../maven-push.gradle'

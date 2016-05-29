@@ -10,7 +10,7 @@ class RxStoreTest {
     data class MyAction(val type: String = "unknown")
 
     @Test
-    fun `when an action is fired, the corresponding reducer should be called and update the state of the application`() {
+    fun when_an_action_is_fired_the_corresponding_reducer_should_be_called_and_update_the_state_of_the_application() {
         val reducer = Reducer<MyState> { state, action->
             if (action !is MyAction) state
             else
@@ -27,7 +27,7 @@ class RxStoreTest {
     }
 
     @Test
-    fun `when two reducers are combined, and a series of actions are fired, the correct reducer should be called`() {
+    fun when_two_reducers_are_combined_and_a_series_of_actions_are_fired_the_correct_reducer_should_be_called() {
         val helloReducer1 = "helloReducer1"
         val helloReducer2 = "helloReducer2"
 
@@ -58,13 +58,13 @@ class RxStoreTest {
     }
 
     @Test
-    fun `subscribers should be notified when the state changes`() {
+    fun subscribers_should_be_notified_when_the_state_changes() {
         val store = RxStore(MyState(), Reducer<MyState>{ state, action -> MyState() })
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 
-        store.subscribe(subscriber1)
-        store.subscribe(subscriber2)
+        store.subscribe(subscriber1,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
+        store.subscribe(subscriber2,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
 
         store.dispatch(MyAction())
 
@@ -73,13 +73,13 @@ class RxStoreTest {
     }
 
     @Test
-    fun `the store should not notify unsubscribed objects`() {
+    fun the_store_should_not_notify_unsubscribed_objects() {
         val store = RxStore(MyState(), Reducer<MyState>{ state, action -> MyState() })
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 
-        store.subscribe(subscriber1)
-        val subscription = store.subscribe(subscriber2)
+        store.subscribe(subscriber1,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
+        val subscription = store.subscribe(subscriber2,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
         subscription.unsubscribe()
 
         store.dispatch(MyAction())
