@@ -63,8 +63,8 @@ class RxStoreTest {
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 
-        store.subscribe(subscriber1,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
-        store.subscribe(subscriber2,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
+        store.subscribe(subscriber1, subscribeOnAndroidMainThread = false) //false, otherwise will throw exception in test
+        store.subscribe(subscriber2, subscribeOnAndroidMainThread = false) // false, otherwise will throw exception in test
 
         store.dispatch(MyAction())
 
@@ -78,8 +78,8 @@ class RxStoreTest {
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 
-        store.subscribe(subscriber1,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
-        val subscription = store.subscribe(subscriber2,observeOnAndroidMainThread = false) //observeOnAndroidMainThread = false, otherwise will throw exception in test
+        store.subscribe(subscriber1, subscribeOnAndroidMainThread = false) //false, otherwise will throw exception in test
+        val subscription = store.subscribe(subscriber2, subscribeOnAndroidMainThread = false) // false, otherwise will throw exception in test
         subscription.unsubscribe()
 
         store.dispatch(MyAction())
