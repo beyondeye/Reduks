@@ -41,7 +41,7 @@ class RxStore<S>(
      * The only advantage of using RxStoreSubscriber is that we avoid the need to override all onNext,onCompleted,onError methods
      * we just need to override [RxStoreSubscriber.onStateChange] that is binded to onNext
      */
-    fun subscribe(subscriber: rx.Subscriber<S>, subscribeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
-        return RxStoreSubscription(this,subscriber, subscribeOnAndroidMainThread)
+    fun subscribe(subscriber: rx.Subscriber<S>, observeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
+        return RxStoreSubscription(this,subscriber, observeOnAndroidMainThread)
     }
 }
