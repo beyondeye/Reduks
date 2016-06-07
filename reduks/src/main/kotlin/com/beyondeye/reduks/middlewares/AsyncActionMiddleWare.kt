@@ -8,10 +8,10 @@ import nl.komponents.kovenant.Promise
 
 
 sealed class AsyncAction(val type:String) {
-    class Started<PayloadType>(type:String, promise: Promise<PayloadType, Throwable>): AsyncAction(type) {
+    class Started<PayloadType :Any>(type:String, promise: Promise<PayloadType, Throwable>): AsyncAction(type) {
         val promise: Promise<PayloadType, Throwable> = promise
         constructor(type:String,body: () -> PayloadType):this(type, task { body() })
-        fun asCompleted() = Completed<PayloadType>(type, promise.get())
+        fun asCompleted() = Completed(type, promise.get())
         fun asFailed() = Failed(type, promise.getError())
         /**
          * block until we get back the result from the promise
@@ -19,22 +19,22 @@ sealed class AsyncAction(val type:String) {
         fun resolve(): AsyncAction {
             val res: AsyncAction
             try {
-                res= Completed<PayloadType>(type, promise.get())
+                res= Completed(type, promise.get())
             } catch (e:Exception) {
                 res= Failed(type, e)
             }
             return res
         }
     }
-    class Completed<PayloadType>(type:String, val payload: PayloadType): AsyncAction(type)
+    class Completed(type:String, val payload: Any): AsyncAction(type)
     class Failed(type:String, val error:Throwable): AsyncAction(type)
     fun onStarted(body: () -> Unit): AsyncAction {
         if(this is AsyncAction.Started<*>)
             body()
         return this
     }
-    fun <PayloadType> onCompleted(body: (value: PayloadType) -> Unit): AsyncAction {
-        if(this is AsyncAction.Completed<*>)
+    inline fun <reified PayloadType> onCompleted(body: (value: PayloadType) -> Unit): AsyncAction {
+        if(this is AsyncAction.Completed)
             body(this.payload as PayloadType)
         return this
     }

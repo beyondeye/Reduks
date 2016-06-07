@@ -1,5 +1,6 @@
 package com.beyondeye.reduks.rx
 
+import android.util.Log
 import com.beyondeye.reduks.StoreSubscriber
 
 
@@ -21,6 +22,6 @@ abstract class RxStoreSubscriber<S>(val store:RxStore<S>): rx.Subscriber<S>(), S
         //do nothing
     }
     override fun onError(e: Throwable?) {
-        throw UnsupportedOperationException()
+        Log.e("RxStoreSubscriber","error on previous action dispatch detected: "+e?.message)
     }
 }
