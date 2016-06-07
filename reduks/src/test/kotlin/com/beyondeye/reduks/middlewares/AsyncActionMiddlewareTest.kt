@@ -19,7 +19,7 @@ class AsyncActionMiddlewareTest {
     val actionDifficultError ="Sometimes difficult problems cannot be solved"
     val reducer = Reducer<TestState> { state, action ->
         var res: TestState? = null
-        AsyncAction.ofType(actionDifficultTag, action)
+        AsyncAction.ofType(Int::class.java.simpleName, action)
                 ?.onCompleted<Int> { payload ->
                     res = TestState(
                             actionCounter = state.actionCounter+1,
@@ -33,7 +33,7 @@ class AsyncActionMiddlewareTest {
                              lastAsyncActionError = error.message,
                              lastAsyncActionResult = null)
         }
-        AsyncAction.ofType(actionDifficultTextTag, action)
+        AsyncAction.ofType(String::class.java.simpleName, action)
                 ?.onCompleted<String> { payload ->
                     res = TestState(
                             actionCounter = state.actionCounter+1,
@@ -71,7 +71,7 @@ class AsyncActionMiddlewareTest {
                 }
             }
         }) //on state change
-        val asyncAction = AsyncAction.Started(actionDifficultTag) { 2 + 2 }
+        val asyncAction = AsyncAction.Started(Int::class.java.simpleName) { 2 + 2 }
         store.dispatch(asyncAction)
         Thread.sleep(100) //wait for async action to be dispatched TODO: use thunk instead!!
         store.dispatch(EndAction())
@@ -97,9 +97,9 @@ class AsyncActionMiddlewareTest {
                     }
                 }
         }) //on state change
-        val asyncAction = AsyncAction.Started<Int>(actionDifficultTag) { 2 + 2 }
+        val asyncAction = AsyncAction.Started(Int::class.java.simpleName) { 2 + 2 }
         store.dispatch(asyncAction)
-        val asyncAction2 = AsyncAction.Started<String>(actionDifficultTextTag) { "2 + 2" }
+        val asyncAction2 = AsyncAction.Started(String::class.java.simpleName) { "2 + 2" }
         store.dispatch(asyncAction2)
         Thread.sleep(100) ////need to wait, because otherwise the end action will be dispatched before we complete the two async actions
         store.dispatch(EndAction())
@@ -126,7 +126,7 @@ class AsyncActionMiddlewareTest {
                     }
                 }
         )
-        val asyncAction = AsyncAction.Started(actionDifficultTag) {
+        val asyncAction = AsyncAction.Started(Int::class.java.simpleName) {
             throw Exception(actionDifficultError)
         }
         store.dispatch(asyncAction)
