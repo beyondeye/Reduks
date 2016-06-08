@@ -7,50 +7,67 @@ import nl.komponents.kovenant.task
 import nl.komponents.kovenant.Promise
 
 
-sealed class AsyncAction(val type:String) {
-    class Started<PayloadType :Any>(type:String, promise: Promise<PayloadType, Throwable>): AsyncAction(type) {
+sealed class AsyncAction(val payloadTypename:String) {
+    class AsyncActionMatcher<PayloadType>(val action:AsyncAction) {
+        fun onStarted(body: () -> Unit): AsyncActionMatcher<PayloadType>? {
+            if(action is AsyncAction.Started<*>)
+                body()
+            return this
+        }
+        @Suppress("UNCHECKED_CAST")
+        inline fun  onCompleted(body: (value: PayloadType) -> Unit):  AsyncActionMatcher<PayloadType> {
+            if(action is AsyncAction.Completed<*>)
+                body(action.payload as PayloadType)
+            return this
+        }
+        fun onFailed(body: (error: Throwable) -> Unit):  AsyncActionMatcher<PayloadType> {
+            if(action is AsyncAction.Failed)
+                body(action.error)
+            return this
+        }
+    }
+
+    /**
+     * it seems redundant to store both type name and define this class as template class
+     * unfortunately this is required because of type erasure in java/kotlin generics
+     */
+    class Started<PayloadType :Any>(payloadTypename:String, promise: Promise<PayloadType, Throwable>): AsyncAction(payloadTypename) {
         val promise: Promise<PayloadType, Throwable> = promise
         constructor(type:String,body: () -> PayloadType):this(type, task { body() })
-        fun asCompleted() = Completed(type, promise.get())
-        fun asFailed() = Failed(type, promise.getError())
+        fun asCompleted() = Completed(payloadTypename, promise.get())
+        fun asFailed() = Failed(payloadTypename, promise.getError())
         /**
          * block until we get back the result from the promise
          */
         fun resolve(): AsyncAction {
             val res: AsyncAction
             try {
-                res= Completed(type, promise.get())
+                res= Completed(payloadTypename, promise.get())
             } catch (e:Exception) {
-                res= Failed(type, e)
+                res= Failed(payloadTypename, e)
             }
             return res
         }
     }
-    class Completed(type:String, val payload: Any): AsyncAction(type)
-    class Failed(type:String, val error:Throwable): AsyncAction(type)
-    fun onStarted(body: () -> Unit): AsyncAction {
-        if(this is AsyncAction.Started<*>)
-            body()
-        return this
-    }
-    inline fun <reified PayloadType> onCompleted(body: (value: PayloadType) -> Unit): AsyncAction {
-        if(this is AsyncAction.Completed)
-            body(this.payload as PayloadType)
-        return this
-    }
-    fun onFailed(body: (error: Throwable) -> Unit): AsyncAction {
-        if(this is AsyncAction.Failed)
-            body(this.error)
-        return this
-    }
+    class Completed<PayloadType>(payloadTypename:String, val payload: PayloadType): AsyncAction(payloadTypename)
+    class Failed(payloadTypename:String, val error:Throwable): AsyncAction(payloadTypename)
     companion object {
-        fun ofType(type: String, action: Any):AsyncAction? {
+        inline fun <reified PayloadType:Any > withPayload(action: Any):AsyncActionMatcher<PayloadType>? {
             if(action !is AsyncAction) return null
-            if (action.type!=type) return null
-            return action
+            val expectedname=PayloadType::class.java.canonicalName //use Payload type name from java reflection to identify async action
+            if (action.payloadTypename !=expectedname) return null
+            return AsyncActionMatcher<PayloadType>(action)
+        }
+        inline fun <reified  PayloadType:Any> start( promise: Promise<PayloadType, Throwable>):AsyncAction {
+            return Started<PayloadType>(PayloadType::class.java.canonicalName,promise)
+        }
+        inline fun <reified  PayloadType:Any> start(noinline  body: () -> PayloadType):AsyncAction {
+            return Started<PayloadType>(PayloadType::class.java.canonicalName,body)
         }
     }
 }
+
+
 /**
  * a middleware that knows how to handle actions of type [AsyncAction]
  * based on ideas from

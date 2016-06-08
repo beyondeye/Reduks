@@ -43,7 +43,6 @@ fun <S> Store<S>.applyMiddleware(
     return  this
 }
 
-fun <S> Store<S>.withStandardMiddlewares() :Store<S> {
+fun <S> Store<S>.applyStandardMiddlewares() {
     this.applyMiddleware(AsyncActionMiddleWare(),ThunkMiddleware())
-    return this
 }
