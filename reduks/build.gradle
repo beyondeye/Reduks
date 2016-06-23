@@ -2,16 +2,16 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-  compileSdkVersion rootProject.ext.compileSdkVersion
-  buildToolsVersion rootProject.ext.buildToolsVersion
+  compileSdkVersion compileSdkVersion_
+  buildToolsVersion buildToolsVersion_
 
   defaultConfig {
-    minSdkVersion rootProject.ext.minSdkVersion
+    minSdkVersion minSdkVersion_
   }
 
   compileOptions {
-    sourceCompatibility rootProject.ext.sourceCompatibility
-    targetCompatibility rootProject.ext.targetCompatibility
+    sourceCompatibility sourceCompatibility_
+    targetCompatibility targetCompatibility_
   }
   sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
@@ -30,22 +30,14 @@ repositories {
 
 
 dependencies {
-  compile "nl.komponents.kovenant:kovenant:$kovenant_version"
-  compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
-  compile "io.reactivex:rxjava:$rxjava_version"
-  compile "io.reactivex:rxandroid:$rxandroid_version"
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  compile "nl.komponents.kovenant:kovenant:$kovenantVersion"
+  compile "nl.komponents.kovenant:kovenant-ui:$kovenantVersion"
+  compile "io.reactivex:rxjava:$rxjavaVersion"
+  compile "io.reactivex:rxandroid:$rxandroidVersion"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
   testCompile "junit:junit:${junit_version}"
   testCompile 'org.assertj:assertj-core:1.7.1'
   testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
 }
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-  }
-}
