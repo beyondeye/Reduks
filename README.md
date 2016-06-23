@@ -6,13 +6,16 @@ This library was started as a fork of https://github.com/brianegan/bansa. Thanks
 While bansa is focused on Java, Reduks is totally focused on making the best, fully battery included port of reduxjs for Kotlin+Android.
 it currently has the following features that bansa misses.
 
- -RxJava+RxAndroid support
+ - RxJava+RxAndroid support
  
- -Promise middleware based on kovenant promises (http://kovenant.komponents.nl/)
+ - Promise middleware based on kovenant promises (http://kovenant.komponents.nl/)
  
- -Thunk middleware
+ - Thunk middleware
  
- -port of reselect library(https://github.com/reactjs/reselect)
+ - Thread safe action dispatch from multiple threads, in my implementation of State store based on Kovenant promises
+  (see https://github.com/beyondeye/Reduks/blob/master/reduks/src/main/kotlin/com/beyondeye/reduks/KovenantStore.kt)
+   see also this issue in original bansa repository: [Is it safe to call dispatch from multiple threads](https://github.com/brianegan/bansa/issues/24)
+ - port of reselect library(https://github.com/reactjs/reselect)
 
 ##Planned:
 support for persisting store state on activity/fragment lifecycle events
