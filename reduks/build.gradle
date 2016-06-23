@@ -1,9 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-//forked from https://github.com/brianegan/bansa
-//see also http://redux.js.org/
-
 android {
   compileSdkVersion rootProject.ext.compileSdkVersion
   buildToolsVersion rootProject.ext.buildToolsVersion
@@ -39,7 +36,7 @@ dependencies {
   compile "io.reactivex:rxandroid:$rxandroid_version"
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-  testCompile 'junit:junit:4.12'
+  testCompile "junit:junit:${junit_version}"
   testCompile 'org.assertj:assertj-core:1.7.1'
   testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
 }
@@ -52,5 +49,3 @@ buildscript {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
-
-apply from: '../maven-push.gradle'
