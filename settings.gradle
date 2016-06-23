@@ -1,1 +1,5 @@
 include ':reduks'
+include ':reduks-devtools'
+include ':reduks-rx'
+
+project(':reduks').name = 'reduks-core'

@@ -37,9 +37,9 @@ class RxStore<S>(
     }
 
     /**
-     * note: subscribe take as input an [rx.Subscriber] which is a base class for [RxStoreSubscriber]
+     * note: subscribe take as input an rx.Subscriber which is a base class for RxStoreSubscriber
      * The only advantage of using RxStoreSubscriber is that we avoid the need to override all onNext,onCompleted,onError methods
-     * we just need to override [RxStoreSubscriber.onStateChange] that is binded to onNext
+     * we just need to override RxStoreSubscriber.onStateChange that is binded to onNext
      */
     fun subscribe(subscriber: rx.Subscriber<S>, observeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
         return RxStoreSubscription(this,subscriber, observeOnAndroidMainThread)
