@@ -1,7 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.KovenantStore
-import com.beyondeye.reduks.SimpleStore
 import com.beyondeye.reduks.Middleware
 import com.beyondeye.reduks.Reducer
 import org.assertj.core.api.Assertions.assertThat

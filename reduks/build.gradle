@@ -1,5 +1,4 @@
 dependencies {
-  compile "io.reactivex:rxjava:$rxjavaVersion"
-  compile "io.reactivex:rxandroid:$rxandroidVersion"
+    testCompile "io.reactivex:rxjava:$rxjavaVersion"
 }
 
