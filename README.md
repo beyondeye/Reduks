@@ -16,3 +16,16 @@ it currently has the following features that bansa misses.
 
 ##Planned:
 support for persisting store state on activity/fragment lifecycle events
+
+## dependencies for gradle
+```groovy
+// main reduks package
+dependencies {
+  compile 'com.github.beyondeye.reduks:reduks-core:v1.2.1'
+}
+
+//rx-java support
+dependencies {
+  compile 'com.github.beyondeye.reduks:reduks-rx:v1.2.1'
+}
+```
