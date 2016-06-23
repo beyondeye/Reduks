@@ -19,13 +19,16 @@ support for persisting store state on activity/fragment lifecycle events
 
 ## dependencies for gradle
 ```groovy
-// main reduks package
-dependencies {
-  compile 'com.github.beyondeye.reduks:reduks-core:v1.2.1'
+// First, add JitPack to your repositories
+repositories {
+    ...
+    maven { url "https://jitpack.io" }
 }
 
+// main reduks package
+compile 'com.github.beyondeye.reduks:reduks-core:v1.2.1'
+
+
 //rx-java support
-dependencies {
-  compile 'com.github.beyondeye.reduks:reduks-rx:v1.2.1'
-}
+compile 'com.github.beyondeye.reduks:reduks-rx:v1.2.1'
 ```
