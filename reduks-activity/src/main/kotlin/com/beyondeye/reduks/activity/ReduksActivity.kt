@@ -49,6 +49,14 @@ abstract class ReduksActivity<S>: AppCompatActivity() {
      */
     abstract fun getActivityStateReducer(): Reducer<S>
 
+    //override for making this function visible to inheritors
+    override fun onStop() {
+        super.onStop()
+    }
+    //override for making this function visible to inheritors
+    override fun onStart() {
+        super.onStart()
+    }
 
     /**
      * return the activity main store subscriber

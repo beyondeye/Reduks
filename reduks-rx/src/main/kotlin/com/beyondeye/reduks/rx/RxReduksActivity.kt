@@ -20,6 +20,14 @@ abstract class RxReduksActivity<S>: AppCompatActivity() {
         startKovenant()
         initReduks()
     }
+    //override for make this function visible to inheritors
+    override fun onStop() {
+        super.onStop()
+    }
+    //override for make this function visible to inheritors
+    override fun onStart() {
+        super.onStart()
+    }
 
     override fun onDestroy() {
         stopKovenant()
