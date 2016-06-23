@@ -1,17 +1,24 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-allprojects {
-    group = GROUP
+buildscript {
+    ext.kotlinVersion = '1.0.2-1'
+    ext.extraConfVersion = '2.2.+'
     repositories {
+        mavenCentral()
         jcenter()
-    }
-    buildscript {
-        repositories {
-            jcenter()
-            mavenCentral()
-            maven { url "http://repository.jetbrains.com/all" }
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
         }
     }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
+
+    }
+}
+allprojects {
+    group = GROUP
+
     configurations {
         javadocDeps
     }
@@ -20,7 +27,6 @@ allprojects {
             sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
             targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
             junit_version= '4.12'
-            kotlinVersion = '1.0.2-1'
             kovenantVersion= '3.2.2'
             rxjavaVersion='1.1.6'
             rxandroidVersion='1.2.1'
@@ -31,17 +37,50 @@ allprojects {
             mytargetSdkVersion=23 //Integer
             extraConfVersion = '2.2.+'
         }
-    buildscript {
-        repositories {
-            jcenter()
-            mavenCentral()
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
         }
-        dependencies {
-            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-            classpath 'com.android.tools.build:gradle:2.1.0'
+        maven {
+            url 'https://oss.sonatype.org/content/groups/staging'
+        }
+        maven {
+            url "http://repository.jetbrains.com/all"
         }
     }
+    apply plugin: 'com.android.library'
+    apply plugin: 'kotlin-android'
 
+    android {
+        compileSdkVersion compileSdkVersion_
+        buildToolsVersion buildToolsVersion_
+
+        defaultConfig {
+            minSdkVersion minSdkVersion_
+        }
+
+        compileOptions {
+            sourceCompatibility sourceCompatibility_
+            targetCompatibility targetCompatibility_
+        }
+        sourceSets {
+            main.java.srcDirs += 'src/main/kotlin'
+            test.java.srcDirs += 'src/test/kotlin'
+        }
+    }
+    dependencies {
+        compile "nl.komponents.kovenant:kovenant:$kovenantVersion"
+        compile "nl.komponents.kovenant:kovenant-ui:$kovenantVersion"
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+        testCompile "junit:junit:${junit_version}"
+        testCompile 'org.assertj:assertj-core:1.7.1'
+        testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
+    }
 }
 
 
