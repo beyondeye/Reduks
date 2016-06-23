@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/beyondeye/reduks.svg)](https://jitpack.io/#beyondeye/reduks)
+
 # Reduks: a port of Reduxjs for Kotlin+Android
 
 This library was started as a fork of https://github.com/brianegan/bansa. Thanks a lot to Brian Egan for his work on bansa
