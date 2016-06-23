@@ -1,9 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.Thunk
-import com.beyondeye.reduks.SimpleStore
-import com.beyondeye.reduks.Reducer
-import com.beyondeye.reduks.StoreSubscriber
+import com.beyondeye.reduks.*
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
@@ -27,7 +24,7 @@ class ThunkMiddlewareTest {
     }
     @Test
     fun testSimpleMathFunctionThunk() {
-        val store = SimpleStore(TestState1(0, 0), reducer1)
+        val store = KovenantStore(TestState1(0, 0), reducer1)
         store.applyMiddleware(ThunkMiddleware<TestState1>())
 
         store.dispatch(Thunk<TestState1> {
@@ -56,7 +53,7 @@ class ThunkMiddlewareTest {
     }
     @Test
     fun testAsyncActionsThunk() {
-        val store = SimpleStore(TestState2(), reducer2)
+        val store = KovenantStore(TestState2(), reducer2)
         store.applyMiddleware(ThunkMiddleware<TestState2>())
         val thunk= Thunk<TestState2> { dispatcher, state ->
             val promise: Promise<Any, Exception> = task {

@@ -13,7 +13,7 @@ class Reduks<State>(startState:State,startAction:Any,
     val storeSubscriber: StoreSubscriber<State>
     val storeSubscription: StoreSubscription
     init {
-        store = SimpleStore(startState,reducer)
+        store = KovenantStore(startState,reducer)
         store.applyStandardMiddlewares()
         storeSubscriber=getSubscriber(store)
         storeSubscription = store.subscribe(storeSubscriber)

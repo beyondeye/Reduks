@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.SimpleStore
+import com.beyondeye.reduks.KovenantStore
 import com.beyondeye.reduks.Reducer
 import com.beyondeye.reduks.StoreSubscriber
 import org.assertj.core.api.Assertions
@@ -55,7 +55,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation() {
-        val store = SimpleStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer)
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -78,7 +78,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_two_async_actions_with_different_payload_type() {
-        val store = SimpleStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer)
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -108,7 +108,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation_that_fails() {
 
-        val store = SimpleStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer)
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!
@@ -135,7 +135,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_that_normal_actions_pass_through_the_middleware() {
 
-        val store = SimpleStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer)
         store.applyMiddleware(AsyncActionMiddleWare())
 
 

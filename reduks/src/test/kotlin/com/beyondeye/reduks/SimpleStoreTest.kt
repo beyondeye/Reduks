@@ -3,7 +3,7 @@ package com.beyondeye.reduks
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class StoreTest {
+class SimpleStoreTest {
     data class TestState(val message: String = "initial state")
     data class TestAction(val type: String = "unknown")
 
