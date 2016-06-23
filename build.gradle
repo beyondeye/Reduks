@@ -1,7 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlinVersion = '1.0.2-1'
-    ext.extraConfVersion = '2.2.+'
     repositories {
         mavenCentral()
         jcenter()
@@ -12,7 +11,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.android.tools.build:gradle:2.1.0'
-        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+"
 
     }
 }
@@ -23,34 +22,35 @@ allprojects {
         javadocDeps
     }
     //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
-        ext {
-            sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
-            targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
-            junit_version= '4.12'
-            kovenantVersion= '3.2.2'
-            rxjavaVersion='1.1.6'
-            rxandroidVersion='1.2.1'
-            support_version = '24.0.0' //android support lib
-            compileSdkVersion_=23
-            buildToolsVersion_="23.0.3" //String
-            minSdkVersion_=15 //Integer
-            mytargetSdkVersion=23 //Integer
-            extraConfVersion = '2.2.+'
-        }
+    ext {
+        sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
+        targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
+        junit_version = '4.12'
+        kovenantVersion = '3.2.2'
+        rxjavaVersion = '1.1.6'
+        rxandroidVersion = '1.2.1'
+        support_version = '24.0.0' //android support lib
+        compileSdkVersion_ = 23
+        buildToolsVersion_ = "23.0.3" //String
+        minSdkVersion_ = 15 //Integer
+        mytargetSdkVersion = 23 //Integer
+        extraConfVersion = '2.2.+'
+    }
 }
 
 subprojects {
     repositories {
         mavenCentral()
-        maven {
-            url 'http://oss.sonatype.org/content/repositories/snapshots'
-        }
-        maven {
-            url 'https://oss.sonatype.org/content/groups/staging'
-        }
-        maven {
-            url "http://repository.jetbrains.com/all"
-        }
+//        jcenter()
+//        maven {
+//            url 'http://oss.sonatype.org/content/repositories/snapshots'
+//        }
+//        maven {
+//            url 'https://oss.sonatype.org/content/groups/staging'
+//        }
+//        maven {
+//            url "http://repository.jetbrains.com/all"
+//        }
     }
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
