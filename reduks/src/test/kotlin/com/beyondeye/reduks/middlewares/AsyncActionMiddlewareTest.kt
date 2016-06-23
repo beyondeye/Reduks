@@ -59,8 +59,8 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber {
-            with (store.state) {
+        store.subscribe (StoreSubscriber { state->
+            with (state) {
                 if (lastAsyncActionMessage != "none") {
                     Assertions.assertThat(lastAsyncActionMessage).isEqualTo(actionDifficultTag)
                     Assertions.assertThat(lastAsyncActionError).isNull()
@@ -82,8 +82,8 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber {
-                with (store.state) {
+        store.subscribe (StoreSubscriber { state->
+                with (state) {
                     if (lastAsyncActionMessage == actionDifficultTag) {
                         Assertions.assertThat(lastAsyncActionError).isNull()
                         Assertions.assertThat(lastAsyncActionResult).isEqualTo(2 + 2)
@@ -113,12 +113,12 @@ class AsyncActionMiddlewareTest {
 
         //subscribe before dispatch!
         store.subscribe (
-                StoreSubscriber {
-                    with(store.state) {
+                StoreSubscriber { state->
+                    with(state) {
                         if (lastAsyncActionMessage != "none") {
-                            Assertions.assertThat(store.state.lastAsyncActionMessage).isEqualTo(actionDifficultTag)
-                            Assertions.assertThat(store.state.lastAsyncActionError).isEqualTo(actionDifficultError)
-                            Assertions.assertThat(store.state.lastAsyncActionResult).isNull()
+                            Assertions.assertThat(lastAsyncActionMessage).isEqualTo(actionDifficultTag)
+                            Assertions.assertThat(lastAsyncActionError).isEqualTo(actionDifficultError)
+                            Assertions.assertThat(lastAsyncActionResult).isNull()
                         }
                         if(endActionReceived) {
                             Assertions.assertThat(actionCounter).isEqualTo(0) //one action failed
