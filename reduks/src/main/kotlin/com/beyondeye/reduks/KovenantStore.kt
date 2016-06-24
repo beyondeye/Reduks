@@ -1,16 +1,16 @@
 package com.beyondeye.reduks
 
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.task
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.*
+import nl.komponents.kovenant.ui.promiseOnUi
 import java.util.ArrayList
 
-/**
+infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Exception> {
+    return this.then { promiseOnUi { bind(it) }.get() }
+}
+    /**
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
- * TODO add  option to make always sure that subscribers are called on the main android thread
- * this is the most common use case
  */
-class KovenantStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
+class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUiThread:Boolean=true) : Store<S> {
     private var _statePromise: Promise<S,Exception> = task {initialState}
     val statePromise: Promise<S,Exception> get() =_statePromise
     override val state: S
@@ -22,11 +22,20 @@ class KovenantStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
                 _statePromise = _statePromise.then { startState ->
                     val newState=reducer.reduce(startState, action) //return newState
                     newState
-                } then { newState->
-                    for (i in subscribers.indices) {
-                        subscribers[i].onStateChange(newState)
+                }.then { newState->
+                    if(!observeOnUiThread) {
+                        for (i in subscribers.indices) {
+                            subscribers[i].onStateChange(newState)
+                        }
+                        newState
+                    } else {
+                        promiseOnUi {
+                            for (i in subscribers.indices) {
+                                subscribers[i].onStateChange(newState)
+                            }
+                            newState
+                        }.get()
                     }
-                    newState
                 }
             }
             return action;
