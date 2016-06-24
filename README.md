@@ -29,16 +29,16 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:1.4.1'
+compile 'com.github.beyondeye.reduks:reduks-core:1.4.2'
 
 
 //rx-java support
-compile 'com.github.beyondeye.reduks:reduks-rx:1.4.1'
+compile 'com.github.beyondeye.reduks:reduks-rx:1.4.2'
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:1.4.1'
+compile 'com.github.beyondeye.reduks:reduks-devtools:1.4.2'
 
 //base activity that make it easier to write reduks based activities
-compile 'com.github.beyondeye.reduks:reduks-activity:1.4.1'
+compile 'com.github.beyondeye.reduks:reduks-activity:1.4.2'
 
 ```
