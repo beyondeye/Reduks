@@ -19,7 +19,7 @@ class KovenantStoreTest {
             }
         }
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
 
         store.dispatch(TestAction(type = "to invoke"))
         assertThat(store.state.message).isEqualTo("reduced")
@@ -50,7 +50,7 @@ class KovenantStoreTest {
             }
         }
 
-        val store = KovenantStore(TestState(), combineReducers(reducer1, reducer2))
+        val store = KovenantStore(TestState(), combineReducers(reducer1, reducer2),observeOnUiThread = false) //false: otherwise exception if not running on android
 
         store.dispatch(TestAction(type = helloReducer1))
         assertThat(store.state.message).isEqualTo("oh hai")
@@ -60,7 +60,7 @@ class KovenantStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() })
+        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
 
@@ -77,7 +77,7 @@ class KovenantStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() })
+        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
 
@@ -106,7 +106,7 @@ class KovenantStoreTest {
         }
 
         var actual: TestState = TestState()
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
 
         store.subscribe(StoreSubscriber { actual = it })
         store.dispatch(TestAction(type = "to invoke"))

@@ -30,7 +30,7 @@ class KovenantStoreMiddlewareTest {
             next(action)
         }
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare)
 
         store.dispatch(TestAction(type = "hey hey!"))
@@ -67,7 +67,8 @@ class KovenantStoreMiddlewareTest {
             }
         }
 
-        val store = KovenantStore(TestState(), reducer)
+
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "hey hey!"))
@@ -121,7 +122,7 @@ class KovenantStoreMiddlewareTest {
             }
         }
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(fetchMiddleware, loggerMiddleware)
 
         store.dispatch(TestAction(type = "CALL_API"))
@@ -164,7 +165,7 @@ class KovenantStoreMiddlewareTest {
             state
         }
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "around!"))

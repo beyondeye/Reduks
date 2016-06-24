@@ -12,18 +12,23 @@ infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Except
 /**
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
  */
-class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUiThread: Boolean = false) : Store<S> {
-    val uiContext = Kovenant.context
-    /*Kovenant.createContext {
-        workerContext {
-            dispatcher = androidUiDispatcher()
-            errorHandler = Kovenant.context.workerContext.errorHandler
-        }
-        callbackContext {
-            dispatcher = Kovenant.context.callbackContext.dispatcher
-            errorHandler = Kovenant.context.callbackContext.errorHandler
-        }
-    }*/
+class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
+    val observeContext =
+            if (!observeOnUiThread)
+            {
+                Kovenant.context
+            } else {
+                Kovenant.createContext {
+                    workerContext {
+                        dispatcher = androidUiDispatcher()
+                        errorHandler = Kovenant.context.workerContext.errorHandler
+                    }
+                    callbackContext {
+                        dispatcher = Kovenant.context.callbackContext.dispatcher
+                        errorHandler = Kovenant.context.callbackContext.errorHandler
+                    }
+                }
+            }
     val defaultContext = Kovenant.context
     private var _statePromise: Promise<S, Exception> = task { initialState }
     val statePromise: Promise<S, Exception> get() = _statePromise
@@ -34,7 +39,6 @@ class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUi
         override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any {
             val deferredNextState = deferred<S, Exception>()
             var curStatePromise: Promise<S, Exception>? = null
-            val observeContext = if (observeOnUiThread) uiContext else defaultContext
             synchronized(this) {
                 curStatePromise = _statePromise
                 _statePromise = deferredNextState.promise

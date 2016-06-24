@@ -55,7 +55,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation() {
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -78,7 +78,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_two_async_actions_with_different_payload_type() {
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -108,7 +108,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation_that_fails() {
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!
@@ -135,7 +135,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_that_normal_actions_pass_through_the_middleware() {
 
-        val store = KovenantStore(TestState(), reducer)
+        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
 
