@@ -44,5 +44,6 @@ fun <S> Store<S>.applyMiddleware(
 }
 
 fun <S> Store<S>.applyStandardMiddlewares() {
-    this.applyMiddleware(AsyncActionMiddleWare(),ThunkMiddleware())
+//    this.applyMiddleware(AsyncActionMiddleWare(),ThunkMiddleware())
+    this.applyMiddleware(ThunkMiddleware())
 }

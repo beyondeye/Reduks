@@ -77,9 +77,6 @@ subprojects {
         }
     }
     dependencies {
-        compile "nl.komponents.kovenant:kovenant:$kovenantVersion"
-        compile "nl.komponents.kovenant:kovenant-ui:$kovenantVersion"
-        compile "nl.komponents.kovenant:kovenant-android:$kovenantVersion"
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
         testCompile "junit:junit:${junit_version}"

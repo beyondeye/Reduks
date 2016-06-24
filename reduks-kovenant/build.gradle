@@ -1,6 +1,12 @@
 dependencies {
+    compile project(':reduks-core')
+    compile "nl.komponents.kovenant:kovenant:$kovenantVersion"
+    compile "nl.komponents.kovenant:kovenant-ui:$kovenantVersion"
+    compile "nl.komponents.kovenant:kovenant-android:$kovenantVersion"
+
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
     provided "com.android.support:appcompat-v7:$supportVersion"
+
     testCompile "io.reactivex:rxjava:$rxjavaVersion"
 }
 

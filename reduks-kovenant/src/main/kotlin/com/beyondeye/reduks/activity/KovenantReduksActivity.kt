@@ -2,17 +2,14 @@ package com.beyondeye.reduks.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.beyondeye.reduks.Reducer
-import com.beyondeye.reduks.Reduks
-import com.beyondeye.reduks.Store
-import com.beyondeye.reduks.StoreSubscriber
+import com.beyondeye.reduks.*
 import nl.komponents.kovenant.android.startKovenant
 import nl.komponents.kovenant.android.stopKovenant
 
 /**
  * Created by daely on 6/13/2016.
  */
-abstract class ReduksActivity<S>: AppCompatActivity() {
+abstract class KovenantReduksActivity<S>: AppCompatActivity() {
     lateinit var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +28,7 @@ abstract class ReduksActivity<S>: AppCompatActivity() {
         super.onDestroy()
     }
     fun initReduks() {
-        reduks = Reduks(activityStartState(), activityStartAction(), getActivityStateReducer(), getActivityStoreSubscriber())
+        reduks = KovenantReduks(activityStartState(), activityStartAction(), getActivityStateReducer(), getActivityStoreSubscriber())
     }
 
     /**
