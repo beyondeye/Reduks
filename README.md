@@ -29,15 +29,15 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:1.5.0'
+compile 'com.github.beyondeye.reduks:reduks-core:1.5.2'
 
 //rx-java based state store
-compile 'com.github.beyondeye.reduks:reduks-rx:1.5.0'
+compile 'com.github.beyondeye.reduks:reduks-rx:1.5.2'
 
 //kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:1.5.0'
+compile 'com.github.beyondeye.reduks:reduks-kovenant:1.5.2'
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:1.5.0'
+compile 'com.github.beyondeye.reduks:reduks-devtools:1.5.2'
 
 ```
