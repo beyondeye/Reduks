@@ -23,6 +23,9 @@ allprojects {
     }
     //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
     ext {
+        VERSION_NAME='1.5.2-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
+        POM_NAME='Reduks: Reduxjs for Kotlin+Android'
+        GROUP= 'com.github.beyondeye.reduks'
         sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
         targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
         junit_version = '4.12'
@@ -33,7 +36,7 @@ allprojects {
         compileSdkVersion_ = 23
         buildToolsVersion_ = "23.0.3" //String
         minSdkVersion_ = 15 //Integer
-        mytargetSdkVersion = 23 //Integer
+        targetSdkVersion_ = 23 //Integer
         extraConfVersion = '2.2.+'
         firebaseVersion='9.0.2'
 
@@ -57,7 +60,7 @@ subprojects {
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
     apply plugin: 'com.github.dcendents.android-maven'
-    group = 'com.github.beyondeye'
+    group = 'com.github.beyondeye' //.reduks is appended automatically by jitpack
 
     android {
         compileSdkVersion compileSdkVersion_
@@ -65,6 +68,9 @@ subprojects {
 
         defaultConfig {
             minSdkVersion minSdkVersion_
+            targetSdkVersion targetSdkVersion_
+            versionCode = 1
+            versionName VERSION_NAME
         }
 
         compileOptions {

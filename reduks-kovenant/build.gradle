@@ -10,3 +10,4 @@ dependencies {
     testCompile "io.reactivex:rxjava:$rxjavaVersion"
 }
 
+apply from: '../maven-push.gradle'

@@ -1,0 +1,89 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven'
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            group GROUP
+            artifactId POM_ARTIFACT_ID
+            version VERSION_NAME
+        }
+    }
+}
+
+def isReleaseBuild() {
+    return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+def getOutputDir() {
+  if (isReleaseBuild()) {
+      return "${project.buildDir}/releases"
+  } else {
+      return "${project.buildDir}/snapshots"
+  }
+}
+
+def getDestUrl() {
+  if (isReleaseBuild()) {
+      return "s3://plensee-maven/android/releases"
+  } else {
+      return "s3://plensee-maven/android/snapshots"
+  }
+}
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file:///" + getOutputDir()) //can also be used to copy to local file
+                //repository(url: getDestUrl()) // for copying directly to S3
+
+                pom.groupId = GROUP
+                pom.artifactId = POM_ARTIFACT_ID
+                pom.version = VERSION_NAME
+
+                pom.project {
+                    name POM_NAME
+                    packaging POM_PACKAGING
+                    description POM_DESCRIPTION
+                }
+            }
+        }
+    }
+    task androidJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += configurations.javadocDeps
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+        failOnError false //don't stop build if error in building javadocs
+    }
+
+//from lock.android maven-push TODO do I need this?
+afterEvaluate {
+    javadoc.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
+}
+
+
+    // build a jar with javadoc
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
+
+    // build a jar with source files
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.sourceFiles
+    }
+
+    artifacts {
+        archives androidSourcesJar
+        archives androidJavadocsJar
+    }
+
+    task copyToS3(type: Exec) {
+        commandLine 'aws', 's3', 'cp', '--recursive', getOutputDir(), getDestUrl()
+    }
+
+    copyToS3.dependsOn uploadArchives
+}
