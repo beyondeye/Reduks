@@ -43,16 +43,36 @@ class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUi
                 curStatePromise = _statePromise
                 _statePromise = deferredNextState.promise
             }
-
-            curStatePromise?.then(defaultContext) { startState ->
-                reducer.reduce(startState, action) //return newState
-            }?.then(observeContext) { newState ->
-                for (i in subscribers.indices) {
-                    subscribers[i].onStateChange(newState)
+            if(observeOnUiThread) {
+                curStatePromise?.then(defaultContext) { startState ->
+                    val newState = reducer.reduce(startState, action) //return newState
+                    //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
+                    // then subscribers will be notified sequentially of state changes in the correct
+                    // order even if we resolve the newState promise here.
+                    // If we would wait to resolve the newstate promise  after subscriber notification we risk to cause deadlocks
+                    deferredNextState.resolve(newState)
+                    newState
+                }?.then(observeContext) { newState ->
+                    notifySubscribers(newState)
                 }
-                deferredNextState.resolve(newState)
+            } else
+            { //in case we don't observe on the ui thread, then the correct thing to do, for
+              //being sure that subscribers always sees the sequence of state changes as they
+              //actually happened is to wait to resolve the state change promise after the notification phase
+                curStatePromise?.then(defaultContext) { startState ->
+                    reducer.reduce(startState, action) //return newState
+                }?.then(observeContext) { newState ->
+                    notifySubscribers(newState)
+                    deferredNextState.resolve(newState)
+                }
+
             }
             return action;
+        }
+    }
+    private fun notifySubscribers(newState:S) {
+        for (i in subscribers.indices) {
+            subscribers[i].onStateChange(newState)
         }
     }
 
