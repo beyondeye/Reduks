@@ -89,6 +89,12 @@ subprojects {
         testCompile 'org.assertj:assertj-core:1.7.1'
         testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
     }
+    //Test Logging
+    tasks.withType(Test) {
+        testLogging {
+            events "started", "passed", "skipped", "failed"
+        }
+    }
 }
 
 
