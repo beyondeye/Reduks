@@ -27,7 +27,7 @@ abstract class KovenantReduksActivity<S>: AppCompatActivity() {
         stopKovenant()
         super.onDestroy()
     }
-    fun initReduks() {
+    open fun initReduks() {
         reduks = KovenantReduks(activityStartState(), activityStartAction(), getActivityStateReducer(), getActivityStoreSubscriber())
     }
 
