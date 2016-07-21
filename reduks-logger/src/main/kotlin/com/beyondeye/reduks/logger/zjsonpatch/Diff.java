@@ -1,6 +1,6 @@
-package com.flipkart.zjsonpatch;
+package com.beyondeye.reduks.logger.zjsonpatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonElement;
 
 import java.util.List;
 
@@ -11,16 +11,16 @@ import java.util.List;
 class Diff {
     private final Operation operation;
     private final List<Object> path;
-    private final JsonNode value;
+    private final JsonElement value;
     private List<Object> toPath; //only to be used in move operation
 
-    Diff(Operation operation, List<Object> path, JsonNode value) {
+    Diff(Operation operation, List<Object> path, JsonElement value) {
         this.operation = operation;
         this.path = path;
         this.value = value;
     }
 
-    Diff(Operation operation, List<Object> fromPath, JsonNode value, List<Object> toPath) {
+    Diff(Operation operation, List<Object> fromPath, JsonElement value, List<Object> toPath) {
         this.operation = operation;
         this.path = fromPath;
         this.value = value;
@@ -35,11 +35,11 @@ class Diff {
         return path;
     }
 
-    public JsonNode getValue() {
+    public JsonElement getValue() {
         return value;
     }
 
-    public static Diff generateDiff(Operation replace, List<Object> path, JsonNode target) {
+    public static Diff generateDiff(Operation replace, List<Object> path, JsonElement target) {
         return new Diff(replace, path, target);
     }
 
