@@ -1,8 +1,10 @@
 package com.beyondeye.reduks.logger.zjsonpatch;
 
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
+//import com.fasterxml.jackson.core.JsonToken;
+//import com.fasterxml.jackson.databind.JsonNode;
+//import com.google.common.base.Preconditions;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -42,6 +44,7 @@ enum NodeType {
      */
     private final String name;
 
+    /* *ORIGINALCODE*
     private static final Map<JsonToken, NodeType> TOKEN_MAP
             = new EnumMap<JsonToken, NodeType>(JsonToken.class);
 
@@ -56,7 +59,7 @@ enum NodeType {
         TOKEN_MAP.put(JsonToken.VALUE_STRING, STRING);
 
     }
-
+*/
     NodeType(final String name) {
         this.name = name;
     }
@@ -66,10 +69,21 @@ enum NodeType {
         return name;
     }
 
-    public static NodeType getNodeType(final JsonNode node) {
+    public static NodeType getNodeType(final JsonObject node) {
+        if(node.isJsonArray()) return ARRAY;
+        if(node.isJsonNull()) return NULL;
+        if(node.isJsonObject()) return OBJECT;
+        //primitive
+        JsonPrimitive pnode=node.getAsJsonPrimitive();
+        if(pnode.isBoolean()) return BOOLEAN;
+        //TODO need to distinguish between float and int
+        if(pnode.isNumber()) return NUMBER;
+        throw new IllegalArgumentException("Unhandled token type:"+ pnode.toString());
+        /* *ORIGINALCODE*
         final JsonToken token = node.asToken();
         final NodeType ret = TOKEN_MAP.get(token);
         Preconditions.checkNotNull(ret, "unhandled token type " + token);
         return ret;
+        */
     }
 }
