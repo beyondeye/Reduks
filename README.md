@@ -13,7 +13,7 @@ it currently has the following features that bansa misses.
  - Thunk middleware
  
  - Thread safe action dispatch from multiple threads, in my implementation of State store based on Kovenant promises
-  (see https://github.com/beyondeye/Reduks/blob/master/reduks/src/main/kotlin/com/beyondeye/reduks/KovenantStore.kt)
+  (see https://github.com/beyondeye/Reduks/blob/master/reduks-kovenant/src/main/kotlin/com/beyondeye/reduks/KovenantStore.kt)
    see also this issue in original bansa repository: [Is it safe to call dispatch from multiple threads](https://github.com/brianegan/bansa/issues/24)
  - port of reselect library(https://github.com/reactjs/reselect)
 
