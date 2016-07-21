@@ -2,5 +2,6 @@ include ':reduks'
 include ':reduks-devtools'
 include ':reduks-rx'
 include ':reduks-kovenant'
+include ':reduks-logger'
 
 project(':reduks').name = 'reduks-core'
