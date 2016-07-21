@@ -39,7 +39,7 @@ allprojects {
         targetSdkVersion_ = 23 //Integer
         extraConfVersion = '2.2.+'
         firebaseVersion='9.0.2'
-
+        gson_version='2.7'
     }
 }
 
