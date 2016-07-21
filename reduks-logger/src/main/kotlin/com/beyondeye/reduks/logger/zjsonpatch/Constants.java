@@ -1,4 +1,4 @@
-package com.flipkart.zjsonpatch;
+package com.beyondeye.reduks.logger.zjsonpatch;
 
 /**
  * Created with IntelliJ IDEA.

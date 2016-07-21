@@ -1,4 +1,4 @@
-package com.flipkart.zjsonpatch;
+package com.beyondeye.reduks.logger.zjsonpatch;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
