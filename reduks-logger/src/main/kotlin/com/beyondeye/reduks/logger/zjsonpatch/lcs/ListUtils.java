@@ -7,6 +7,20 @@ import java.util.List;
  * Created by daely on 7/22/2016.
  */
 public class ListUtils {
+    //-----------------------------------------------------------------------
+    /**
+     * Returns the longest common subsequence (LCS) of two sequences (lists).
+     *
+     * @param <E>  the element type
+     * @param a  the first list
+     * @param b  the second list
+     * @return the longest common subsequence
+     * @throws NullPointerException if either list is {@code null}
+     * @since 4.0
+     */
+    public static <E> List<E> longestCommonSubsequence(final List<E> a, final List<E> b) {
+        return longestCommonSubsequence( a, b, DefaultEquator.defaultEquator() );
+    }
     /**
      * Returns the longest common subsequence (LCS) of two sequences (lists).
      *
