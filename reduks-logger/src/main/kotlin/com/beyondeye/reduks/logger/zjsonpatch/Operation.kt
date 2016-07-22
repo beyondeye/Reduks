@@ -4,7 +4,7 @@ package com.beyondeye.reduks.logger.zjsonpatch
  * User: gopi.vishwakarma
  * Date: 30/07/14
  */
-internal enum class Operation private constructor(private val rfcName: String) {
+internal enum class Operation constructor(private val rfcName: String) {
     ADD("add"),
     REMOVE("remove"),
     REPLACE("replace"),
@@ -21,7 +21,7 @@ internal enum class Operation private constructor(private val rfcName: String) {
                 REPLACE.rfcName to REPLACE,
                 MOVE.rfcName to MOVE)
 
-        fun fromRfcName(rfcName: String): Operation {
+        @JvmStatic fun fromRfcName(rfcName: String): Operation {
             checkNotNull(rfcName,{"rfcName cannot be null"} )
             return checkNotNull(OPS.get(rfcName.toLowerCase()), {"unknown / unsupported operation $rfcName"})
         }
