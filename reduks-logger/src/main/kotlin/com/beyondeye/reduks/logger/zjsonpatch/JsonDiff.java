@@ -1,15 +1,22 @@
 package com.beyondeye.reduks.logger.zjsonpatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.ListUtils;
+//import com.fasterxml.jackson.databind.JsonNode;
+//import com.fasterxml.jackson.databind.node.ArrayNode;
+//import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+//import com.fasterxml.jackson.databind.node.ObjectNode;
+//import com.google.common.base.Function;
+//import com.google.common.base.Joiner;
+//import com.google.common.base.Preconditions;
+//import com.google.common.collect.Iterables;
+//import com.google.common.collect.Lists;
+import com.beyondeye.reduks.logger.zjsonpatch.lcs.ListUtils;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+//import org.apache.commons.collections4.ListUtils;
+
+import org.json.JSONArray;
 
 import java.util.*;
 
@@ -19,19 +26,10 @@ import java.util.*;
  */
 public final class JsonDiff {
 
-    public static final EncodePathFunction ENCODE_PATH_FUNCTION = new EncodePathFunction();
-
     private JsonDiff() {}
 
-    private final static class EncodePathFunction implements Function<Object, String> {
-        @Override
-        public String apply(Object object) {
-            String path = object.toString(); // see http://tools.ietf.org/html/rfc6901#section-4
-            return path.replaceAll("~", "~0").replaceAll("/", "~1");
-        }
-    }
 
-    public static JsonNode asJson(final JsonNode source, final JsonNode target) {
+    public static JsonArray asJson(final JsonElement source, final JsonElement target) {
         final List<Diff> diffs = new ArrayList<Diff>();
         List<Object> path = new LinkedList<Object>();
         /**
@@ -149,47 +147,58 @@ public final class JsonDiff {
         }
     }
 
-    private static ArrayNode getJsonNodes(List<Diff> diffs) {
-        JsonNodeFactory FACTORY = JsonNodeFactory.instance;
-        final ArrayNode patch = FACTORY.arrayNode();
+    private static JsonArray getJsonNodes(List<Diff> diffs) {
+//        JsonNodeFactory FACTORY = JsonNodeFactory.instance;
+        final JsonArray patch = new JsonArray();
         for (Diff diff : diffs) {
-            ObjectNode jsonNode = getJsonNode(FACTORY, diff);
+            JsonObject jsonNode = getJsonNode( diff);
             patch.add(jsonNode);
         }
         return patch;
     }
 
-    private static ObjectNode getJsonNode(JsonNodeFactory FACTORY, Diff diff) {
-        ObjectNode jsonNode = FACTORY.objectNode();
-        jsonNode.put(Constants.OP, diff.getOperation().rfcName());
-        jsonNode.put(Constants.PATH, getArrayNodeRepresentation(diff.getPath()));
+    private static JsonObject getJsonNode( Diff diff) {
+        JsonObject jsonNode = new JsonObject();
+        jsonNode.addProperty(Constants.OP, diff.getOperation().rfcName());
+        jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.getPath()));
         if (Operation.MOVE.equals(diff.getOperation())) {
-            jsonNode.put(Constants.FROM, getArrayNodeRepresentation(diff.getPath())); //required {from} only in case of Move Operation
-            jsonNode.put(Constants.PATH, getArrayNodeRepresentation(diff.getToPath()));  // destination Path
+            jsonNode.addProperty(Constants.FROM, getArrayNodeRepresentation(diff.getPath())); //required {from} only in case of Move Operation
+            jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.getToPath()));  // destination Path
         }
         if (!Operation.REMOVE.equals(diff.getOperation()) && !Operation.MOVE.equals(diff.getOperation())) { // setting only for Non-Remove operation
-            jsonNode.put(Constants.VALUE, diff.getValue());
+            jsonNode.add(Constants.VALUE, diff.getValue());
         }
         return jsonNode;
     }
 
+    public static String  EncodePath(Object object) {
+        String path = object.toString(); // see http://tools.ietf.org/html/rfc6901#section-4
+        return path.replaceAll("~", "~0").replaceAll("/", "~1");
+    }
+    //join path parts in argument 'path', inserting a '/' between joined elements, starting with '/' and transforming the element of the list with ENCODE_PATH_FUNCTION
     private static String getArrayNodeRepresentation(List<Object> path) {
-        return Joiner.on('/').appendTo(new StringBuilder().append('/'),
-                Iterables.transform(path, ENCODE_PATH_FUNCTION)).toString();
+//        return Joiner.on('/').appendTo(new StringBuilder().append('/'),
+//                Iterables.transform(path, ENCODE_PATH_FUNCTION)).toString();
+        StringBuilder sb=new StringBuilder();
+        for(int i=0;i<path.size();++i) {
+            sb.append('/');
+            sb.append(EncodePath(path.get(i)));
+
+        }
+        return sb.toString();
     }
 
-
-    private static void generateDiffs(List<Diff> diffs, List<Object> path, JsonNode source, JsonNode target) {
+    private static void generateDiffs(List<Diff> diffs, List<Object> path, JsonElement source, JsonElement target) {
         if (!source.equals(target)) {
-            final NodeType sourceType = NodeType.getNodeType(source);
-            final NodeType targetType = NodeType.getNodeType(target);
+            final int sourceType = NodeType.getNodeType(source);
+            final int targetType = NodeType.getNodeType(target);
 
             if (sourceType == NodeType.ARRAY && targetType == NodeType.ARRAY) {
                 //both are arrays
                 compareArray(diffs, path, source, target);
             } else if (sourceType == NodeType.OBJECT && targetType == NodeType.OBJECT) {
                 //both are json
-                compareObjects(diffs, path, source, target);
+                compareObjects(diffs, path, source.getAsJsonObject(), target.getAsJsonObject());
             } else {
                 //can be replaced
 
@@ -198,8 +207,10 @@ public final class JsonDiff {
         }
     }
 
-    private static void compareArray(List<Diff> diffs, List<Object> path, JsonNode source, JsonNode target) {
-        List<JsonNode> lcs = getLCS(source, target);
+    private static void compareArray(List<Diff> diffs, List<Object> path, JsonElement source_, JsonElement target_) {
+        JsonArray source=source_.getAsJsonArray();
+        JsonArray target=target_.getAsJsonArray();
+        List<JsonElement> lcs = getLCS(source, target);
         int srcIdx = 0;
         int targetIdx = 0;
         int lcsIdx = 0;
@@ -209,9 +220,9 @@ public final class JsonDiff {
 
         int pos = 0;
         while (lcsIdx < lcsSize) {
-            JsonNode lcsNode = lcs.get(lcsIdx);
-            JsonNode srcNode = source.get(srcIdx);
-            JsonNode targetNode = target.get(targetIdx);
+            JsonElement lcsNode = lcs.get(lcsIdx);
+            JsonElement srcNode = source.get(srcIdx);
+            JsonElement targetNode = target.get(targetIdx);
 
 
             if (lcsNode.equals(srcNode) && lcsNode.equals(targetNode)) { // Both are same as lcs node, nothing to do here
@@ -243,8 +254,8 @@ public final class JsonDiff {
         }
 
         while ((srcIdx < srcSize) && (targetIdx < targetSize)) {
-            JsonNode srcNode = source.get(srcIdx);
-            JsonNode targetNode = target.get(targetIdx);
+            JsonElement srcNode = source.get(srcIdx);
+            JsonElement targetNode = target.get(targetIdx);
             List<Object> currPath = getPath(path, pos);
             generateDiffs(diffs, currPath, srcNode, targetNode);
             srcIdx++;
@@ -255,8 +266,8 @@ public final class JsonDiff {
         removeRemaining(diffs, path, pos, srcIdx, srcSize, source);
     }
 
-    private static Integer removeRemaining(List<Diff> diffs, List<Object> path, int pos, int srcIdx, int srcSize, JsonNode source) {
-
+    private static Integer removeRemaining(List<Diff> diffs, List<Object> path, int pos, int srcIdx, int srcSize, JsonElement source_) {
+        JsonArray source = source_.getAsJsonArray();
         while (srcIdx < srcSize) {
             List<Object> currPath = getPath(path, pos);
             diffs.add(Diff.generateDiff(Operation.REMOVE, currPath, source.get(srcIdx)));
@@ -265,9 +276,10 @@ public final class JsonDiff {
         return pos;
     }
 
-    private static Integer addRemaining(List<Diff> diffs, List<Object> path, JsonNode target, int pos, int targetIdx, int targetSize) {
+    private static Integer addRemaining(List<Diff> diffs, List<Object> path, JsonElement target_, int pos, int targetIdx, int targetSize) {
+        JsonArray target=target_.getAsJsonArray();
         while (targetIdx < targetSize) {
-            JsonNode jsonNode = target.get(targetIdx);
+            JsonElement jsonNode = target.get(targetIdx);
             List<Object> currPath = getPath(path, pos);
             diffs.add(Diff.generateDiff(Operation.ADD, currPath, jsonNode.deepCopy()));
             pos++;
@@ -276,10 +288,10 @@ public final class JsonDiff {
         return pos;
     }
 
-    private static void compareObjects(List<Diff> diffs, List<Object> path, JsonNode source, JsonNode target) {
-        Iterator<String> keysFromSrc = source.fieldNames();
+    private static void compareObjects(List<Diff> diffs, List<Object> path, JsonObject source, JsonObject target) {
+        Iterator<Map.Entry<String, JsonElement>> keysFromSrc = source.entrySet().iterator();
         while (keysFromSrc.hasNext()) {
-            String key = keysFromSrc.next();
+            String key = keysFromSrc.next().getKey();
             if (!target.has(key)) {
                 //remove case
                 List<Object> currPath = getPath(path, key);
@@ -289,9 +301,9 @@ public final class JsonDiff {
             List<Object> currPath = getPath(path, key);
             generateDiffs(diffs, currPath, source.get(key), target.get(key));
         }
-        Iterator<String> keysFromTarget = target.fieldNames();
+        Iterator<Map.Entry<String, JsonElement>> keysFromTarget = target.entrySet().iterator();
         while (keysFromTarget.hasNext()) {
-            String key = keysFromTarget.next();
+            String key = keysFromTarget.next().getKey();
             if (!source.has(key)) {
                 //add case
                 List<Object> currPath = getPath(path, key);
@@ -307,10 +319,11 @@ public final class JsonDiff {
         return toReturn;
     }
 
-    private static List<JsonNode> getLCS(final JsonNode first, final JsonNode second) {
-
-        Preconditions.checkArgument(first.isArray(), "LCS can only work on JSON arrays");
-        Preconditions.checkArgument(second.isArray(), "LCS can only work on JSON arrays");
+    private static List<JsonElement> getLCS(final JsonElement first_, final JsonElement second_) {
+        if(!first_.isJsonArray()) throw new IllegalArgumentException("LCS can only work on JSON arrays");
+        if(!second_.isJsonArray()) throw new IllegalArgumentException("LCS can only work on JSON arrays");
+        JsonArray first = (JsonArray) first_;
+        JsonArray second = (JsonArray) second_;
 
         return ListUtils.longestCommonSubsequence(Lists.newArrayList(first), Lists.newArrayList(second));
     }
