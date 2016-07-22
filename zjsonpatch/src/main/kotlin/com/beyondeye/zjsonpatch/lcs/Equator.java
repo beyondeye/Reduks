@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.logger.zjsonpatch.lcs;
+package com.beyondeye.zjsonpatch.lcs;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more contributor license

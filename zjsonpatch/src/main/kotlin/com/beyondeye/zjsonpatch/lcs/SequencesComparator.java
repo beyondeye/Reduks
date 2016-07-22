@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.logger.zjsonpatch.lcs;
+package com.beyondeye.zjsonpatch.lcs;
 import java.util.List;
 
 

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.beyondeye.reduks.logger.zjsonpatch.lcs;
+package com.beyondeye.zjsonpatch.lcs;
 
 /**
  * Abstract base class for all commands used to transform an objects sequence

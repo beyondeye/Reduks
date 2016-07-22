@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.logger.zjsonpatch;
+package com.beyondeye.zjsonpatch;
 
 import com.google.gson.JsonElement;
 

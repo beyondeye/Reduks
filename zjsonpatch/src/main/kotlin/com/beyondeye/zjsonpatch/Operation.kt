@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.logger.zjsonpatch
+package com.beyondeye.zjsonpatch
 
 /**
  * User: gopi.vishwakarma

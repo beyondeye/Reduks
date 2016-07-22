@@ -1,6 +1,6 @@
-package com.beyondeye.reduks.logger.zjsonpatch
+package com.beyondeye.zjsonpatch
 
-import com.beyondeye.reduks.logger.zjsonpatch.lcs.ListUtils
+import com.beyondeye.zjsonpatch.lcs.ListUtils
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -318,6 +318,6 @@ object JsonDiff {
         if (!second_.isJsonArray) throw IllegalArgumentException("LCS can only work on JSON arrays")
         val first = first_ as JsonArray
         val second = second_ as JsonArray
-        return ListUtils.longestCommonSubsequence(first.toList(),second.toList())
+        return com.beyondeye.zjsonpatch.lcs.ListUtils.longestCommonSubsequence(first.toList(),second.toList())
     }
 }
