@@ -1,0 +1,5 @@
+dependencies {
+    compile "com.google.code.gson:gson:$gson_version"
+}
+
+apply from: '../maven-push.gradle'
