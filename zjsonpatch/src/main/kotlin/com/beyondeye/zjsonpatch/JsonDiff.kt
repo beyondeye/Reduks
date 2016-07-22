@@ -22,7 +22,7 @@ import java.util.*
 object JsonDiff {
 
 
-    fun asJson(source: JsonElement, target: JsonElement): JsonArray {
+    @JvmStatic fun asJson(source: JsonElement, target: JsonElement): JsonArray {
         val diffs = ArrayList<Diff>()
         val path = LinkedList<Any>()
         /**
@@ -161,7 +161,7 @@ object JsonDiff {
         return jsonNode
     }
 
-    fun EncodePath(`object`: Any): String {
+    private fun EncodePath(`object`: Any): String {
         val path = `object`.toString() // see http://tools.ietf.org/html/rfc6901#section-4
         return path.replace("~".toRegex(), "~0").replace("/".toRegex(), "~1")
     }

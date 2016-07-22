@@ -19,7 +19,7 @@ import com.google.gson.publicDeepCopy
  * Dario Elyasy 22/7/2016
  */
 object JsonPatch {
-    fun apply(patch: JsonArray, source: JsonElement): JsonElement {
+    @JvmStatic fun apply(patch: JsonArray, source: JsonElement): JsonElement {
         val operations = patch.iterator()
         var ret = source.publicDeepCopy()
         while (operations.hasNext()) {
@@ -195,7 +195,7 @@ object JsonPatch {
         }
     }
 
-    internal fun decodePath(path: String): String {
+    private fun decodePath(path: String): String {
         return path.replace("~1".toRegex(), "/").replace("~0".toRegex(), "~") // see http://tools.ietf.org/html/rfc6901#section-4
     }
 
