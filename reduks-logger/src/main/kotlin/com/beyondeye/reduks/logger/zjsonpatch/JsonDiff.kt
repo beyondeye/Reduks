@@ -1,14 +1,5 @@
 package com.beyondeye.reduks.logger.zjsonpatch
 
-//import com.fasterxml.jackson.databind.JsonNode;
-//import com.fasterxml.jackson.databind.node.ArrayNode;
-//import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-//import com.fasterxml.jackson.databind.node.ObjectNode;
-//import com.google.common.base.Function;
-//import com.google.common.base.Joiner;
-//import com.google.common.base.Preconditions;
-//import com.google.common.collect.Iterables;
-//import com.google.common.collect.Lists;
 import com.beyondeye.reduks.logger.zjsonpatch.lcs.ListUtils
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
@@ -24,6 +15,9 @@ import java.util.*
 /**
  * User: gopi.vishwakarma
  * Date: 30/07/14
+ *
+ * use Gson instead of Jackson, converted to Kotlin and some clean up
+ * Dario Elyasy 22/7/2016
  */
 object JsonDiff {
 
