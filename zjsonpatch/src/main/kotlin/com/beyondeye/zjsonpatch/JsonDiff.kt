@@ -47,7 +47,7 @@ object JsonDiff {
             val diff1 = diffs[i]
 
             // if not remove OR add, move to next diff
-            if (!(Operation.REMOVE == diff1.operation || Operation.ADD == diff1.operation)) {
+            if (!(Operations.REMOVE == diff1.operation || Operations.ADD == diff1.operation)) {
                 continue
             }
 
@@ -58,13 +58,13 @@ object JsonDiff {
                 }
 
                 var moveDiff: Diff? = null
-                if (Operation.REMOVE == diff1.operation && Operation.ADD == diff2.operation) {
+                if (Operations.REMOVE == diff1.operation && Operations.ADD == diff2.operation) {
                     computeRelativePath(diff2.path, i + 1, j - 1, diffs)
-                    moveDiff = Diff(Operation.MOVE, diff1.path, diff2.value, diff2.path)
+                    moveDiff = Diff(Operations.MOVE, diff1.path, diff2.value, diff2.path)
 
-                } else if (Operation.ADD == diff1.operation && Operation.REMOVE == diff2.operation) {
+                } else if (Operations.ADD == diff1.operation && Operations.REMOVE == diff2.operation) {
                     computeRelativePath(diff2.path, i, j - 1, diffs) // diff1's add should also be considered
-                    moveDiff = Diff(Operation.MOVE, diff2.path, diff1.value, diff1.path)
+                    moveDiff = Diff(Operations.MOVE, diff2.path, diff1.value, diff1.path)
                 }
                 if (moveDiff != null) {
                     diffs.removeAt(j)
@@ -85,7 +85,7 @@ object JsonDiff {
         for (i in startIdx..endIdx) {
             val diff = diffs[i]
             //Adjust relative path according to #ADD and #Remove
-            if (Operation.ADD == diff.operation || Operation.REMOVE == diff.operation) {
+            if (Operations.ADD == diff.operation || Operations.REMOVE == diff.operation) {
                 updatePath(path, diff, counters)
             }
         }
@@ -129,10 +129,10 @@ object JsonDiff {
     }
 
     private fun updateCounters(pseudo: Diff, idx: Int, counters: MutableList<Int>) {
-        if (Operation.ADD == pseudo.operation) {
+        if (Operations.ADD == pseudo.operation) {
             counters[idx] = counters[idx] - 1
         } else {
-            if (Operation.REMOVE == pseudo.operation) {
+            if (Operations.REMOVE == pseudo.operation) {
                 counters[idx] = counters[idx] + 1
             }
         }
@@ -150,13 +150,13 @@ object JsonDiff {
 
     private fun getJsonNode(diff: Diff): JsonObject {
         val jsonNode = JsonObject()
-        jsonNode.addProperty(Constants.OP, diff.operation.rfcName())
+        jsonNode.addProperty(Constants.OP,Operations.nameFromOp(diff.operation))
         jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.path))
-        if (Operation.MOVE == diff.operation) {
+        if (Operations.MOVE == diff.operation) {
             jsonNode.addProperty(Constants.FROM, getArrayNodeRepresentation(diff.path)) //required {from} only in case of Move Operation
             jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.toPath))  // destination Path
         }
-        if (Operation.REMOVE != diff.operation && Operation.MOVE != diff.operation) { // setting only for Non-Remove operation
+        if (Operations.REMOVE != diff.operation && Operations.MOVE != diff.operation) { // setting only for Non-Remove operation
             jsonNode.add(Constants.VALUE, diff.value)
         }
         return jsonNode
@@ -194,7 +194,7 @@ object JsonDiff {
             } else {
                 //can be replaced
 
-                diffs.add(Diff.generateDiff(Operation.REPLACE, path, target))
+                diffs.add(Diff.generateDiff(Operations.REPLACE, path, target))
             }
         }
     }
@@ -226,13 +226,13 @@ object JsonDiff {
                 if (lcsNode == srcNode) { // src node is same as lcs, but not targetNode
                     //addition
                     val currPath = getPath(path, pos)
-                    diffs.add(Diff.generateDiff(Operation.ADD, currPath, targetNode))
+                    diffs.add(Diff.generateDiff(Operations.ADD, currPath, targetNode))
                     pos++
                     targetIdx++
                 } else if (lcsNode == targetNode) { //targetNode node is same as lcs, but not src
                     //removal,
                     val currPath = getPath(path, pos)
-                    diffs.add(Diff.generateDiff(Operation.REMOVE, currPath, srcNode))
+                    diffs.add(Diff.generateDiff(Operations.REMOVE, currPath, srcNode))
                     srcIdx++
                 } else {
                     val currPath = getPath(path, pos)
@@ -263,7 +263,7 @@ object JsonDiff {
         val source = source_.asJsonArray
         while (srcIdx < srcSize) {
             val currPath = getPath(path, pos)
-            diffs.add(Diff.generateDiff(Operation.REMOVE, currPath, source.get(srcIdx)))
+            diffs.add(Diff.generateDiff(Operations.REMOVE, currPath, source.get(srcIdx)))
             srcIdx++
         }
         return pos
@@ -276,7 +276,7 @@ object JsonDiff {
         while (targetIdx < targetSize) {
             val jsonNode = target.get(targetIdx)
             val currPath = getPath(path, pos)
-            diffs.add(Diff.generateDiff(Operation.ADD, currPath, jsonNode.publicDeepCopy()))
+            diffs.add(Diff.generateDiff(Operations.ADD, currPath, jsonNode.publicDeepCopy()))
             pos++
             targetIdx++
         }
@@ -290,7 +290,7 @@ object JsonDiff {
             if (!target.has(key)) {
                 //remove case
                 val currPath = getPath(path, key)
-                diffs.add(Diff.generateDiff(Operation.REMOVE, currPath, source.get(key)))
+                diffs.add(Diff.generateDiff(Operations.REMOVE, currPath, source.get(key)))
                 continue
             }
             val currPath = getPath(path, key)
@@ -302,7 +302,7 @@ object JsonDiff {
             if (!source.has(key)) {
                 //add case
                 val currPath = getPath(path, key)
-                diffs.add(Diff.generateDiff(Operation.ADD, currPath, target.get(key)))
+                diffs.add(Diff.generateDiff(Operations.ADD, currPath, target.get(key)))
             }
         }
     }

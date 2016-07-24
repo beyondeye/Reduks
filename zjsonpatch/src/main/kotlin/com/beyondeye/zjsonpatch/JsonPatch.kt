@@ -24,22 +24,22 @@ object JsonPatch {
         var ret = source.publicDeepCopy()
         while (operations.hasNext()) {
             val jsonNode = operations.next() as JsonObject
-            val operation = Operation.fromRfcName(jsonNode.get(Constants.OP).toString().replace("\"".toRegex(), ""))
+            val operation = Operations.opFromName(jsonNode.get(Constants.OP).toString().replace("\"".toRegex(), ""))
             val path = getPath(jsonNode.get(Constants.PATH))
             var fromPath: List<String>? = null
-            if (Operation.MOVE == operation) {
+            if (Operations.MOVE == operation) {
                 fromPath = getPath(jsonNode.get(Constants.FROM))
             }
             var value: JsonElement? = null
-            if (Operation.REMOVE != operation && Operation.MOVE != operation) {
+            if (Operations.REMOVE != operation && Operations.MOVE != operation) {
                 value = jsonNode.get(Constants.VALUE)
             }
 
             when (operation) {
-                Operation.REMOVE -> remove(ret, path)
-                Operation.REPLACE -> ret = replace(ret, path, value!!)
-                Operation.ADD -> ret = add(ret, path, value!!)
-                Operation.MOVE -> ret = move(ret, fromPath!!, path)
+                Operations.REMOVE -> remove(ret, path)
+                Operations.REPLACE -> ret = replace(ret, path, value!!)
+                Operations.ADD -> ret = add(ret, path, value!!)
+                Operations.MOVE -> ret = move(ret, fromPath!!, path)
             }
         }
         return ret

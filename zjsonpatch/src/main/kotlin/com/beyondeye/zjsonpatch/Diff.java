@@ -9,25 +9,25 @@ import java.util.List;
  * Date: 30/07/14
  */
 class Diff {
-    private final Operation operation;
+    private final int operation;
     private final List<Object> path;
     private final JsonElement value;
     private List<Object> toPath; //only to be used in move operation
 
-    Diff(Operation operation, List<Object> path, JsonElement value) {
+    Diff(int operation, List<Object> path, JsonElement value) {
         this.operation = operation;
         this.path = path;
         this.value = value;
     }
 
-    Diff(Operation operation, List<Object> fromPath, JsonElement value, List<Object> toPath) {
+    Diff(int operation, List<Object> fromPath, JsonElement value, List<Object> toPath) {
         this.operation = operation;
         this.path = fromPath;
         this.value = value;
         this.toPath = toPath;
     }
 
-    public Operation getOperation() {
+    public int getOperation() {
         return operation;
     }
 
@@ -39,7 +39,7 @@ class Diff {
         return value;
     }
 
-    public static Diff generateDiff(Operation replace, List<Object> path, JsonElement target) {
+    public static Diff generateDiff(int replace, List<Object> path, JsonElement target) {
         return new Diff(replace, path, target);
     }
 
