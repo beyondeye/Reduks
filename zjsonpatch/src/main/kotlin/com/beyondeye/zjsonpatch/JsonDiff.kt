@@ -1,14 +1,9 @@
 package com.beyondeye.zjsonpatch
 
-import com.beyondeye.zjsonpatch.lcs.ListUtils
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.publicDeepCopy
-
-//import org.apache.commons.collections4.ListUtils;
-
-import org.json.JSONArray
 
 import java.util.*
 
@@ -154,7 +149,7 @@ object JsonDiff {
         jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.path))
         if (Operations.MOVE == diff.operation) {
             jsonNode.addProperty(Constants.FROM, getArrayNodeRepresentation(diff.path)) //required {from} only in case of Move Operation
-            jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.toPath))  // destination Path
+            jsonNode.addProperty(Constants.PATH, getArrayNodeRepresentation(diff.toPath!!))  // destination Path
         }
         if (Operations.REMOVE != diff.operation && Operations.MOVE != diff.operation) { // setting only for Non-Remove operation
             jsonNode.add(Constants.VALUE, diff.value)

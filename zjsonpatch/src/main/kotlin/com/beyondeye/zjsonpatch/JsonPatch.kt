@@ -1,11 +1,5 @@
 package com.beyondeye.zjsonpatch
 
-//import com.google.common.base.Function;
-//import com.google.common.base.Splitter;
-//import com.google.common.base.Strings;
-//import com.google.common.collect.Iterables;
-//import com.google.common.collect.Lists;
-
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
