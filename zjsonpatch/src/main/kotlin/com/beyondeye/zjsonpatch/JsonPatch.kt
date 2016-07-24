@@ -13,27 +13,29 @@ import com.google.gson.publicDeepCopy
  * Dario Elyasy 22/7/2016
  */
 object JsonPatch {
+    internal val op= Operations()
+    internal val consts= Constants()
     @JvmStatic fun apply(patch: JsonArray, source: JsonElement): JsonElement {
         val operations = patch.iterator()
         var ret = source.publicDeepCopy()
         while (operations.hasNext()) {
             val jsonNode = operations.next() as JsonObject
-            val operation = Operations.opFromName(jsonNode.get(Constants.OP).toString().replace("\"".toRegex(), ""))
-            val path = getPath(jsonNode.get(Constants.PATH))
+            val operation = op.opFromName(jsonNode.get(consts.OP).toString().replace("\"".toRegex(), ""))
+            val path = getPath(jsonNode.get(consts.PATH))
             var fromPath: List<String>? = null
-            if (Operations.MOVE == operation) {
-                fromPath = getPath(jsonNode.get(Constants.FROM))
+            if (op.MOVE == operation) {
+                fromPath = getPath(jsonNode.get(consts.FROM))
             }
             var value: JsonElement? = null
-            if (Operations.REMOVE != operation && Operations.MOVE != operation) {
-                value = jsonNode.get(Constants.VALUE)
+            if (op.REMOVE != operation && op.MOVE != operation) {
+                value = jsonNode.get(consts.VALUE)
             }
 
             when (operation) {
-                Operations.REMOVE -> remove(ret, path)
-                Operations.REPLACE -> ret = replace(ret, path, value!!)
-                Operations.ADD -> ret = add(ret, path, value!!)
-                Operations.MOVE -> ret = move(ret, fromPath!!, path)
+                op.REMOVE -> remove(ret, path)
+                op.REPLACE -> ret = replace(ret, path, value!!)
+                op.ADD -> ret = add(ret, path, value!!)
+                op.MOVE -> ret = move(ret, fromPath!!, path)
             }
         }
         return ret

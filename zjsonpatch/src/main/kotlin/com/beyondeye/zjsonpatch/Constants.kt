@@ -6,10 +6,9 @@ package com.beyondeye.zjsonpatch
  * Date: 10/07/15
  * Time: 10:35 AM
  */
-internal object Constants {
-    var OP = "op"
-    var VALUE = "value"
-    var PATH = "path"
-    var FROM = "from"
-
+internal open class Constants {
+    open val OP = "op"
+    open val VALUE = "value"
+    open val PATH = "path"
+    open val FROM = "from"
 }
