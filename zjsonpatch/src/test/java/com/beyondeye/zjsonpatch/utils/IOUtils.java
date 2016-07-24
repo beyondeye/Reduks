@@ -1,4 +1,4 @@
-package com.beyondeye.zjsonpatch;
+package com.beyondeye.zjsonpatch.utils;
 
 import java.io.InputStream;
 
@@ -7,7 +7,7 @@ import java.io.InputStream;
  */
 public class IOUtils {
     //see http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
-    static String toString(InputStream is, String charsetName) {
+    public static String toString(InputStream is, String charsetName) {
         java.util.Scanner s = new java.util.Scanner(is, charsetName).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }

@@ -1,4 +1,4 @@
-package com.beyondeye.zjsonpatch;
+package com.beyondeye.zjsonpatch.utils;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

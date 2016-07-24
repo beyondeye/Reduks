@@ -1,12 +1,13 @@
 package com.beyondeye.zjsonpatch;
 
 
+import com.beyondeye.zjsonpatch.utils.GsonObjectMapper;
+import com.beyondeye.zjsonpatch.utils.IOUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
