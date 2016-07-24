@@ -1,9 +1,10 @@
 package com.beyondeye.zjsonpatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.commons.io.IOUtils;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,33 +18,33 @@ import static org.hamcrest.core.IsEqual.equalTo;
  * @author ctranxuan (streamdata.io).
  */
 public abstract class AbstractTest {
-    static ObjectMapper objectMapper = new ObjectMapper();
-    static ArrayNode jsonNode;
-    static ArrayNode errorNode;
+    static GsonObjectMapper objectMapper = new GsonObjectMapper();
+    static JsonArray jsonNode;
+    static JsonArray errorNode;
 
     protected AbstractTest(String fileName) throws IOException {
         String path = "/testdata/" + fileName + ".json";
         InputStream resourceAsStream = JsonDiffTest.class.getResourceAsStream(path);
         String testData = IOUtils.toString(resourceAsStream, "UTF-8");
-        JsonNode testsNode = objectMapper.readTree(testData);
-        jsonNode = (ArrayNode) testsNode.get("ops");
-        errorNode = (ArrayNode) testsNode.get("errors");
+        JsonObject testsNode = objectMapper.readTree(testData).getAsJsonObject();
+        jsonNode = testsNode.get("ops").getAsJsonArray();
+        errorNode =testsNode.get("errors").getAsJsonArray();
     }
 
     @Test
     public void testPatchAppliedCleanly() throws Exception {
         for (int i = 0; i < jsonNode.size(); i++) {
-            JsonNode first = jsonNode.get(i).get("node");
-            JsonNode second = jsonNode.get(i).get("expected");
-            JsonNode patch = jsonNode.get(i).get("op");
-            String message = jsonNode.get(i).has("message") ? jsonNode.get(i).get("message").toString() : "";
+            JsonElement first = jsonNode.get(i).getAsJsonObject().get("node");
+            JsonElement second = jsonNode.get(i).getAsJsonObject().get("expected");
+            JsonArray patch = jsonNode.get(i).getAsJsonObject().get("op").getAsJsonArray();
+            String message = jsonNode.get(i).getAsJsonObject().has("message") ? jsonNode.get(i).getAsJsonObject().get("message").toString() : "";
 
             System.out.println("Test # " + i);
             System.out.println(first);
             System.out.println(second);
             System.out.println(patch);
 
-            JsonNode secondPrime = JsonPatch.apply(patch, first);
+            JsonElement secondPrime = JsonPatch.apply(patch, first);
             System.out.println(secondPrime);
             Assert.assertThat(message, secondPrime, equalTo(second));
         }
@@ -70,14 +71,14 @@ public abstract class AbstractTest {
     @Test(expected = RuntimeException.class)
     public void testErrorsAreCorrectlyReported() {
         for (int i = 0; i < errorNode.size(); i++) {
-            JsonNode first = errorNode.get(i).get("node");
-            JsonNode patch = errorNode.get(i).get("op");
+            JsonElement first = errorNode.get(i).getAsJsonObject().get("node");
+            JsonArray patch = errorNode.get(i).getAsJsonObject().get("op").getAsJsonArray();
 
             System.out.println("Error Test # " + i);
             System.out.println(first);
             System.out.println(patch);
 
-            JsonNode secondPrime = JsonPatch.apply(patch, first);
+            JsonElement secondPrime = JsonPatch.apply(patch, first);
             System.out.println(secondPrime);
         }
 

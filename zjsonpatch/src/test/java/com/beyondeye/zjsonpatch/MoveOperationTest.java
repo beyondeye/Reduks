@@ -1,6 +1,7 @@
 package com.beyondeye.zjsonpatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonElement;
+
 import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,22 +23,22 @@ public class MoveOperationTest extends AbstractTest {
 
     @Test
     public void testMoveValueGeneratedHasNoValue() throws IOException {
-        JsonNode jsonNode1 = objectMapper.readTree("{ \"foo\": { \"bar\": \"baz\", \"waldo\": \"fred\" }, \"qux\": { \"corge\": \"grault\" } }");
-        JsonNode jsonNode2 = objectMapper.readTree("{ \"foo\": { \"bar\": \"baz\" }, \"qux\": { \"corge\": \"grault\", \"thud\": \"fred\" } }");
-        JsonNode patch = objectMapper.readTree("[{\"op\":\"move\",\"from\":\"/foo/waldo\",\"path\":\"/qux/thud\"}]");
+        JsonElement jsonNode1 = objectMapper.readTree("{ \"foo\": { \"bar\": \"baz\", \"waldo\": \"fred\" }, \"qux\": { \"corge\": \"grault\" } }");
+        JsonElement jsonNode2 = objectMapper.readTree("{ \"foo\": { \"bar\": \"baz\" }, \"qux\": { \"corge\": \"grault\", \"thud\": \"fred\" } }");
+        JsonElement patch = objectMapper.readTree("[{\"op\":\"move\",\"from\":\"/foo/waldo\",\"path\":\"/qux/thud\"}]");
 
-        JsonNode diff = JsonDiff.asJson(jsonNode1, jsonNode2);
+        JsonElement diff = JsonDiff.asJson(jsonNode1, jsonNode2);
 
         assertThat(diff, equalTo(patch));
     }
 
     @Test
     public void testMoveArrayGeneratedHasNoValue() throws IOException {
-        JsonNode jsonNode1 = objectMapper.readTree("{ \"foo\": [ \"all\", \"grass\", \"cows\", \"eat\" ] }");
-        JsonNode jsonNode2 = objectMapper.readTree("{ \"foo\": [ \"all\", \"cows\", \"eat\", \"grass\" ] }");
-        JsonNode patch = objectMapper.readTree("[{\"op\":\"move\",\"from\":\"/foo/1\",\"path\":\"/foo/3\"}]");
+        JsonElement jsonNode1 = objectMapper.readTree("{ \"foo\": [ \"all\", \"grass\", \"cows\", \"eat\" ] }");
+        JsonElement jsonNode2 = objectMapper.readTree("{ \"foo\": [ \"all\", \"cows\", \"eat\", \"grass\" ] }");
+        JsonElement patch = objectMapper.readTree("[{\"op\":\"move\",\"from\":\"/foo/1\",\"path\":\"/foo/3\"}]");
 
-        JsonNode diff = JsonDiff.asJson(jsonNode1, jsonNode2);
+        JsonElement diff = JsonDiff.asJson(jsonNode1, jsonNode2);
 
         assertThat(diff, equalTo(patch));
     }

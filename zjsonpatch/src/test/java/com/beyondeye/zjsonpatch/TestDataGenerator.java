@@ -1,9 +1,8 @@
 package com.beyondeye.zjsonpatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,24 +22,24 @@ public class TestDataGenerator {
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j");
 
-    public static JsonNode generate(int count) {
-        ArrayNode jsonNode = JsonNodeFactory.instance.arrayNode();
+    public static JsonElement generate(int count) {
+        JsonArray jsonNode = new JsonArray();
         for (int i = 0; i < count; i++) {
-            ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-            objectNode.put("name", name.get(random.nextInt(name.size())));
-            objectNode.put("age", age.get(random.nextInt(age.size())));
-            objectNode.put("gender", gender.get(random.nextInt(gender.size())));
-            ArrayNode countryNode = getArrayNode(country.subList(random.nextInt(country.size() / 2), (country.size() / 2) + random.nextInt(country.size() / 2)));
-            objectNode.put("country", countryNode);
-            ArrayNode friendNode = getArrayNode(friends.subList(random.nextInt(friends.size() / 2), (friends.size() / 2) + random.nextInt(friends.size() / 2)));
-            objectNode.put("friends", friendNode);
+            JsonObject objectNode = new JsonObject();
+            objectNode.addProperty("name", name.get(random.nextInt(name.size())));
+            objectNode.addProperty("age", age.get(random.nextInt(age.size())));
+            objectNode.addProperty("gender", gender.get(random.nextInt(gender.size())));
+            JsonArray countryNode = getArrayNode(country.subList(random.nextInt(country.size() / 2), (country.size() / 2) + random.nextInt(country.size() / 2)));
+            objectNode.add("country", countryNode);
+            JsonArray friendNode = getArrayNode(friends.subList(random.nextInt(friends.size() / 2), (friends.size() / 2) + random.nextInt(friends.size() / 2)));
+            objectNode.add("friends", friendNode);
             jsonNode.add(objectNode);
         }
         return jsonNode;
     }
 
-    private static ArrayNode getArrayNode(List<String> args) {
-        ArrayNode countryNode = JsonNodeFactory.instance.arrayNode();
+    private static JsonArray getArrayNode(List<String> args) {
+        JsonArray countryNode = new JsonArray();
         for(String arg : args){
             countryNode.add(arg);
         }
