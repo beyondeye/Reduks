@@ -1,5 +1,6 @@
 dependencies {
     compile project(':reduks-core')
+    compile project(':zjsonpatch')
     compile "com.google.code.gson:gson:$gson_version"
 }
 
