@@ -1,11 +1,11 @@
 package com.beyondeye.reduks.logger.logformatter;
 
 /**
- * Logger is a wrapper of {@link android.util.Log}
+ * LogFormatter is a wrapper of {@link android.util.Log}
  * But more pretty, simple and powerful
  * adapted from https://github.com/orhanobut/logger
  */
-public final class Logger {
+public final class LogFormatter {
 //  public static final int DEBUG = 3;
 //  public static final int ERROR = 6;
 //  public static final int ASSERT = 7;
@@ -18,7 +18,7 @@ public final class Logger {
   private static Printer printer = new LoggerPrinter();
 
   //no instance
-  private Logger() {
+  private LogFormatter() {
   }
 
   /**
@@ -33,7 +33,7 @@ public final class Logger {
   /**
    * It is used to change the tag
    *
-   * @param tag is the given string which will be used in Logger as TAG
+   * @param tag is the given string which will be used in LogFormatter as TAG
    */
   public static Settings init(String tag) {
     printer = new LoggerPrinter();

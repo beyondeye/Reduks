@@ -6,8 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-
 final class LoggerPrinter implements Printer {
 
     private static final String DEFAULT_TAG = "PRETTYLOGGER";
@@ -80,7 +78,7 @@ final class LoggerPrinter implements Printer {
     /**
      * It is used to change the tag
      *
-     * @param tag is the given string which will be used in Logger
+     * @param tag is the given string which will be used in LogFormatter
      */
     @Override
     public Settings init(String tag) {
@@ -408,7 +406,7 @@ final class LoggerPrinter implements Printer {
         for (int i = MIN_STACK_OFFSET; i < trace.length; i++) {
             StackTraceElement e = trace[i];
             String name = e.getClassName();
-            if (!name.equals(LoggerPrinter.class.getName()) && !name.equals(Logger.class.getName())) {
+            if (!name.equals(LoggerPrinter.class.getName()) && !name.equals(LogFormatter.class.getName())) {
                 return --i;
             }
         }
