@@ -12,6 +12,9 @@ import com.google.gson.GsonBuilder
  */
 class ReduksLogger<S>(val options: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
     private val jsonDiffer= JsonDiff
+    /**
+     * gson instance used to serialize reduks State and Actions
+     */
     var gsonInstance = GsonBuilder().serializeNulls().disableHtmlEscaping().serializeSpecialFloatingPointValues().create()
     private val logger = DefaultGroupedLogger()
     private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
