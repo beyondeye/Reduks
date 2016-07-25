@@ -15,5 +15,5 @@ object LogLevel {
     val WARN=w
     val wtf=5
     val e=6
-    val ERROR=6
+    val ERROR=e
 }

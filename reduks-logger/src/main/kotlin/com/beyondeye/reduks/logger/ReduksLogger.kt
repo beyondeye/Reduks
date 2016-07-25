@@ -6,6 +6,7 @@ import com.beyondeye.reduks.StateType
 import com.beyondeye.reduks.Store
 import com.beyondeye.zjsonpatch.JsonDiff
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 
 /**
  * Reduks Logger middleware
@@ -13,6 +14,7 @@ import com.google.gson.GsonBuilder
  */
 class ReduksLogger<S>(val options: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
     private val jsonDiffer = JsonDiff
+    private val jsonParser = JsonParser()
     /**
      * gson instance used to serialize reduks State and Actions
      */
@@ -129,8 +131,22 @@ class ReduksLogger<S>(val options: ReduksLoggerConfig<S> = ReduksLoggerConfig())
         return gsonInstance.toJson(s, stateType.type)
     }
 
-    private fun diffLogger(prevState: String, nextState: String, collapsed: Boolean): Int? {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    private fun diffLogger(prevStateJsonStr: String, nextStateJsonStr: String, collapsed: Boolean) {
+        val prevStateJson=jsonParser.parse(prevStateJsonStr)
+        val nextStateJson=jsonParser.parse(nextStateJsonStr)
+        val stateDiff=jsonDiffer.asJson(prevStateJson,nextStateJson)
+        if (collapsed) {
+            logger.groupCollapsed("diff")
+        } else {
+            logger.group("diff")
+        }
 
+        if (stateDiff.size()>2) {
+            logger.json("",stateDiff.toString())
+        } else {
+            logger.log("—— no diff ——")
+        }
+
+        logger.groupEnd()
+    }
 }
