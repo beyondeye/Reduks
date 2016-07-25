@@ -8,6 +8,9 @@ public interface Printer {
 
   Settings getSettings();
 
+  void groupStart();
+  void groupEnd();
+
   void d(String message, Object... args);
 
   void d(Object object);
@@ -26,9 +29,8 @@ public interface Printer {
 
   void json(String json);
 
-  void xml(String xml);
-
   void log(int priority, String tag, String message, Throwable throwable);
+  //void log(int priority, Throwable throwable, String msg, Object... args);
 
   void resetSettings();
 

@@ -101,13 +101,6 @@ public final class Logger {
     printer.json(json);
   }
 
-  /**
-   * Formats the json content and print it
-   *
-   * @param xml the xml content
-   */
-  public static void xml(String xml) {
-    printer.xml(xml);
-  }
+
 
 }

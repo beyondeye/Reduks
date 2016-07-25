@@ -7,10 +7,8 @@ public final class Settings {
   private int methodOffset = 0;
   private LogAdapter logAdapter;
 
-  /**
-   * Determines to how logs will be printed
-   */
   private Boolean logEnabled = true;
+  private Boolean borderEnabled =true;
 
   public Settings hideThreadInfo() {
     showThreadInfo = false;
@@ -22,6 +20,11 @@ public final class Settings {
       methodCount = 0;
     }
     this.methodCount = methodCount;
+    return this;
+  }
+
+  public Settings borderEnabled(Boolean borderEnabled) {
+      this.borderEnabled = borderEnabled;
     return this;
   }
 
@@ -55,6 +58,7 @@ public final class Settings {
   public int getMethodOffset() {
     return methodOffset;
   }
+  public boolean isBorderEnabled() { return borderEnabled; }
 
   public LogAdapter getLogAdapter() {
     if (logAdapter == null) {
