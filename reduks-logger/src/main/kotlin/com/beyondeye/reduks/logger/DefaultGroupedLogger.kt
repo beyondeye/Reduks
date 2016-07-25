@@ -23,7 +23,7 @@ internal class DefaultGroupedLogger: GroupedLogger {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun json(s: String, logLevel: Int) {
+    override fun json(objName:String,s: String, logLevel: Int) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

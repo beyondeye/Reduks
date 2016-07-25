@@ -6,5 +6,5 @@ internal interface GroupedLogger {
     fun groupCollapsed(s:String)
     fun groupEnd()
     fun  log(s: String,logLevel:Int=LogLevel.INFO)
-    fun  json(s: String,logLevel:Int=LogLevel.INFO)
+    fun  json(objName:String,s: String,logLevel:Int=LogLevel.INFO)
 }
