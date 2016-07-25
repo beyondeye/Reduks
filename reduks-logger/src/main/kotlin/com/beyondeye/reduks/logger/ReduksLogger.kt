@@ -4,28 +4,19 @@ import com.beyondeye.reduks.Middleware
 import com.beyondeye.reduks.NextDispatcher
 import com.beyondeye.reduks.Store
 
-data class LogEntry<S>(
-        val started: Long,
-        val prevState: S,
-        val action: Any,
-        var error: Throwable? = null, //error, nextState and took need to be var in case we don't log errors and unhandled exceptions before we can update it
-        var nextState: S? = null,
-        var took: Double = 0.0,
-        var diffActivated:Boolean=false)
-
 /**
  * Reduks Logger middleware
  * Created by daely on 7/21/2016.
  */
-class ReduksLogger<S>(val options: Options<S> = Options()) : Middleware<S> {
-    val logger = DefaultGroupedLogger()
-    val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
+class ReduksLogger<S>(val options: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
+    private val logger = DefaultGroupedLogger()
+    private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
     override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any? {
         // Exit early if predicate function returns 'false'
         val prevState = store.state
-        if (!options.predicate(prevState, action)) return next.dispatch(action)
+        if (!options.filter(prevState, action)) return next.dispatch(action)
         val started = System.nanoTime()
-        val logEntry = LogEntry<S>(started,  options.stateTransformer(prevState), action)
+        val logEntry = LogEntry<S>(started, options.stateTransformer(prevState), action)
         logBuffer.add(logEntry)
 
         var returnedValue: Any? = null
@@ -41,7 +32,7 @@ class ReduksLogger<S>(val options: Options<S> = Options()) : Middleware<S> {
         logEntry.took = Math.round((System.nanoTime() - logEntry.started)/10.0)/100.0 //in ms rounded to max two decimals
         logEntry.nextState = options.stateTransformer(store.state)
         //check if diff is activated
-        logEntry.diffActivated = if(options.logStateDiff&&options.diffPredicate!=null) options.diffPredicate.invoke(logEntry.nextState!!,action) else options.logStateDiff
+        logEntry.diffActivated = if(options.logStateDiff&&options.logStateDiffFilter!=null) options.logStateDiffFilter.invoke(logEntry.nextState!!,action) else options.logStateDiff
         printBuffer(logBuffer)
         logBuffer.clear()
 
@@ -53,7 +44,7 @@ class ReduksLogger<S>(val options: Options<S> = Options()) : Middleware<S> {
         buffer.forEachIndexed { key, curEntry ->
             var took = curEntry.took
             var nextState=curEntry.nextState
-            val nextEntry:LogEntry<S>? = if(key<buffer.size) buffer[key+1] else null
+            val nextEntry: LogEntry<S>? = if(key<buffer.size) buffer[key+1] else null
             if(nextEntry!=null) {
                 nextState=nextEntry.prevState
                 took=Math.round((nextEntry.started-curEntry.started)/10.0)/100.0

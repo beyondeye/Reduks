@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.logger
 
 //'console' API
-interface GroupedLogger {
+internal interface GroupedLogger {
     fun group(s:String)
     fun groupCollapsed(s:String)
     fun groupEnd()
