@@ -7,11 +7,11 @@ package com.beyondeye.reduks.logger
  * Created by daely on 7/25/2016.
  */
 internal class DefaultGroupedLogger: GroupedLogger {
-    override fun group(s: String) {
+    override fun group(s: String,logLevel:Int) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun groupCollapsed(s: String) {
+    override fun groupCollapsed(s: String,logLevel:Int) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
