@@ -34,7 +34,7 @@ allprojects {
         rxandroidVersion = '1.2.1'
         supportVersion = '24.0.0' //android support lib
         compileSdkVersion_ = 23
-        buildToolsVersion_ = "23.0.3" //String
+        buildToolsVersion_ = "24.0.1" //String
         minSdkVersion_ = 15 //Integer
         targetSdkVersion_ = 23 //Integer
         extraConfVersion = '2.2.+'
