@@ -1,5 +1,7 @@
 package com.beyondeye.reduks.logger.logformatter;
 
+import com.beyondeye.reduks.logger.LogLevel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,12 +12,12 @@ final class LoggerPrinter implements Printer {
 
     private static final String DEFAULT_TAG = "PRETTYLOGGER";
 
-    private static final int DEBUG = 3;
-    private static final int ERROR = 6;
-    private static final int ASSERT = 7;
-    private static final int INFO = 4;
-    private static final int VERBOSE = 2;
-    private static final int WARN = 5;
+//    private static final int DEBUG = 3;
+//    private static final int ERROR = 6;
+//    private static final int ASSERT = 7;
+//    private static final int INFO = 4;
+//    private static final int VERBOSE = 2;
+//    private static final int WARN = 5;
 
     /**
      * Android's max limit for a log entry is ~4076 bytes,
@@ -64,7 +66,7 @@ final class LoggerPrinter implements Printer {
      */
     private final ThreadLocal<String> localTag = new ThreadLocal<String>();
     private final ThreadLocal<Integer> localMethodCount = new ThreadLocal<Integer>();
-    private final ThreadLocal<String> groupBlanks = new ThreadLocal<String>();
+    private final ThreadLocal<String> groupBlanks = new ThreadLocal<String>(); //TODO it's wrong to make it thread local since reducer/subscribers can operate from multiple threads?
 
     /**
      * It is used to determine log settings such as method count, thread info visibility
@@ -120,50 +122,58 @@ final class LoggerPrinter implements Printer {
         return this;
     }
 
-    @Override
-    public void d(String message, Object... args) {
-        log(DEBUG, null, message, args);
+//    @Override
+//    public void d(String message, Object... args) {
+//        log(DEBUG, null, message, args);
+//    }
+
+
+//    @Override
+//    public void d(Object object) {
+//        String message;
+//        if (object.getClass().isArray()) {
+//            message = Arrays.deepToString((Object[]) object);
+//        } else {
+//            message = object.toString();
+//        }
+//        log(DEBUG, null, message);
+//    }
+
+//    @Override
+//    public void e(String message, Object... args) {
+//        e(null, message, args);
+//    }
+
+//    @Override
+//    public void e(Throwable throwable, String message, Object... args) {
+//        log(ERROR, throwable, message, args);
+//    }
+
+//    @Override
+//    public void w(String message, Object... args) {
+//        log(WARN, null, message, args);
+//    }
+
+//    @Override
+//    public void i(String message, Object... args) {
+//        log(INFO, null, message, args);
+//    }
+
+//    @Override
+//    public void v(String message, Object... args) {
+//        log(VERBOSE, null, message, args);
+//    }
+
+//    @Override
+//    public void wtf(String message, Object... args) {
+//        log(ASSERT, null, message, args);
+//    }
+    private void d(String message) {
+        log(LogLevel.DEBUG, null, message, null);
     }
 
-    @Override
-    public void d(Object object) {
-        String message;
-        if (object.getClass().isArray()) {
-            message = Arrays.deepToString((Object[]) object);
-        } else {
-            message = object.toString();
-        }
-        log(DEBUG, null, message);
-    }
-
-    @Override
-    public void e(String message, Object... args) {
-        e(null, message, args);
-    }
-
-    @Override
-    public void e(Throwable throwable, String message, Object... args) {
-        log(ERROR, throwable, message, args);
-    }
-
-    @Override
-    public void w(String message, Object... args) {
-        log(WARN, null, message, args);
-    }
-
-    @Override
-    public void i(String message, Object... args) {
-        log(INFO, null, message, args);
-    }
-
-    @Override
-    public void v(String message, Object... args) {
-        log(VERBOSE, null, message, args);
-    }
-
-    @Override
-    public void wtf(String message, Object... args) {
-        log(ASSERT, null, message, args);
+    private void e(String message) {
+        log(LogLevel.ERROR, null, message, null);
     }
 
     /**
@@ -197,10 +207,9 @@ final class LoggerPrinter implements Printer {
         }
     }
 
-    //TODO remove synchronized from here and put on printBuffer
+    //TODO remove synchronized from here and put on reduks_logger printBuffer
     @Override
-
-    public synchronized void log(int priority, String tag, String message, Throwable throwable) {
+    public synchronized void log(int loglevel, String tag, String message, Throwable throwable) {
         if (!settings.getLogEnabled()) {
             return;
         }
@@ -218,29 +227,29 @@ final class LoggerPrinter implements Printer {
             message = "Empty/NULL log message";
         }
 
-        logTopBorder(priority, tag);
-        logHeaderContent(priority, tag, methodCount);
+        logTopBorder(loglevel, tag);
+        logHeaderContent(loglevel, tag, methodCount);
 
         //get bytes of message with system's default charset (which is UTF-8 for Android)
         byte[] bytes = message.getBytes();
         int length = bytes.length;
         if (length <= CHUNK_SIZE) {
             if (methodCount > 0) {
-                logDivider(priority, tag);
+                logDivider(loglevel, tag);
             }
-            logContent(priority, tag, message);
-            logBottomBorder(priority, tag);
+            logContent(loglevel, tag, message);
+            logBottomBorder(loglevel, tag);
             return;
         }
         if (methodCount > 0) {
-            logDivider(priority, tag);
+            logDivider(loglevel, tag);
         }
         for (int i = 0; i < length; i += CHUNK_SIZE) {
             int count = Math.min(length - i, CHUNK_SIZE);
             //create a new String with system's default charset (which is UTF-8 for Android)
-            logContent(priority, tag, new String(bytes, i, count));
+            logContent(loglevel, tag, new String(bytes, i, count));
         }
-        logBottomBorder(priority, tag);
+        logBottomBorder(loglevel, tag);
     }
 
     @Override
@@ -248,17 +257,17 @@ final class LoggerPrinter implements Printer {
         settings.reset();
     }
 
-    /**
-     * This method is synchronized in order to avoid messy of logs' order.
-     */
-    private synchronized void log(int priority, Throwable throwable, String msg, Object... args) {
-        if (!settings.getLogEnabled()) {
-            return;
-        }
-        String tag = getTag();
-        String message = createMessage(msg, args);
-        log(priority, tag, message, throwable);
-    }
+//    /**
+//     * This method is synchronized in order to avoid messy of logs' order.
+//     */
+//    private synchronized void log(int priority, Throwable throwable, String msg, Object... args) {
+//        if (!settings.getLogEnabled()) {
+//            return;
+//        }
+//        String tag = getTag();
+//        String message = createMessage(msg, args);
+//        log(priority, tag, message, throwable);
+//    }
 
     private void logTopBorder(int logType, String tag) {
         if (!settings.isBorderEnabled()) return;
@@ -325,22 +334,22 @@ final class LoggerPrinter implements Printer {
     private void logChunk(int logType, String tag, String chunk) {
         String finalTag = formatTag(tag);
         switch (logType) {
-            case ERROR:
+            case LogLevel.ERROR:
                 settings.getLogAdapter().e(finalTag, chunk);
                 break;
-            case INFO:
+            case LogLevel.INFO:
                 settings.getLogAdapter().i(finalTag, chunk);
                 break;
-            case VERBOSE:
+            case LogLevel.VERBOSE:
                 settings.getLogAdapter().v(finalTag, chunk);
                 break;
-            case WARN:
+            case LogLevel.WARN:
                 settings.getLogAdapter().w(finalTag, chunk);
                 break;
-            case ASSERT:
+            case LogLevel.ASSERT:
                 settings.getLogAdapter().wtf(finalTag, chunk);
                 break;
-            case DEBUG:
+            case LogLevel.DEBUG:
                 // Fall through, log debug by default
             default:
                 settings.getLogAdapter().d(finalTag, chunk);
@@ -372,9 +381,9 @@ final class LoggerPrinter implements Printer {
         return this.tag;
     }
 
-    private String createMessage(String message, Object... args) {
-        return args == null || args.length == 0 ? message : String.format(message, args);
-    }
+//    private String createMessage(String message, Object... args) {
+//        return args == null || args.length == 0 ? message : String.format(message, args);
+//    }
 
     private int getMethodCount() {
         Integer count = localMethodCount.get();

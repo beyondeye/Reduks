@@ -11,21 +11,21 @@ public interface Printer {
   void groupStart();
   void groupEnd();
 
-  void d(String message, Object... args);
+//  void d(String message, Object... args);
 
-  void d(Object object);
+//  void d(Object object);
 
-  void e(String message, Object... args);
+//  void e(String message, Object... args);
 
-  void e(Throwable throwable, String message, Object... args);
+//  void e(Throwable throwable, String message, Object... args);
 
-  void w(String message, Object... args);
+//  void w(String message, Object... args);
 
-  void i(String message, Object... args);
+//  void i(String message, Object... args);
 
-  void v(String message, Object... args);
+//  void v(String message, Object... args);
 
-  void wtf(String message, Object... args);
+//  void wtf(String message, Object... args);
 
   void json(String json);
 

@@ -5,15 +5,16 @@ package com.beyondeye.reduks.logger
  * Created by daely on 7/25/2016.
  */
 object LogLevel {
-    val v=0
-    val VERBOSE=v
-    val i=1
-    val INFO=i
-    val d=2
-    val DEBUG=d
-    val w=3
-    val WARN=w
-    val wtf=5
-    val e=6
-    val ERROR=e
+    @JvmField val v=0
+    @JvmField val VERBOSE=v
+    @JvmField val i=1
+    @JvmField val INFO=i
+    @JvmField val d=2
+    @JvmField val DEBUG=d
+    @JvmField val w=3
+    @JvmField val WARN=w
+    @JvmField val wtf=5
+    @JvmField val ASSERT=wtf
+    @JvmField val e=6
+    @JvmField val ERROR=e
 }
