@@ -3,12 +3,16 @@ package com.beyondeye.reduks.logger
 import com.beyondeye.reduks.Middleware
 import com.beyondeye.reduks.NextDispatcher
 import com.beyondeye.reduks.Store
+import com.beyondeye.zjsonpatch.JsonDiff
+import com.google.gson.GsonBuilder
 
 /**
  * Reduks Logger middleware
  * Created by daely on 7/21/2016.
  */
 class ReduksLogger<S>(val options: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
+    private val jsonDiffer= JsonDiff
+    var gsonInstance = GsonBuilder().serializeNulls().disableHtmlEscaping().serializeSpecialFloatingPointValues().create()
     private val logger = DefaultGroupedLogger()
     private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
     override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any? {
