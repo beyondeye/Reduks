@@ -92,5 +92,7 @@ public final class LogFormatterSettings {
     showThreadInfo = false;
     showCallStack = false;
     logEnabled = true;
+    logToString=false;
+    borderEnabled=true;
   }
 }
