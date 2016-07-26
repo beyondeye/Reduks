@@ -48,5 +48,10 @@ data class ReduksLoggerConfig<S>(
         /**
          *  Transform error before print. By default no transformation
          */
-        val errorTransformer:(Throwable)->Throwable = {e->e}
+        val errorTransformer:(Throwable)->Throwable = {e->e},
+
+        /**
+         * main tag to use for logger output
+         */
+        val reduksLoggerTag:String="REDUKS"
 )
