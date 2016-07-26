@@ -52,4 +52,9 @@ public class StringBufferLogAdapter  implements LogAdapter {
     public void wtf(String tag, String message) {
         log('A',tag,message);
     }
+
+    @Override
+    public int max_message_size() {
+        return Integer.MAX_VALUE;
+    }
 }

@@ -18,13 +18,6 @@ class LogFormatterPrinter {
 //    private static final int WARN = 5;
 
     /**
-     * Android's max limit for a log entry is ~4076 bytes,
-     * so 4000 bytes is used as chunk size since default charset
-     * is UTF-8
-     */
-    private static final int CHUNK_SIZE = 4000;
-
-    /**
      * It is used for json pretty print
      */
     private static final int JSON_INDENT = 2;
@@ -254,6 +247,7 @@ class LogFormatterPrinter {
         //get bytes of message with system's default charset (which is UTF-8 for Android)
         byte[] bytes = message.getBytes();
         int length = bytes.length;
+        int CHUNK_SIZE=settings.getLogAdapter().max_message_size();
         if (length <= CHUNK_SIZE) {
             if (isShowCallStack&& methodCount > 0) {
                 logDivider(loglevel, tagSuffix);

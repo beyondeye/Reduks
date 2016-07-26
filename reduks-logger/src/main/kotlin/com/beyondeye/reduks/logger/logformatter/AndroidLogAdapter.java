@@ -26,4 +26,14 @@ class AndroidLogAdapter implements LogAdapter {
   @Override public void wtf(String tag, String message) {
     Log.wtf(tag, message);
   }
+
+  /**
+   * Android's max limit for a log entry is ~4076 bytes,
+   * so 4000 bytes is used as chunk size since default charset
+   * is UTF-8
+   */
+  @Override
+  public int max_message_size() {
+    return 4000;
+  }
 }
