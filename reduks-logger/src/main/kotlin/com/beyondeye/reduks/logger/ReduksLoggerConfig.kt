@@ -53,5 +53,9 @@ data class ReduksLoggerConfig<S>(
         /**
          * main tag to use for logger output
          */
-        val reduksLoggerTag:String="REDUKS"
+        val reduksLoggerTag:String="REDUKS",
+        /**
+         * if true, write all log message to a buffer, instead of using the android log
+         */
+        val logToStringBuffer: Boolean=false
 )

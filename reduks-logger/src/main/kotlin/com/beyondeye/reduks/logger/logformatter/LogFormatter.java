@@ -15,9 +15,9 @@ public class LogFormatter {
 
   private LogFormatterPrinter printer = new LogFormatterPrinter();
 
-  public LogFormatter(String tag) {
+  public LogFormatter(String tag,Boolean logToStringBuffer) {
     printer = new LogFormatterPrinter();
-    printer.init(tag);
+    printer.init(tag).logToString(logToStringBuffer);
   }
   public void resetSettings() {
     printer.resetSettings();
