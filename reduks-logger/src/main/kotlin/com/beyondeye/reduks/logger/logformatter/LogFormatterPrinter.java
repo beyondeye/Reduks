@@ -133,11 +133,11 @@ class LogFormatterPrinter {
 //    }
 
     private void d(String message) {
-        log(message,LogLevel.DEBUG, null,  null);
+        log(message,LogLevel.DEBUG, null);
     }
 
     private void e(String message) {
-        log(message,LogLevel.ERROR, null,  null);
+        log(message,LogLevel.ERROR, null);
     }
 
     /**
@@ -153,19 +153,19 @@ class LogFormatterPrinter {
         try {
             json = json.trim();
             if(isCollapsed()) { //no json pretty printing if collapsed
-                log(jsonWithObjName(objName,json),logLevel,null,null);
+                log(jsonWithObjName(objName,json),logLevel,null);
                 return;
             }
             if (json.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(json);
                 String formatted_json = jsonObject.toString(JSON_INDENT);
-                log(jsonWithObjName(objName,formatted_json),logLevel,null,null);
+                log(jsonWithObjName(objName,formatted_json),logLevel,null);
                 return;
             }
             if (json.startsWith("[")) {
                 JSONArray jsonArray = new JSONArray(json);
                 String formatted_json = jsonArray.toString(JSON_INDENT);
-                log(jsonWithObjName(objName,formatted_json),logLevel,null,null);
+                log(jsonWithObjName(objName,formatted_json),logLevel,null);
                 return;
             }
             e("Invalid Json");
@@ -178,54 +178,46 @@ class LogFormatterPrinter {
         return objName+"="+json;
     }
 
-    //TODO remove synchronized from here and put on reduks_logger printBuffer
-    public synchronized void log(String message,int loglevel, String tagSuffix,  Throwable throwable) {
+    public synchronized void log(String message,int loglevel, String tagSuffix) {
         if (!settings.isLogEnabled()) {
             return;
         }
-        if (isCollapsed()) log_collapsed(loglevel,tagSuffix,message,throwable);
-        boolean isShowCallStack=settings.isShowCallStack();
-        if (throwable != null && message != null) {
-            message += " : " + Helper.getStackTraceString(throwable);
-            isShowCallStack=true; //always enable call stack for exceptions
-        }
-        if (throwable != null && message == null) {
-            message = Helper.getStackTraceString(throwable);
-            isShowCallStack=true; //always enable call stack for exceptions
-        }
+        if (isCollapsed()) log_collapsed(message,loglevel,tagSuffix);
 
         int methodCount = getMethodCount();
         logTopBorder(loglevel, tagSuffix);
         boolean isShowThreadInfo = settings.isShowThreadInfo();
-        logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
+        boolean isShowCallStack=settings.isShowCallStack();
+        logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo,isShowCallStack);
         if (isShowCallStack && methodCount > 0) {
             logDivider(loglevel, tagSuffix);
         }
         logMessageBodyChunked(loglevel, tagSuffix, message);
     }
 
+    public String addFormattedThrowableToMessage(String message, Throwable throwable) {
+        if (throwable != null && message != null) {
+            message += " : " + Helper.getStackTraceString(throwable);
+        }
+        if (throwable != null && message == null) {
+            message = Helper.getStackTraceString(throwable);
+        }
+        return message;
+    }
+
     private String msgBufferTagSuffix ="";
     private int    msgBufferLogLevel=-1;
     private StringBuilder msgbuffer=new StringBuilder();
     //TODO remove synchronized from here and put on reduks_logger printBuffer
-    public synchronized void log_collapsed(int loglevel, String tagSuffix, String message, Throwable throwable) {
-        boolean isShowCallStack=settings.isShowCallStack();
+    private void log_collapsed(String message,int loglevel, String tagSuffix) {
         boolean isFirstLineInCollapsedGroup=msgbuffer.length()==0;
-        if (throwable != null && message != null) {
-            message += " : " + Helper.getStackTraceString(throwable);
-            isShowCallStack=true; //always enable call stack for exceptions
-        }
-        if (throwable != null && message == null) {
-            message = Helper.getStackTraceString(throwable);
-            isShowCallStack=true; //always enable call stack for exceptions
-        }
-
         int methodCount = getMethodCount();
         if(isFirstLineInCollapsedGroup) {
             msgBufferTagSuffix =tagSuffix;
             msgBufferLogLevel=loglevel;
             logTopBorder(loglevel, tagSuffix);
             boolean isShowThreadInfo = settings.isShowThreadInfo();
+            boolean isShowCallStack=settings.isShowCallStack();
             logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
             if (isShowCallStack&& methodCount > 0) {
                 logDivider(loglevel, tagSuffix);

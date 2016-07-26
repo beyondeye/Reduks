@@ -36,7 +36,7 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      */
     fun group(message: String, logLevel: Int= LogLevel.INFO,tagSuffix: String?=null) {
         printer.groupStart()
-        printer.log(message,logLevel, tagSuffix, null)
+        printer.log(message,logLevel, tagSuffix)
     }
 
     /**
@@ -45,14 +45,15 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      */
     fun groupCollapsed(message: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
         printer.groupCollapsedStart()
-        printer.log(message,logLevel, tagSuffix, null)
+        printer.log(message,logLevel, tagSuffix)
     }
 
     fun groupEnd() {
         printer.groupEnd()
     }
     fun log(message: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null,throwable: Throwable?=null) {
-        printer.log(message,logLevel, tagSuffix, throwable)
+        val message_=printer.addFormattedThrowableToMessage(message,throwable)
+        printer.log(message_,logLevel, tagSuffix)
     }
 
     /**
