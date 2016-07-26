@@ -1,6 +1,7 @@
 package com.beyondeye.reduks.logger
 
 import com.beyondeye.reduks.logger.logformatter.LogFormatter
+import com.beyondeye.reduks.logger.logformatter.LogFormatterSettings
 
 
 /**
@@ -8,8 +9,8 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatter
  * see https://developer.mozilla.org/en/docs/Web/API/console (Using groups in console)
  * Created by daely on 7/25/2016.
  */
-internal class GroupedLogger(tag: String, logToStringBuffer: Boolean) {
-    val logFormatter = LogFormatter(tag,logToStringBuffer)
+internal class GroupedLogger(tag: String, logFormatterSettings: LogFormatterSettings) {
+    val logFormatter = LogFormatter(tag,logFormatterSettings)
     /**
      * start a new group, increasing indent, until next call to [groupEnd]
      * and call [log] with the specified argument

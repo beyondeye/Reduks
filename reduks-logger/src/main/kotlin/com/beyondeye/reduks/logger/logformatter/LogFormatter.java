@@ -13,11 +13,11 @@ public class LogFormatter {
 //  public static final int VERBOSE = 2;
 //  public static final int WARN = 5;
 
-  private LogFormatterPrinter printer = new LogFormatterPrinter();
+  private final LogFormatterPrinter printer;
 
-  public LogFormatter(String tag,Boolean logToStringBuffer) {
-    printer = new LogFormatterPrinter();
-    printer.init(tag).logToString(logToStringBuffer);
+  public LogFormatter(String tag,LogFormatterSettings settings) {
+    printer = new LogFormatterPrinter(settings);
+    printer.setTag(tag);
   }
   public void resetSettings() {
     printer.resetSettings();

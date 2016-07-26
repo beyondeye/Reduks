@@ -1,5 +1,7 @@
 package com.beyondeye.reduks.logger
 
+import com.beyondeye.reduks.logger.logformatter.LogFormatterSettings
+
 /**
  *
  * Created by daely on 7/21/2016.
@@ -55,7 +57,7 @@ data class ReduksLoggerConfig<S>(
          */
         val reduksLoggerTag:String="REDUKS",
         /**
-         * if true, write all log message to a buffer, instead of using the android log
+         * log formatter setting
          */
-        val logToStringBuffer: Boolean=false
+        val formatterSettings:LogFormatterSettings= LogFormatterSettings()
 )

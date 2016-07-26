@@ -20,7 +20,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
      */
     var gsonInstance = GsonBuilder().serializeNulls().disableHtmlEscaping().serializeSpecialFloatingPointValues().create()
     private val stateType = StateType<S>()
-    private val logger = GroupedLogger(config.reduksLoggerTag,config.logToStringBuffer)
+    private val logger = GroupedLogger(config.reduksLoggerTag,config.formatterSettings)
     private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
     fun getLogAsString():String = logger.getLogAsString()
     override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any? {

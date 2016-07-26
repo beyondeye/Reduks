@@ -9,6 +9,9 @@ public final class LogFormatterSettings {
   private LogAdapter logAdapter;
 
   private Boolean logEnabled = true;
+  /**
+   * if true, write all log message to a buffer, instead of using the android log
+   */
   private Boolean logToString=false;
   private Boolean borderEnabled =true;
 

@@ -65,10 +65,14 @@ class LogFormatterPrinter {
     /**
      * It is used to determine log settings such as method count, thread info visibility
      */
-    private final LogFormatterSettings settings = new LogFormatterSettings();
+    private final LogFormatterSettings settings;
 
-    public LogFormatterPrinter() {
-        init(DEFAULT_TAG);
+    public LogFormatterPrinter(LogFormatterSettings settings) {
+        if(settings!=null)
+            this.settings=settings;
+        else
+            this.settings=new LogFormatterSettings();
+        setTag(DEFAULT_TAG);
     }
 
     /**
@@ -76,7 +80,7 @@ class LogFormatterPrinter {
      *
      * @param tag is the given string which will be used in LogFormatter
      */
-    public LogFormatterSettings init(String tag) {
+    public void setTag(String tag) {
         if (tag == null) {
             throw new NullPointerException("tag may not be null");
         }
@@ -84,7 +88,6 @@ class LogFormatterPrinter {
             throw new IllegalStateException("tag may not be empty");
         }
         this.tag = tag;
-        return settings;
     }
 
     public LogFormatterSettings getSettings() {
