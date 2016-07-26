@@ -199,22 +199,30 @@ class LogFormatterPrinter {
         }
         try {
             json = json.trim();
+            if(isCollapsed()) { //no json pretty printing if collapsed
+                log(logLevel,null,jsonWithObjName(objName,json),null);
+                return;
+            }
             if (json.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(json);
-                String message = jsonObject.toString(JSON_INDENT);
-                log(logLevel,null,message,null);
+                String formatted_json = jsonObject.toString(JSON_INDENT);
+                log(logLevel,null,jsonWithObjName(objName,formatted_json),null);
                 return;
             }
             if (json.startsWith("[")) {
                 JSONArray jsonArray = new JSONArray(json);
-                String message = jsonArray.toString(JSON_INDENT);
-                log(logLevel,null,message,null);
+                String formatted_json = jsonArray.toString(JSON_INDENT);
+                log(logLevel,null,jsonWithObjName(objName,formatted_json),null);
                 return;
             }
             e("Invalid Json");
         } catch (JSONException e) {
             e("Invalid Json");
         }
+    }
+    //TODO use stringbuilder here?
+    String jsonWithObjName(String objName, String json) {
+        return objName+"="+json;
     }
 
     //TODO remove synchronized from here and put on reduks_logger printBuffer
