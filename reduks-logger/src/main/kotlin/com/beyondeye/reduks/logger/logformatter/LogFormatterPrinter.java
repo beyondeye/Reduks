@@ -53,7 +53,7 @@ class LogFormatterPrinter {
     /**
      * single level group blanks
      */
-    private static final String SINGLEGROUPBLANKS = "  ";
+    private static final String SINGLE_GROUP_BLANKS = "  ";
 
     /**
      * tag is used for the Log, the name is a little different
@@ -65,9 +65,9 @@ class LogFormatterPrinter {
      * Localize single tag and method count and groupBlanks for each thread
      */
 //    private final ThreadLocal<String> localTag = new ThreadLocal<String>();
-    private final ThreadLocal<Integer> localMethodCount = new ThreadLocal<Integer>();
-    private final ThreadLocal<String> groupBlanks = new ThreadLocal<String>(); //TODO it's wrong to make it thread local since reducer/subscribers can operate from multiple threads?
-    private final ThreadLocal<String> groupCollapsed = new ThreadLocal<String>(); //TODO it's wrong to make it thread local since reducer/subscribers can operate from multiple threads?
+    private int localMethodCount;
+    private String groupBlanks = "";
+    private String  groupCollapsed = "";
 
     /**
      * It is used to determine log settings such as method count, thread info visibility
@@ -99,32 +99,26 @@ class LogFormatterPrinter {
     }
 
     public void groupStart() {
-        String curGroupBlanks = groupBlanks.get();
-        groupBlanks.set(curGroupBlanks + SINGLEGROUPBLANKS);
+        groupBlanks += SINGLE_GROUP_BLANKS;
     }
     
     public void groupEnd() {
-        String curGroupBlanks = groupBlanks.get();
-        int newlength = curGroupBlanks.length() - SINGLEGROUPBLANKS.length();
+        int newlength = groupBlanks.length() - SINGLE_GROUP_BLANKS.length();
         if (newlength >= 0) {
-            String newGroupBlanks = curGroupBlanks.substring(0, newlength);
-            groupBlanks.set(newGroupBlanks);
+            groupBlanks= groupBlanks.substring(0, newlength);
         }
         //remove one level of collapse
-        String curGroupCollapsed = groupCollapsed.get();
-        int newcollapsed = curGroupCollapsed.length() -1;
+        int newcollapsed = groupCollapsed.length() -1;
         if (newcollapsed >= 0) {
-            String newGroupCollapsed = curGroupCollapsed.substring(0, newcollapsed);
-            groupCollapsed.set(newGroupCollapsed);
+            groupCollapsed = groupCollapsed.substring(0, newcollapsed);
         }
     }
     public boolean isCollapsed() {
-        return groupCollapsed.get().length()>0;
+        return groupCollapsed.length()>0;
     }
     public void groupCollapsedStart() {
         groupStart();
-        String curGroupCollapsed = groupCollapsed.get();
-        groupCollapsed.set(curGroupCollapsed + 'c');
+        groupCollapsed +='c';
     }
 
 //    public LogFormatterPrinter t(String localTag, int methodCount) {
@@ -135,7 +129,7 @@ class LogFormatterPrinter {
 //        return this;
 //    }
     public LogFormatterPrinter t(int methodCount) {
-        localMethodCount.set(methodCount);
+        localMethodCount=methodCount;
         return this;
     }
 
@@ -401,10 +395,10 @@ class LogFormatterPrinter {
 //    }
 
     private int getMethodCount() {
-        Integer count = localMethodCount.get();
+        int count = localMethodCount;
         int result = settings.getMethodCount();
-        if (count != null) {
-            localMethodCount.remove();
+        if (count >=0) {
+            localMethodCount=-1;
             result = count;
         }
         if (result < 0) {
