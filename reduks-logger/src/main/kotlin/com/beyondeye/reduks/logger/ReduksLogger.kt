@@ -102,8 +102,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
             }
 
             if (curEntry.error != null && errorLevel != null) {
-                logger.log("error" + curEntry.error.toString(), errorLevel)
-
+                logger.log("error" , errorLevel,null, curEntry.error)
             }
 
             val nextStateJson:String=stateToJson(nextState)
