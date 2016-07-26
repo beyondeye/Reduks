@@ -71,7 +71,7 @@ final class LoggerPrinter{
     /**
      * It is used to determine log settings such as method count, thread info visibility
      */
-    private final Settings settings = new Settings();
+    private final LogFormatterSettings settings = new LogFormatterSettings();
 
     public LoggerPrinter() {
         init(DEFAULT_TAG);
@@ -82,7 +82,7 @@ final class LoggerPrinter{
      *
      * @param tag is the given string which will be used in LogFormatter
      */
-    public Settings init(String tag) {
+    public LogFormatterSettings init(String tag) {
         if (tag == null) {
             throw new NullPointerException("tag may not be null");
         }
@@ -93,7 +93,7 @@ final class LoggerPrinter{
         return settings;
     }
 
-    public Settings getSettings() {
+    public LogFormatterSettings getSettings() {
         return settings;
     }
 

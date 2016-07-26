@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.logger.logformatter;
 
-public final class Settings {
+public final class LogFormatterSettings {
 
   private int methodCount = 2;
   private boolean showThreadInfo = true;
@@ -11,12 +11,12 @@ public final class Settings {
   private Boolean logToString=false;
   private Boolean borderEnabled =true;
 
-  public Settings hideThreadInfo() {
+  public LogFormatterSettings hideThreadInfo() {
     showThreadInfo = false;
     return this;
   }
 
-  public Settings methodCount(int methodCount) {
+  public LogFormatterSettings methodCount(int methodCount) {
     if (methodCount < 0) {
       methodCount = 0;
     }
@@ -24,26 +24,26 @@ public final class Settings {
     return this;
   }
 
-  public Settings borderEnabled(Boolean borderEnabled) {
+  public LogFormatterSettings borderEnabled(Boolean borderEnabled) {
       this.borderEnabled = borderEnabled;
     return this;
   }
 
-  public Settings logEnabled(Boolean logEnabled) {
+  public LogFormatterSettings logEnabled(Boolean logEnabled) {
     this.logEnabled = logEnabled;
     return this;
   }
-  public Settings logToString(Boolean logToString) {
+  public LogFormatterSettings logToString(Boolean logToString) {
     this.logToString = logToString;
     return this;
   }
 
-  public Settings methodOffset(int offset) {
+  public LogFormatterSettings methodOffset(int offset) {
     this.methodOffset = offset;
     return this;
   }
 
-  public Settings logAdapter(LogAdapter logAdapter) {
+  public LogFormatterSettings logAdapter(LogAdapter logAdapter) {
     this.logAdapter = logAdapter;
     return this;
   }

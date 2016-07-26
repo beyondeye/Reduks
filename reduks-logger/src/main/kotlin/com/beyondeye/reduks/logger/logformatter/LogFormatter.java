@@ -5,7 +5,7 @@ package com.beyondeye.reduks.logger.logformatter;
  * But more pretty, simple and powerful
  * adapted from https://github.com/orhanobut/logger
  */
-public final class LogFormatter {
+public class LogFormatter {
 //  public static final int DEBUG = 3;
 //  public static final int ERROR = 6;
 //  public static final int ASSERT = 7;
@@ -13,50 +13,30 @@ public final class LogFormatter {
 //  public static final int VERBOSE = 2;
 //  public static final int WARN = 5;
 
-  private static final String DEFAULT_TAG = "REDUKS"; //PRETTYLOGGER
+  private LoggerPrinter printer = new LoggerPrinter();
 
-  private static LoggerPrinter printer = new LoggerPrinter();
-
-  //no instance
-  private LogFormatter() {
-  }
-
-  /**
-   * It is used to get the settings object in order to change settings
-   *
-   * @return the settings object
-   */
-  public static Settings init() {
-    return init(DEFAULT_TAG);
-  }
-
-  /**
-   * It is used to change the tag
-   *
-   * @param tag is the given string which will be used in LogFormatter as TAG
-   */
-  public static Settings init(String tag) {
+  public LogFormatter(String tag) {
     printer = new LoggerPrinter();
-    return printer.init(tag);
+    printer.init(tag);
   }
-
-  public static void resetSettings() {
+  public void resetSettings() {
     printer.resetSettings();
   }
+  public LogFormatterSettings getSettings() { return printer.getSettings(); }
 
-  public static LoggerPrinter t(String tag) {
+  public  LoggerPrinter t(String tag) {
     return printer.t(tag, printer.getSettings().getMethodCount());
   }
 
-  public static LoggerPrinter t(int methodCount) {
+  public  LoggerPrinter t(int methodCount) {
     return printer.t(null, methodCount);
   }
 
-  public static LoggerPrinter t(String tag, int methodCount) {
+  public  LoggerPrinter t(String tag, int methodCount) {
     return printer.t(tag, methodCount);
   }
 
-  public static void log(int priority, String tag, String message, Throwable throwable) {
+  public  void log(int priority, String tag, String message, Throwable throwable) {
     printer.log(priority, tag, message, throwable);
   }
 
@@ -97,7 +77,7 @@ public final class LogFormatter {
    *
    * @param json the json content
    */
-  public static void json(String json) {
+  public  void json(String json) {
     printer.json(json);
   }
 

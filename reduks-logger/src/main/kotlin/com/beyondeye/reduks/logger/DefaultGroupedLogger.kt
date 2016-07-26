@@ -9,7 +9,7 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatter
  * Created by daely on 7/25/2016.
  */
 internal class DefaultGroupedLogger(tag:String): GroupedLogger {
-    val logFormatter=LogFormatter.init(tag)
+    val logFormatter=LogFormatter(tag)
     override fun group(s: String,logLevel:Int) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
