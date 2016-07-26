@@ -15,7 +15,7 @@ public final class LogFormatter {
 
   private static final String DEFAULT_TAG = "REDUKS"; //PRETTYLOGGER
 
-  private static Printer printer = new LoggerPrinter();
+  private static LoggerPrinter printer = new LoggerPrinter();
 
   //no instance
   private LogFormatter() {
@@ -44,15 +44,15 @@ public final class LogFormatter {
     printer.resetSettings();
   }
 
-  public static Printer t(String tag) {
+  public static LoggerPrinter t(String tag) {
     return printer.t(tag, printer.getSettings().getMethodCount());
   }
 
-  public static Printer t(int methodCount) {
+  public static LoggerPrinter t(int methodCount) {
     return printer.t(null, methodCount);
   }
 
-  public static Printer t(String tag, int methodCount) {
+  public static LoggerPrinter t(String tag, int methodCount) {
     return printer.t(tag, methodCount);
   }
 

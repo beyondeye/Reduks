@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-final class LoggerPrinter implements Printer {
+final class LoggerPrinter{
 
     private static final String DEFAULT_TAG = "PRETTYLOGGER";
 
@@ -80,7 +80,6 @@ final class LoggerPrinter implements Printer {
      *
      * @param tag is the given string which will be used in LogFormatter
      */
-    @Override
     public Settings init(String tag) {
         if (tag == null) {
             throw new NullPointerException("tag may not be null");
@@ -92,7 +91,6 @@ final class LoggerPrinter implements Printer {
         return settings;
     }
 
-    @Override
     public Settings getSettings() {
         return settings;
     }
@@ -111,8 +109,7 @@ final class LoggerPrinter implements Printer {
         }
     }
 
-    @Override
-    public Printer t(String tag, int methodCount) {
+    public LoggerPrinter t(String tag, int methodCount) {
         if (tag != null) {
             localTag.set(tag);
         }
@@ -179,7 +176,6 @@ final class LoggerPrinter implements Printer {
      *
      * @param json the json content
      */
-    @Override
     public void json(String json) {
         if (Helper.isEmpty(json)) {
             d("Empty/Null json content");
@@ -206,7 +202,6 @@ final class LoggerPrinter implements Printer {
     }
 
     //TODO remove synchronized from here and put on reduks_logger printBuffer
-    @Override
     public synchronized void log(int loglevel, String tag, String message, Throwable throwable) {
         if (!settings.getLogEnabled()) {
             return;
@@ -250,7 +245,6 @@ final class LoggerPrinter implements Printer {
         logBottomBorder(loglevel, tag);
     }
 
-    @Override
     public void resetSettings() {
         settings.reset();
     }
