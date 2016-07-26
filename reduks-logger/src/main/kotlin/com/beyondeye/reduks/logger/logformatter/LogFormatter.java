@@ -38,8 +38,8 @@ public class LogFormatter {
   public void groupStart() {
     printer.groupStart();
   }
-  public void collapsedGroupStart() {
-    printer.groupStart();
+  public void groupCollapsedStart() {
+    printer.groupCollapsedStart();
   }
   public void groupEnd() {
     printer.groupEnd();
@@ -86,8 +86,8 @@ public class LogFormatter {
    *
    * @param json the json content
    */
-  public  void json(String json) {
-    printer.json(json);
+  public  void json(int logLevel,String objName,String json) {
+    printer.json(logLevel,objName,json);
   }
 
 

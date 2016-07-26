@@ -12,22 +12,23 @@ internal class DefaultGroupedLogger(tag:String): GroupedLogger {
     val logFormatter=LogFormatter(tag)
     override fun group(s: String,logLevel:Int) {
         logFormatter.groupStart()
-        logFormatter.log(logLevel,null,s,null)
+        log(s,logLevel)
     }
 
     override fun groupCollapsed(s: String,logLevel:Int) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        logFormatter.groupCollapsedStart()
+        log(s,logLevel)
     }
 
     override fun groupEnd() {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        logFormatter.groupEnd()
     }
 
     override fun log(s: String, logLevel: Int) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        logFormatter.log(logLevel,null,s,null)
     }
 
     override fun json(objName:String,s: String, logLevel: Int) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        logFormatter.json(logLevel,objName,s)
     }
 }

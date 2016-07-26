@@ -198,7 +198,7 @@ class LogFormatterPrinter {
      *
      * @param json the json content
      */
-    public void json(String json) {
+    public void json(int logLevel,String objName,String json) {
         if (Helper.isEmpty(json)) {
             d("Empty/Null json content");
             return;
@@ -208,13 +208,13 @@ class LogFormatterPrinter {
             if (json.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(json);
                 String message = jsonObject.toString(JSON_INDENT);
-                d(message);
+                log(logLevel,null,message,null);
                 return;
             }
             if (json.startsWith("[")) {
                 JSONArray jsonArray = new JSONArray(json);
                 String message = jsonArray.toString(JSON_INDENT);
-                d(message);
+                log(logLevel,null,message,null);
                 return;
             }
             e("Invalid Json");
