@@ -129,9 +129,8 @@ class LogFormatterPrinter {
 //        localMethodCount.set(methodCount);
 //        return this;
 //    }
-    public LogFormatterPrinter t(int methodCount) {
+    public void selLocalMethodCount(int methodCount) {
         localMethodCount=methodCount;
-        return this;
     }
 
 //    @Override
@@ -181,11 +180,11 @@ class LogFormatterPrinter {
 //        log(ASSERT, null, message, args);
 //    }
     private void d(String message) {
-        log(LogLevel.DEBUG, null, message, null);
+        log(message,LogLevel.DEBUG, null,  null);
     }
 
     private void e(String message) {
-        log(LogLevel.ERROR, null, message, null);
+        log(message,LogLevel.ERROR, null,  null);
     }
 
     /**
@@ -193,7 +192,7 @@ class LogFormatterPrinter {
      *
      * @param json the json content
      */
-    public void json(int logLevel,String objName,String json) {
+    public void json(String objName,String json,int logLevel,String tagSuffix) {
         if (Helper.isEmpty(json)) {
             d("Empty/Null json content");
             return;
@@ -201,19 +200,19 @@ class LogFormatterPrinter {
         try {
             json = json.trim();
             if(isCollapsed()) { //no json pretty printing if collapsed
-                log(logLevel,null,jsonWithObjName(objName,json),null);
+                log(jsonWithObjName(objName,json),logLevel,null,null);
                 return;
             }
             if (json.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(json);
                 String formatted_json = jsonObject.toString(JSON_INDENT);
-                log(logLevel,null,jsonWithObjName(objName,formatted_json),null);
+                log(jsonWithObjName(objName,formatted_json),logLevel,null,null);
                 return;
             }
             if (json.startsWith("[")) {
                 JSONArray jsonArray = new JSONArray(json);
                 String formatted_json = jsonArray.toString(JSON_INDENT);
-                log(logLevel,null,jsonWithObjName(objName,formatted_json),null);
+                log(jsonWithObjName(objName,formatted_json),logLevel,null,null);
                 return;
             }
             e("Invalid Json");
@@ -227,7 +226,7 @@ class LogFormatterPrinter {
     }
 
     //TODO remove synchronized from here and put on reduks_logger printBuffer
-    public synchronized void log(int loglevel, String tagSuffix, String message, Throwable throwable) {
+    public synchronized void log(String message,int loglevel, String tagSuffix,  Throwable throwable) {
         if (!settings.isLogEnabled()) {
             return;
         }
