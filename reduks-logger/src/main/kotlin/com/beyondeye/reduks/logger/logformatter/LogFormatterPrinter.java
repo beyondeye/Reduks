@@ -230,11 +230,14 @@ class LogFormatterPrinter {
         if (!settings.isLogEnabled()) {
             return;
         }
+        boolean isShowCallStack=settings.isShowCallStack();
         if (throwable != null && message != null) {
             message += " : " + Helper.getStackTraceString(throwable);
+            isShowCallStack=true; //always enable call stack for exceptions
         }
         if (throwable != null && message == null) {
             message = Helper.getStackTraceString(throwable);
+            isShowCallStack=true; //always enable call stack for exceptions
         }
         if (message == null) {
             message = "No message/exception is set";
@@ -245,13 +248,14 @@ class LogFormatterPrinter {
         }
 
         logTopBorder(loglevel, tagSuffix);
-        logHeaderContent(loglevel, tagSuffix, methodCount);
+        boolean isShowThreadInfo=settings.isShowThreadInfo();
+        logHeaderContent(loglevel, tagSuffix, methodCount,isShowThreadInfo,isShowCallStack);
 
         //get bytes of message with system's default charset (which is UTF-8 for Android)
         byte[] bytes = message.getBytes();
         int length = bytes.length;
         if (length <= CHUNK_SIZE) {
-            if (methodCount > 0) {
+            if (isShowCallStack&& methodCount > 0) {
                 logDivider(loglevel, tagSuffix);
             }
             logContent(loglevel, tagSuffix, message);
@@ -293,12 +297,13 @@ class LogFormatterPrinter {
         return settings.isBorderEnabled() ? HORIZONTAL_DOUBLE_LINE_STR : "";
     }
     @SuppressWarnings("StringBufferReplaceableByString")
-    private void logHeaderContent(int logType, String tagSuffix, int methodCount) {
+    private void logHeaderContent(int logType, String tagSuffix, int methodCount,boolean isShowThreadInfo,boolean isShowCallStack) {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-        if (settings.isShowThreadInfo()) {
+        if (isShowThreadInfo) {
             logChunk(logType, tagSuffix, HorizontalDoubleLine() + "Thread: " + Thread.currentThread().getName());
             logDivider(logType, tagSuffix);
         }
+        if(!isShowCallStack) return;
         String level = "";
 
         int stackOffset = getStackOffset(trace) + settings.getMethodOffset();

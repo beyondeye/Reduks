@@ -3,7 +3,8 @@ package com.beyondeye.reduks.logger.logformatter;
 public final class LogFormatterSettings {
 
   private int methodCount = 2;
-  private boolean showThreadInfo = true;
+  private boolean showThreadInfo = false;
+  private boolean showCallStack = false;
   private int methodOffset = 0;
   private LogAdapter logAdapter;
 
@@ -11,8 +12,12 @@ public final class LogFormatterSettings {
   private Boolean logToString=false;
   private Boolean borderEnabled =true;
 
-  public LogFormatterSettings hideThreadInfo() {
-    showThreadInfo = false;
+  public LogFormatterSettings showThreadInfo(Boolean showThreadInfo) {
+    this.showThreadInfo = showThreadInfo;
+    return this;
+  }
+  public LogFormatterSettings showCallStack(Boolean showCallStack) {
+    this.showCallStack=showCallStack;
     return this;
   }
 
@@ -55,6 +60,9 @@ public final class LogFormatterSettings {
   public boolean isShowThreadInfo() {
     return showThreadInfo;
   }
+  public boolean isShowCallStack() {
+    return showCallStack;
+  }
 
   public Boolean isLogEnabled() {
     return logEnabled;
@@ -78,7 +86,8 @@ public final class LogFormatterSettings {
   public void reset() {
     methodCount = 2;
     methodOffset = 0;
-    showThreadInfo = true;
+    showThreadInfo = false;
+    showCallStack = false;
     logEnabled = true;
   }
 }
