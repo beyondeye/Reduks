@@ -13,10 +13,10 @@ public class LogFormatter {
 //  public static final int VERBOSE = 2;
 //  public static final int WARN = 5;
 
-  private LoggerPrinter printer = new LoggerPrinter();
+  private LogFormatterPrinter printer = new LogFormatterPrinter();
 
   public LogFormatter(String tag) {
-    printer = new LoggerPrinter();
+    printer = new LogFormatterPrinter();
     printer.init(tag);
   }
   public void resetSettings() {
@@ -24,15 +24,15 @@ public class LogFormatter {
   }
   public LogFormatterSettings getSettings() { return printer.getSettings(); }
 
-  public  LoggerPrinter t(String tag) {
+  public LogFormatterPrinter t(String tag) {
     return printer.t(tag, printer.getSettings().getMethodCount());
   }
 
-  public  LoggerPrinter t(int methodCount) {
+  public LogFormatterPrinter t(int methodCount) {
     return printer.t(null, methodCount);
   }
 
-  public  LoggerPrinter t(String tag, int methodCount) {
+  public LogFormatterPrinter t(String tag, int methodCount) {
     return printer.t(tag, methodCount);
   }
 

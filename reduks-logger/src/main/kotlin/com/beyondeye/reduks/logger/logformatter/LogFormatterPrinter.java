@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-final class LoggerPrinter{
+class LogFormatterPrinter {
 
     private static final String DEFAULT_TAG = "PRETTYLOGGER";
 
@@ -73,7 +73,7 @@ final class LoggerPrinter{
      */
     private final LogFormatterSettings settings = new LogFormatterSettings();
 
-    public LoggerPrinter() {
+    public LogFormatterPrinter() {
         init(DEFAULT_TAG);
     }
 
@@ -111,7 +111,7 @@ final class LoggerPrinter{
         }
     }
 
-    public LoggerPrinter t(String tag, int methodCount) {
+    public LogFormatterPrinter t(String tag, int methodCount) {
         if (tag != null) {
             localTag.set(tag);
         }
@@ -403,7 +403,7 @@ final class LoggerPrinter{
         for (int i = MIN_STACK_OFFSET; i < trace.length; i++) {
             StackTraceElement e = trace[i];
             String name = e.getClassName();
-            if (!name.equals(LoggerPrinter.class.getName()) && !name.equals(LogFormatter.class.getName())) {
+            if (!name.equals(LogFormatterPrinter.class.getName()) && !name.equals(LogFormatter.class.getName())) {
                 return --i;
             }
         }
