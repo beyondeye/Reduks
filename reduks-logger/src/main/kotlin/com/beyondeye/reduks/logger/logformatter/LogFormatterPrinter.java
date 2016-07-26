@@ -102,10 +102,15 @@ class LogFormatterPrinter {
         }
         //remove one level of collapse
         int newcollapsed = groupCollapsed.length() -1;
-        if (newcollapsed >= 0) {
+        if (newcollapsed >= 0) { //closed a collapsed group
             groupCollapsed = groupCollapsed.substring(0, newcollapsed);
+            if(newcollapsed==0) { //closed all collapse level: empty buffer
+                flushCollapsedBuffer();
+            }
         }
     }
+
+
     public boolean isCollapsed() {
         return groupCollapsed.length()>0;
     }
@@ -223,6 +228,7 @@ class LogFormatterPrinter {
         if (!settings.isLogEnabled()) {
             return;
         }
+        if (isCollapsed()) log_collapsed(loglevel,tagSuffix,message,throwable);
         boolean isShowCallStack=settings.isShowCallStack();
         if (throwable != null && message != null) {
             message += " : " + Helper.getStackTraceString(throwable);
@@ -232,33 +238,76 @@ class LogFormatterPrinter {
             message = Helper.getStackTraceString(throwable);
             isShowCallStack=true; //always enable call stack for exceptions
         }
-        if (message == null) {
-            message = "No message/exception is set";
-        }
-        if (Helper.isEmpty(message)) {
-            message = "Empty/NULL log message";
-        }
+//        if (message == null) {
+//            message = "No message/exception is set";
+//        }
+//        if (Helper.isEmpty(message)) {
+//            message = "Empty/NULL log message";
+//        }
 
-        logTopBorder(loglevel, tagSuffix);
         int methodCount = getMethodCount();
-        boolean isShowThreadInfo=settings.isShowThreadInfo();
-        logHeaderContent(loglevel, tagSuffix, methodCount,isShowThreadInfo,isShowCallStack);
+        logTopBorder(loglevel, tagSuffix);
+        boolean isShowThreadInfo = settings.isShowThreadInfo();
+        logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
+        if (isShowCallStack && methodCount > 0) {
+            logDivider(loglevel, tagSuffix);
+        }
+        logMessageBodyChunked(loglevel, tagSuffix, message);
+    }
 
+    private String msgBufferTagSuffix ="";
+    private int    msgBufferLogLevel=-1;
+    private StringBuilder msgbuffer=new StringBuilder();
+    //TODO remove synchronized from here and put on reduks_logger printBuffer
+    public synchronized void log_collapsed(int loglevel, String tagSuffix, String message, Throwable throwable) {
+        boolean isShowCallStack=settings.isShowCallStack();
+        boolean isFirstLineInCollapsedGroup=msgbuffer.length()==0;
+        if (throwable != null && message != null) {
+            message += " : " + Helper.getStackTraceString(throwable);
+            isShowCallStack=true; //always enable call stack for exceptions
+        }
+        if (throwable != null && message == null) {
+            message = Helper.getStackTraceString(throwable);
+            isShowCallStack=true; //always enable call stack for exceptions
+        }
+//        if (message == null) {
+//            message = "No message/exception is set";
+//        }
+//        if (Helper.isEmpty(message)) {
+//            message = "Empty/NULL log message";
+//        }
+
+        int methodCount = getMethodCount();
+        if(isFirstLineInCollapsedGroup) {
+            msgBufferTagSuffix =tagSuffix;
+            msgBufferLogLevel=loglevel;
+            logTopBorder(loglevel, tagSuffix);
+            boolean isShowThreadInfo = settings.isShowThreadInfo();
+            logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
+            if (isShowCallStack&& methodCount > 0) {
+                logDivider(loglevel, tagSuffix);
+            }
+        }
+        msgbuffer.append(message);
+    }
+    private void flushCollapsedBuffer() {
+        logMessageBodyChunked(msgBufferLogLevel, msgBufferTagSuffix, msgbuffer.toString());
+        msgbuffer.setLength(0); //empty buffer
+        msgBufferTagSuffix="";
+        msgBufferLogLevel=-1;
+    }
+
+    private void logMessageBodyChunked(int loglevel, String tagSuffix, String message) {
         //get bytes of message with system's default charset (which is UTF-8 for Android)
         byte[] bytes = message.getBytes();
         int length = bytes.length;
         int CHUNK_SIZE=settings.getLogAdapter().max_message_size();
         if (length <= CHUNK_SIZE) {
-            if (isShowCallStack&& methodCount > 0) {
-                logDivider(loglevel, tagSuffix);
-            }
             logContent(loglevel, tagSuffix, message);
             logBottomBorder(loglevel, tagSuffix);
             return;
         }
-        if (methodCount > 0) {
-            logDivider(loglevel, tagSuffix);
-        }
+
         for (int i = 0; i < length; i += CHUNK_SIZE) {
             int count = Math.min(length - i, CHUNK_SIZE);
             //create a new String with system's default charset (which is UTF-8 for Android)
