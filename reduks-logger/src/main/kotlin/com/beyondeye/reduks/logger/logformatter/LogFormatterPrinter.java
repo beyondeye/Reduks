@@ -235,12 +235,12 @@ class LogFormatterPrinter {
         if (message == null) {
             message = "No message/exception is set";
         }
-        int methodCount = getMethodCount();
         if (Helper.isEmpty(message)) {
             message = "Empty/NULL log message";
         }
 
         logTopBorder(loglevel, tagSuffix);
+        int methodCount = getMethodCount();
         boolean isShowThreadInfo=settings.isShowThreadInfo();
         logHeaderContent(loglevel, tagSuffix, methodCount,isShowThreadInfo,isShowCallStack);
 
