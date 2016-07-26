@@ -8,27 +8,35 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatter
  * see https://developer.mozilla.org/en/docs/Web/API/console (Using groups in console)
  * Created by daely on 7/25/2016.
  */
-internal class DefaultGroupedLogger(tag:String): GroupedLogger {
-    val logFormatter=LogFormatter(tag)
-    override fun group(s: String,logLevel:Int) {
+internal class GroupedLogger(tag: String) {
+    val logFormatter = LogFormatter(tag)
+    /**
+     * start a new group, increasing indent, until next call to [groupEnd]
+     * and call [log] with the specified argument
+     */
+    fun group(s: String, logLevel: Int=LogLevel.INFO) {
         logFormatter.groupStart()
-        log(s,logLevel)
+        log(s, logLevel)
     }
 
-    override fun groupCollapsed(s: String,logLevel:Int) {
+    /**
+     * start a new collapsed group: all log lines are collapsed to a single line,, until next call to [groupEnd]
+     * and call [log] with the specified argument
+     */
+    fun groupCollapsed(s: String, logLevel: Int=LogLevel.INFO) {
         logFormatter.groupCollapsedStart()
-        log(s,logLevel)
+        log(s, logLevel)
     }
 
-    override fun groupEnd() {
+    fun groupEnd() {
         logFormatter.groupEnd()
     }
 
-    override fun log(s: String, logLevel: Int) {
-        logFormatter.log(logLevel,null,s,null)
+    fun log(s: String, logLevel: Int=LogLevel.INFO) {
+        logFormatter.log(logLevel, null, s, null)
     }
 
-    override fun json(objName:String,s: String, logLevel: Int) {
-        logFormatter.json(logLevel,objName,s)
+    fun json(objName: String, s: String, logLevel: Int=LogLevel.INFO) {
+        logFormatter.json(logLevel, objName, s)
     }
 }
