@@ -10,12 +10,6 @@ class LogFormatterPrinter {
 
     private static final String DEFAULT_TAG = "PRETTYLOGGER";
 
-//    private static final int DEBUG = 3;
-//    private static final int ERROR = 6;
-//    private static final int ASSERT = 7;
-//    private static final int INFO = 4;
-//    private static final int VERBOSE = 2;
-//    private static final int WARN = 5;
 
     /**
      * It is used for json pretty print
@@ -122,22 +116,10 @@ class LogFormatterPrinter {
         groupCollapsed +='c';
     }
 
-//    public LogFormatterPrinter t(String localTag, int methodCount) {
-//        if (localTag != null) {
-//            this.localTag.set(localTag);
-//        }
-//        localMethodCount.set(methodCount);
-//        return this;
-//    }
+
     public void selLocalMethodCount(int methodCount) {
         localMethodCount=methodCount;
     }
-
-//    @Override
-//    public void d(String message, Object... args) {
-//        log(DEBUG, null, message, args);
-//    }
-
 
 //    @Override
 //    public void d(Object object) {
@@ -150,35 +132,6 @@ class LogFormatterPrinter {
 //        log(DEBUG, null, message);
 //    }
 
-//    @Override
-//    public void e(String message, Object... args) {
-//        e(null, message, args);
-//    }
-
-//    @Override
-//    public void e(Throwable throwable, String message, Object... args) {
-//        log(ERROR, throwable, message, args);
-//    }
-
-//    @Override
-//    public void w(String message, Object... args) {
-//        log(WARN, null, message, args);
-//    }
-
-//    @Override
-//    public void i(String message, Object... args) {
-//        log(INFO, null, message, args);
-//    }
-
-//    @Override
-//    public void v(String message, Object... args) {
-//        log(VERBOSE, null, message, args);
-//    }
-
-//    @Override
-//    public void wtf(String message, Object... args) {
-//        log(ASSERT, null, message, args);
-//    }
     private void d(String message) {
         log(message,LogLevel.DEBUG, null,  null);
     }
@@ -240,12 +193,6 @@ class LogFormatterPrinter {
             message = Helper.getStackTraceString(throwable);
             isShowCallStack=true; //always enable call stack for exceptions
         }
-//        if (message == null) {
-//            message = "No message/exception is set";
-//        }
-//        if (Helper.isEmpty(message)) {
-//            message = "Empty/NULL log message";
-//        }
 
         int methodCount = getMethodCount();
         logTopBorder(loglevel, tagSuffix);
@@ -272,12 +219,6 @@ class LogFormatterPrinter {
             message = Helper.getStackTraceString(throwable);
             isShowCallStack=true; //always enable call stack for exceptions
         }
-//        if (message == null) {
-//            message = "No message/exception is set";
-//        }
-//        if (Helper.isEmpty(message)) {
-//            message = "Empty/NULL log message";
-//        }
 
         int methodCount = getMethodCount();
         if(isFirstLineInCollapsedGroup) {
@@ -322,17 +263,6 @@ class LogFormatterPrinter {
         settings.reset();
     }
 
-//    /**
-//     * This method is synchronized in order to avoid messy of logs' order.
-//     */
-//    private synchronized void log(int priority, Throwable throwable, String msg, Object... args) {
-//        if (!settings.isLogEnabled()) {
-//            return;
-//        }
-//        String tag = getTag();
-//        String message = createMessage(msg, args);
-//        log(priority, tag, message, throwable);
-//    }
 
     private void logTopBorder(int logType, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
@@ -436,21 +366,6 @@ class LogFormatterPrinter {
         return this.tag;
     }
 
-    /**
-     * @return the appropriate tag based on local or global
-     */
-//    private String getTag() {
-//        String tag = localTag.get();
-//        if (tag != null) {
-//            localTag.remove();
-//            return tag;
-//        }
-//        return this.tag;
-//    }
-
-//    private String createMessage(String message, Object... args) {
-//        return args == null || args.length == 0 ? message : String.format(message, args);
-//    }
 
     private int getMethodCount() {
         int count = localMethodCount;
