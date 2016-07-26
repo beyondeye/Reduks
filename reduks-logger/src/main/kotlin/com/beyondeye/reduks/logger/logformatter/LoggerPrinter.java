@@ -34,6 +34,8 @@ final class LoggerPrinter{
      */
     private static final int MIN_STACK_OFFSET = 3;
 
+
+    private static final String LINE_SEPARATOR_CHAR =System.getProperty("line.separator");
     /**
      * Drawing toolbox
      */
@@ -203,7 +205,7 @@ final class LoggerPrinter{
 
     //TODO remove synchronized from here and put on reduks_logger printBuffer
     public synchronized void log(int loglevel, String tag, String message, Throwable throwable) {
-        if (!settings.getLogEnabled()) {
+        if (!settings.isLogEnabled()) {
             return;
         }
         if (throwable != null && message != null) {
@@ -253,7 +255,7 @@ final class LoggerPrinter{
 //     * This method is synchronized in order to avoid messy of logs' order.
 //     */
 //    private synchronized void log(int priority, Throwable throwable, String msg, Object... args) {
-//        if (!settings.getLogEnabled()) {
+//        if (!settings.isLogEnabled()) {
 //            return;
 //        }
 //        String tag = getTag();
@@ -317,11 +319,12 @@ final class LoggerPrinter{
     }
 
     private void logContent(int logType, String tag, String chunk) {
-        String[] lines = chunk.split(System.getProperty("line.separator"));
+        String[] lines = chunk.split(LINE_SEPARATOR_CHAR);
         for (String line : lines) {
             logChunk(logType, tag, HorizontalDoubleLine() + line);
         }
     }
+
 
     private void logChunk(int logType, String tag, String chunk) {
         String finalTag = formatTag(tag);

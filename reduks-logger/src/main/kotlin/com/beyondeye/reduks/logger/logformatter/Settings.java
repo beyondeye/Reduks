@@ -8,6 +8,7 @@ public final class Settings {
   private LogAdapter logAdapter;
 
   private Boolean logEnabled = true;
+  private Boolean logToString=false;
   private Boolean borderEnabled =true;
 
   public Settings hideThreadInfo() {
@@ -32,6 +33,10 @@ public final class Settings {
     this.logEnabled = logEnabled;
     return this;
   }
+  public Settings logToString(Boolean logToString) {
+    this.logToString = logToString;
+    return this;
+  }
 
   public Settings methodOffset(int offset) {
     this.methodOffset = offset;
@@ -51,8 +56,11 @@ public final class Settings {
     return showThreadInfo;
   }
 
-  public Boolean getLogEnabled() {
+  public Boolean isLogEnabled() {
     return logEnabled;
+  }
+  public Boolean isLogToString() {
+    return logToString;
   }
 
   public int getMethodOffset() {
@@ -62,7 +70,7 @@ public final class Settings {
 
   public LogAdapter getLogAdapter() {
     if (logAdapter == null) {
-      logAdapter = new AndroidLogAdapter();
+      logAdapter = logToString ? new StringBufferLogAdapter() : new AndroidLogAdapter();
     }
     return logAdapter;
   }
