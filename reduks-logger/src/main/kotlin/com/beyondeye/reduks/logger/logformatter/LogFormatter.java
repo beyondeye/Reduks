@@ -24,20 +24,29 @@ public class LogFormatter {
   }
   public LogFormatterSettings getSettings() { return printer.getSettings(); }
 
-  public LogFormatterPrinter t(String tag) {
-    return printer.t(tag, printer.getSettings().getMethodCount());
-  }
+//  public LogFormatterPrinter t(String tag) {
+//    return printer.t(tag, printer.getSettings().getMethodCount());
+//  }
 
   public LogFormatterPrinter t(int methodCount) {
-    return printer.t(null, methodCount);
+    return printer.t(methodCount);
   }
 
-  public LogFormatterPrinter t(String tag, int methodCount) {
-    return printer.t(tag, methodCount);
+//  public LogFormatterPrinter t(String tag, int methodCount) {
+//    return printer.t(tag, methodCount);
+//  }
+  public void groupStart() {
+    printer.groupStart();
+  }
+  public void collapsedGroupStart() {
+    printer.groupStart();
+  }
+  public void groupEnd() {
+    printer.groupEnd();
   }
 
-  public  void log(int priority, String tag, String message, Throwable throwable) {
-    printer.log(priority, tag, message, throwable);
+  public  void log(int loglevel, String tagSuffix, String message, Throwable throwable) {
+    printer.log(loglevel, tagSuffix, message, throwable);
   }
 
 //  public static void d(String message, Object... args) {

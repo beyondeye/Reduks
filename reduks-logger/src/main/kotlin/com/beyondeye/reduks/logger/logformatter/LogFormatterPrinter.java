@@ -64,9 +64,10 @@ class LogFormatterPrinter {
     /**
      * Localize single tag and method count and groupBlanks for each thread
      */
-    private final ThreadLocal<String> localTag = new ThreadLocal<String>();
+//    private final ThreadLocal<String> localTag = new ThreadLocal<String>();
     private final ThreadLocal<Integer> localMethodCount = new ThreadLocal<Integer>();
     private final ThreadLocal<String> groupBlanks = new ThreadLocal<String>(); //TODO it's wrong to make it thread local since reducer/subscribers can operate from multiple threads?
+    private final ThreadLocal<String> groupCollapsed = new ThreadLocal<String>(); //TODO it's wrong to make it thread local since reducer/subscribers can operate from multiple threads?
 
     /**
      * It is used to determine log settings such as method count, thread info visibility
@@ -101,7 +102,7 @@ class LogFormatterPrinter {
         String curGroupBlanks = groupBlanks.get();
         groupBlanks.set(curGroupBlanks + SINGLEGROUPBLANKS);
     }
-
+    
     public void groupEnd() {
         String curGroupBlanks = groupBlanks.get();
         int newlength = curGroupBlanks.length() - SINGLEGROUPBLANKS.length();
@@ -109,12 +110,31 @@ class LogFormatterPrinter {
             String newGroupBlanks = curGroupBlanks.substring(0, newlength);
             groupBlanks.set(newGroupBlanks);
         }
+        //remove one level of collapse
+        String curGroupCollapsed = groupCollapsed.get();
+        int newcollapsed = curGroupCollapsed.length() -1;
+        if (newcollapsed >= 0) {
+            String newGroupCollapsed = curGroupCollapsed.substring(0, newcollapsed);
+            groupCollapsed.set(newGroupCollapsed);
+        }
+    }
+    public boolean isCollapsed() {
+        return groupCollapsed.get().length()>0;
+    }
+    public void groupCollapsedStart() {
+        groupStart();
+        String curGroupCollapsed = groupCollapsed.get();
+        groupCollapsed.set(curGroupCollapsed + 'c');
     }
 
-    public LogFormatterPrinter t(String tag, int methodCount) {
-        if (tag != null) {
-            localTag.set(tag);
-        }
+//    public LogFormatterPrinter t(String localTag, int methodCount) {
+//        if (localTag != null) {
+//            this.localTag.set(localTag);
+//        }
+//        localMethodCount.set(methodCount);
+//        return this;
+//    }
+    public LogFormatterPrinter t(int methodCount) {
         localMethodCount.set(methodCount);
         return this;
     }
@@ -204,7 +224,7 @@ class LogFormatterPrinter {
     }
 
     //TODO remove synchronized from here and put on reduks_logger printBuffer
-    public synchronized void log(int loglevel, String tag, String message, Throwable throwable) {
+    public synchronized void log(int loglevel, String tagSuffix, String message, Throwable throwable) {
         if (!settings.isLogEnabled()) {
             return;
         }
@@ -222,29 +242,29 @@ class LogFormatterPrinter {
             message = "Empty/NULL log message";
         }
 
-        logTopBorder(loglevel, tag);
-        logHeaderContent(loglevel, tag, methodCount);
+        logTopBorder(loglevel, tagSuffix);
+        logHeaderContent(loglevel, tagSuffix, methodCount);
 
         //get bytes of message with system's default charset (which is UTF-8 for Android)
         byte[] bytes = message.getBytes();
         int length = bytes.length;
         if (length <= CHUNK_SIZE) {
             if (methodCount > 0) {
-                logDivider(loglevel, tag);
+                logDivider(loglevel, tagSuffix);
             }
-            logContent(loglevel, tag, message);
-            logBottomBorder(loglevel, tag);
+            logContent(loglevel, tagSuffix, message);
+            logBottomBorder(loglevel, tagSuffix);
             return;
         }
         if (methodCount > 0) {
-            logDivider(loglevel, tag);
+            logDivider(loglevel, tagSuffix);
         }
         for (int i = 0; i < length; i += CHUNK_SIZE) {
             int count = Math.min(length - i, CHUNK_SIZE);
             //create a new String with system's default charset (which is UTF-8 for Android)
-            logContent(loglevel, tag, new String(bytes, i, count));
+            logContent(loglevel, tagSuffix, new String(bytes, i, count));
         }
-        logBottomBorder(loglevel, tag);
+        logBottomBorder(loglevel, tagSuffix);
     }
 
     public void resetSettings() {
@@ -263,19 +283,19 @@ class LogFormatterPrinter {
 //        log(priority, tag, message, throwable);
 //    }
 
-    private void logTopBorder(int logType, String tag) {
+    private void logTopBorder(int logType, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tag, TOP_BORDER);
+        logChunk(logType, tagSuffix, TOP_BORDER);
     }
     private String HorizontalDoubleLine() {
         return settings.isBorderEnabled() ? HORIZONTAL_DOUBLE_LINE_STR : "";
     }
     @SuppressWarnings("StringBufferReplaceableByString")
-    private void logHeaderContent(int logType, String tag, int methodCount) {
+    private void logHeaderContent(int logType, String tagSuffix, int methodCount) {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         if (settings.isShowThreadInfo()) {
-            logChunk(logType, tag, HorizontalDoubleLine() + "Thread: " + Thread.currentThread().getName());
-            logDivider(logType, tag);
+            logChunk(logType, tagSuffix, HorizontalDoubleLine() + "Thread: " + Thread.currentThread().getName());
+            logDivider(logType, tagSuffix);
         }
         String level = "";
 
@@ -304,30 +324,30 @@ class LogFormatterPrinter {
                     .append(trace[stackIndex].getLineNumber())
                     .append(")");
             level += "   ";
-            logChunk(logType, tag, builder.toString());
+            logChunk(logType, tagSuffix, builder.toString());
         }
     }
 
-    private void logBottomBorder(int logType, String tag) {
+    private void logBottomBorder(int logType, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tag, BOTTOM_BORDER);
+        logChunk(logType, tagSuffix, BOTTOM_BORDER);
     }
 
-    private void logDivider(int logType, String tag) {
+    private void logDivider(int logType, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tag, MIDDLE_BORDER);
+        logChunk(logType, tagSuffix, MIDDLE_BORDER);
     }
 
-    private void logContent(int logType, String tag, String chunk) {
+    private void logContent(int logType, String tagSuffix, String chunk) {
         String[] lines = chunk.split(LINE_SEPARATOR_CHAR);
         for (String line : lines) {
-            logChunk(logType, tag, HorizontalDoubleLine() + line);
+            logChunk(logType, tagSuffix, HorizontalDoubleLine() + line);
         }
     }
 
 
-    private void logChunk(int logType, String tag, String chunk) {
-        String finalTag = formatTag(tag);
+    private void logChunk(int logType, String tagSuffix, String chunk) {
+        String finalTag = formatTag(tagSuffix);
         switch (logType) {
             case LogLevel.ERROR:
                 settings.getLogAdapter().e(finalTag, chunk);
@@ -357,9 +377,9 @@ class LogFormatterPrinter {
         return name.substring(lastIndex + 1);
     }
 
-    private String formatTag(String tag) {
-        if (!Helper.isEmpty(tag) && !Helper.equals(this.tag, tag)) {
-            return this.tag + "-" + tag + groupBlanks;
+    private String formatTag(String suffixTag) {
+        if (!Helper.isEmpty(suffixTag) && !Helper.equals(this.tag, suffixTag)) {
+            return this.tag + "-" + suffixTag + groupBlanks;
         }
         return this.tag;
     }
@@ -367,14 +387,14 @@ class LogFormatterPrinter {
     /**
      * @return the appropriate tag based on local or global
      */
-    private String getTag() {
-        String tag = localTag.get();
-        if (tag != null) {
-            localTag.remove();
-            return tag;
-        }
-        return this.tag;
-    }
+//    private String getTag() {
+//        String tag = localTag.get();
+//        if (tag != null) {
+//            localTag.remove();
+//            return tag;
+//        }
+//        return this.tag;
+//    }
 
 //    private String createMessage(String message, Object... args) {
 //        return args == null || args.length == 0 ? message : String.format(message, args);

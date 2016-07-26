@@ -11,7 +11,8 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatter
 internal class DefaultGroupedLogger(tag:String): GroupedLogger {
     val logFormatter=LogFormatter(tag)
     override fun group(s: String,logLevel:Int) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        logFormatter.groupStart()
+        logFormatter.log(logLevel,null,s,null)
     }
 
     override fun groupCollapsed(s: String,logLevel:Int) {
