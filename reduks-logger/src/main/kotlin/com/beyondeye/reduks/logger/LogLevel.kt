@@ -7,14 +7,14 @@ package com.beyondeye.reduks.logger
 object LogLevel {
     @JvmField val v=0
     @JvmField val VERBOSE=v
-    @JvmField val i=1
-    @JvmField val INFO=i
-    @JvmField val d=2
+    @JvmField val d=1
     @JvmField val DEBUG=d
+    @JvmField val i=2
+    @JvmField val INFO=i
     @JvmField val w=3
     @JvmField val WARN=w
+    @JvmField val e=4
+    @JvmField val ERROR=e
     @JvmField val wtf=5
     @JvmField val ASSERT=wtf
-    @JvmField val e=6
-    @JvmField val ERROR=e
 }
