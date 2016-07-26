@@ -39,4 +39,6 @@ internal class GroupedLogger(tag: String, logToStringBuffer: Boolean) {
     fun json(objName: String, s: String, logLevel: Int=LogLevel.INFO) {
         logFormatter.json(logLevel, objName, s)
     }
+
+    fun getLogAsString(): String =logFormatter.getStringBuffer()
 }

@@ -91,5 +91,9 @@ public class LogFormatter {
   }
 
 
-
+    public String getStringBuffer() {
+        LogAdapter logAdapter= printer.getSettings().getLogAdapter();
+        if(!(logAdapter instanceof StringBufferLogAdapter)) return "";
+        return ((StringBufferLogAdapter)logAdapter).getBuffer();
+    }
 }

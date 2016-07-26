@@ -22,6 +22,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
     private val stateType = StateType<S>()
     private val logger = GroupedLogger(config.reduksLoggerTag,config.logToStringBuffer)
     private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
+    fun getLogAsString():String = logger.getLogAsString()
     override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any? {
         // Exit early if predicate function returns 'false'
         val prevState = store.state
