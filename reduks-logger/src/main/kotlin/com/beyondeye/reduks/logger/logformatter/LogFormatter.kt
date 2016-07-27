@@ -34,18 +34,18 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      * start a new group, increasing indent, until next call to [groupEnd]
      * and call [log] with the specified argument
      */
-    fun group(message: String, logLevel: Int= LogLevel.INFO,tagSuffix: String?=null) {
-        printer.groupStart()
-        printer.log(message,logLevel, tagSuffix)
+    fun group(groupHeaderMessage: String, logLevel: Int= LogLevel.INFO,tagSuffix: String?=null) {
+        printer.log(groupHeaderMessage,logLevel, tagSuffix) //group header
+        printer.groupStart() //start indenting AFTER header
     }
 
     /**
      * start a new collapsed group: all log lines are collapsed to a single line,, until next call to [groupEnd]
      * and call [log] with the specified argument
      */
-    fun groupCollapsed(message: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
-        printer.groupCollapsedStart()
-        printer.log(message,logLevel, tagSuffix)
+    fun groupCollapsed(groupHeaderMessage: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
+        printer.log(groupHeaderMessage,logLevel, tagSuffix)
+        printer.groupCollapsedStart() //start indenting and collapsing AFTER header
     }
 
     fun groupEnd() {
