@@ -1,0 +1,17 @@
+I/_RDKS_:╔════════════════════
+I/_RDKS_:║ action: TestAction  =
+I/_RDKS_:╟────────────────────
+I/_RDKS_:║ {
+I/_RDKS_:║   "type": "reduce component1"
+I/_RDKS_:║ }
+I/_RDKS_:╟────────────────────
+I/_RDKS_:║ prev state={
+I/_RDKS_:║   "component1": "initial state",
+I/_RDKS_:║   "component2": "initial state"
+I/_RDKS_:║ }
+I/_RDKS_:╟────────────────────
+I/_RDKS_:║ next state={
+I/_RDKS_:║   "component1": "reduced",
+I/_RDKS_:║   "component2": "initial state"
+I/_RDKS_:║ }
+I/_RDKS_:╚════════════════════
