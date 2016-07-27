@@ -1,25 +1,19 @@
 package com.beyondeye.reduks.logger.logformatter
 
-class LogFormatterSettings {
+data class LogFormatterSettings(
+        var methodCount:Int = 2,
+        var isShowThreadInfo:Boolean = false,
+        var isShowCallStack:Boolean = false,
+        var methodOffset:Int = 0,
+        var isLogEnabled: Boolean = true,
+        /**
+         * if true, write all log message to a buffer, instead of using the android log
+         */
+        var isLogToString: Boolean = false,
+        var isBorderEnabled: Boolean = true
+        ) {
 
-    var methodCount = 2
-        private set
-    var isShowThreadInfo = false
-        private set
-    var isShowCallStack = false
-        private set
-    var methodOffset = 0
-        private set
     internal var logAdapter: LogAdapter? = null
-
-    var isLogEnabled: Boolean = true
-        private set
-    /**
-     * if true, write all log message to a buffer, instead of using the android log
-     */
-    var isLogToString: Boolean = false
-        private set
-    private var borderEnabled: Boolean = true
 
     fun showThreadInfo(showThreadInfo: Boolean?): LogFormatterSettings {
         this.isShowThreadInfo = showThreadInfo!!
@@ -32,16 +26,12 @@ class LogFormatterSettings {
     }
 
     fun methodCount(methodCount: Int): LogFormatterSettings {
-        var methodCount = methodCount
-        if (methodCount < 0) {
-            methodCount = 0
-        }
-        this.methodCount = methodCount
+        this.methodCount = if(methodCount>=0) methodCount else 0
         return this
     }
 
     fun borderEnabled(borderEnabled: Boolean): LogFormatterSettings {
-        this.borderEnabled = borderEnabled
+        this.isBorderEnabled = borderEnabled
         return this
     }
 
@@ -65,9 +55,6 @@ class LogFormatterSettings {
         return this
     }
 
-    val isBorderEnabled: Boolean
-        get() = borderEnabled
-
     fun getLogAdapter(): LogAdapter {
         if (logAdapter == null) {
             logAdapter = if (isLogToString) StringBufferLogAdapter() else AndroidLogAdapter()
@@ -82,6 +69,6 @@ class LogFormatterSettings {
         isShowCallStack = false
         isLogEnabled = true
         isLogToString = false
-        borderEnabled = true
+        isBorderEnabled = true
     }
 }
