@@ -53,11 +53,11 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         return returnedValue
     }
     private fun printBuffer(buffer: List<LogEntry<S>>) {
-        buffer.forEachIndexed { key, curEntry ->
+        buffer.forEachIndexed { entryIdx, curEntry ->
             var took = curEntry.took
             var nextState = curEntry.nextState
-            val nextEntry: LogEntry<S>? = if (key < buffer.size) buffer[key + 1] else null
-            if (nextEntry != null) {
+            val nextEntry: LogEntry<S>? = if (entryIdx < buffer.size-1) buffer[entryIdx + 1] else null
+            if (nextEntry != null) { //handle the case where we had an exception and buffer length>1
                 nextState = nextEntry.prevState
                 took = nano2ms(curEntry.started,nextEntry.started)
             }
@@ -65,20 +65,16 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
             //message
             val formattedAction = config.actionTransformer(curEntry.action)
             val isCollapsed = config.collapsed(nextState, curEntry.action)
-            val tookstr = took.toString().padStart(5) //took.toFixed(2)
+            val tookstr = took.toString().padStart(7) //took.toFixed(2)
             val durationstr = if (config.logActionDuration) "(in $tookstr ms)" else ""
             val actiontypestr = config.actionTypeExtractor(formattedAction)
-            val title = "action @ $actiontypestr $durationstr "
+            val title = "action: $actiontypestr $durationstr "
 
             // Render
             try {
                 if (isCollapsed) {
-                    //  if (colors.title) logger.groupCollapsed("%c ${title}", titleCSS);
-                    //  else
                     logger.groupCollapsed(title)
                 } else {
-                    //if (colors.title) logger.group("%c ${title}", titleCSS);
-                    //else
                     logger.group(title)
                 }
             } catch (e: Exception) {
