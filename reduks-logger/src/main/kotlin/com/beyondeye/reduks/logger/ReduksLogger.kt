@@ -141,7 +141,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         if (collapsed) {
             logger.groupCollapsed("state diff"+stateDiff.toString(), diffStateLogLevel)
         } else {
-            val stateDiffPretty=logger.getPrettyPrintedJson("diff",stateDiff.toString())
+            val stateDiffPretty=logger.getPrettyPrintedJson("state diff",stateDiff.toString())
             logger.group(stateDiffPretty, diffStateLogLevel)
         }
 

@@ -76,6 +76,68 @@ class ReduksLoggerTest {
         val logstr=loggerMiddleware.getLogAsString()
         assertTextEqualToFileContent(logstr, "simple_action_changing_one_field_state_diff")
     }
+    @Test
+    fun test_simple_action_changing_one_field_of_state_collapsed() {
+        //-----GIVEN
+        val store = SimpleStore(TestState(), testReducer)
+        val loggerConfig=ReduksLoggerConfig<TestState>(
+                collapsed = { state,action-> true },
+                reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true,borderDividerLength = 20))
+        val loggerMiddleware=ReduksLogger<TestState>(loggerConfig)
+        store.applyMiddleware(loggerMiddleware)
+        //-----WHEN
+        store.dispatch(TestAction(type = "reduce component1"))
+        //-----THEN
+        val logstr=loggerMiddleware.getLogAsString()
+        assertTextEqualToFileContent(logstr, "simple_action_changing_one_field_of_state_collapsed")
+    }
+    @Test
+    fun test_simple_action_changing_one_field_state_diff_collapsed() {
+        //-----GIVEN
+        val store = SimpleStore(TestState(), testReducer)
+        val loggerConfig=ReduksLoggerConfig<TestState>(
+                collapsed = { state,action-> true },
+                logStateDiff = true,
+                reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true,borderDividerLength = 20))
+        val loggerMiddleware=ReduksLogger<TestState>(loggerConfig)
+        store.applyMiddleware(loggerMiddleware)
+        //-----WHEN
+        store.dispatch(TestAction(type = "reduce component1"))
+        //-----THEN
+        val logstr=loggerMiddleware.getLogAsString()
+        assertTextEqualToFileContent(logstr, "simple_action_changing_one_field_state_diff_collapsed")
+    }
+    @Test
+    fun test_simple_action_changing_one_field_of_state_collapsed_noborder() {
+        //-----GIVEN
+        val store = SimpleStore(TestState(), testReducer)
+        val loggerConfig=ReduksLoggerConfig<TestState>(
+                collapsed = { state,action-> true },
+                reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true,isBorderEnabled = false))
+        val loggerMiddleware=ReduksLogger<TestState>(loggerConfig)
+        store.applyMiddleware(loggerMiddleware)
+        //-----WHEN
+        store.dispatch(TestAction(type = "reduce component1"))
+        //-----THEN
+        val logstr=loggerMiddleware.getLogAsString()
+        assertTextEqualToFileContent(logstr, "simple_action_changing_one_field_of_state_collapsed_noborder")
+    }
+    @Test
+    fun test_simple_action_changing_one_field_state_diff_collapsed_noborder() {
+        //-----GIVEN
+        val store = SimpleStore(TestState(), testReducer)
+        val loggerConfig=ReduksLoggerConfig<TestState>(
+                collapsed = { state,action-> true },
+                logStateDiff = true,
+                reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true,isBorderEnabled = false))
+        val loggerMiddleware=ReduksLogger<TestState>(loggerConfig)
+        store.applyMiddleware(loggerMiddleware)
+        //-----WHEN
+        store.dispatch(TestAction(type = "reduce component1"))
+        //-----THEN
+        val logstr=loggerMiddleware.getLogAsString()
+        assertTextEqualToFileContent(logstr, "simple_action_changing_one_field_state_diff_collapsed_noborder")
+    }
 
     private fun assertTextEqualToFileContent(text: String, expectedTextFilename: String) {
         val logstr = text.filterNot { it == '\r' }

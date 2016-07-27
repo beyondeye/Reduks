@@ -27,16 +27,16 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
 
 
     fun setLocalMethodCount(methodCount: Int) {
-         printer.selLocalMethodCount(methodCount)
+        printer.selLocalMethodCount(methodCount)
     }
 
     /**
      * start a new group, increasing indent, until next call to [groupEnd]
      * and call [log] with the specified argument
      */
-    fun group(groupHeaderMessage: String, logLevel: Int= LogLevel.INFO,tagSuffix: String?=null) {
+    fun group(groupHeaderMessage: String, logLevel: Int = LogLevel.INFO, tagSuffix: String? = null) {
         printer.groupStart()
-        printer.log(groupHeaderMessage,logLevel, tagSuffix) //group header
+        printer.log(groupHeaderMessage, logLevel, tagSuffix) //group header
         printer.increaseIndent() //increase indent AFTER header
     }
 
@@ -44,7 +44,7 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      * start a new collapsed group: all log lines are collapsed to a single line,, until next call to [groupEnd]
      * and call [log] with the specified argument
      */
-    fun groupCollapsed(groupHeaderMessage: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
+    fun groupCollapsed(groupHeaderMessage: String, logLevel: Int = LogLevel.INFO, tagSuffix: String? = null) {
         printer.groupCollapsedStart()
         printer.log(groupHeaderMessage,logLevel, tagSuffix)
         printer.increaseIndent() //increase indent AFTER header
@@ -53,9 +53,10 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
     fun groupEnd() {
         printer.groupEnd()
     }
-    fun log(message: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null,throwable: Throwable?=null) {
-        val message_=printer.addFormattedThrowableToMessage(message,throwable)
-        printer.log(message_,logLevel, tagSuffix)
+
+    fun log(message: String, logLevel: Int = LogLevel.INFO, tagSuffix: String? = null, throwable: Throwable? = null) {
+        val message_ = printer.addFormattedThrowableToMessage(message, throwable)
+        printer.log(message_, logLevel, tagSuffix)
     }
 
     /**
@@ -63,17 +64,17 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
 
      * @param jsonMessage the json content
      */
-    fun json(objName: String, jsonMessage: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
-        printer.json(objName, jsonMessage,logLevel, tagSuffix)
-    }
-    fun getPrettyPrintedJson(objName: String, jsonMessage: String):String {
-        return printer.getPrettyPrintedJson(objName,jsonMessage)
+    fun json(objName: String, jsonMessage: String, logLevel: Int = LogLevel.INFO, tagSuffix: String? = null) {
+        printer.json(objName, jsonMessage, logLevel, tagSuffix)
     }
 
-    fun getLogAsString(): String  {
+    fun getPrettyPrintedJson(objName: String, jsonMessage: String): String {
+        return printer.getPrettyPrintedJson(objName, jsonMessage)
+    }
+
+    fun getLogAsString(): String {
         val logAdapter = printer.settings.logAdapter
         if (logAdapter !is StringBufferLogAdapter) return ""
         return logAdapter.buffer
     }
-
 }
