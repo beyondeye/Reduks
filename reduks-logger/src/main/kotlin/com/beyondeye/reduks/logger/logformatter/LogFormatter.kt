@@ -66,8 +66,8 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
     fun json(objName: String, jsonMessage: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
         printer.json(objName, jsonMessage,logLevel, tagSuffix)
     }
-    fun getPrettyPrintedJson(objName: String, jsonMessage: String) {
-        printer.getPrettyPrintedJson(objName,jsonMessage);
+    fun getPrettyPrintedJson(objName: String, jsonMessage: String):String {
+        return printer.getPrettyPrintedJson(objName,jsonMessage)
     }
 
     fun getLogAsString(): String  {

@@ -7,6 +7,7 @@ import com.beyondeye.reduks.Store
 import com.beyondeye.reduks.logger.logformatter.LogFormatter
 import com.beyondeye.zjsonpatch.JsonDiff
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 
 /**
@@ -129,18 +130,26 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
     private fun diffLogger(prevStateJsonStr: String, nextStateJsonStr: String, collapsed: Boolean, diffStateLogLevel: Int) {
         val prevStateJson=jsonParser.parse(prevStateJsonStr)
         val nextStateJson=jsonParser.parse(nextStateJsonStr)
-        val stateDiff=jsonDiffer.asJson(prevStateJson,nextStateJson)
+        val stateDiff_ = jsonDiffer.asJson(prevStateJson, nextStateJson)
+        val stateDiff: JsonElement =
+                if (stateDiff_.size() == 1) //single element diff: print it, not the array
+                {
+                    stateDiff_.get(0)
+                } else {
+                    stateDiff_
+                }
         if (collapsed) {
-            logger.groupCollapsed("diff", diffStateLogLevel)
+            logger.groupCollapsed("state diff"+stateDiff.toString(), diffStateLogLevel)
         } else {
-            logger.group("diff", diffStateLogLevel)
+            val stateDiffPretty=logger.getPrettyPrintedJson("diff",stateDiff.toString())
+            logger.group(stateDiffPretty, diffStateLogLevel)
         }
 
-        if (stateDiff.size()>2) {
-            logger.json("",stateDiff.toString(),diffStateLogLevel)
-        } else {
-            logger.log("—— no diff ——", diffStateLogLevel)
-        }
+//        if (stateDiff.size()>2) {
+//            logger.json("",stateDiff.toString(),diffStateLogLevel)
+//        } else {
+//            logger.log("—— no diff ——", diffStateLogLevel)
+//        }
 
         logger.groupEnd()
     }
