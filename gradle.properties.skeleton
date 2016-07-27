@@ -21,6 +21,3 @@ AWS_SECRET_KEY=<YOUR SECRET KEY>
 
 #enable kotlin incremental compilation in gradle
 #kotlin.incremental=true
-
-GROUP=com.plensee.libs
-POM_DESCRIPTION=REDUKS: reduxjs for Kotlin and Android

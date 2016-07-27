@@ -4,7 +4,7 @@ apply plugin: 'maven'
 install {
     repositories.mavenInstaller {
         pom.project {
-            group GROUP
+            group GROUP_MAVEN_PUSH
             artifactId POM_ARTIFACT_ID
             version VERSION_NAME
         }
@@ -37,7 +37,7 @@ afterEvaluate { project ->
                 repository(url: "file:///" + getOutputDir()) //can also be used to copy to local file
                 //repository(url: getDestUrl()) // for copying directly to S3
 
-                pom.groupId = GROUP
+                pom.groupId = GROUP_MAVEN_PUSH
                 pom.artifactId = POM_ARTIFACT_ID
                 pom.version = VERSION_NAME
 
