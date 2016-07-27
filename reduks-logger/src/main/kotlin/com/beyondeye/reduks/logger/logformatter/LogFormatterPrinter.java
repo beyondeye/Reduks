@@ -185,36 +185,45 @@ class LogFormatterPrinter {
      * @param json the json content
      */
     public void json(String objName,String json,int logLevel,String tagSuffix) {
-        if (Helper.isEmpty(json)) {
-            d("Empty/Null json content");
+        String formattedJson=getPrettyPrintedJson(objName,json);
+        if(formattedJson==null) {
+            e(jsonWithObjName(objName,"<Invalid Json>"));
+        }
+        else if (formattedJson.length()==0) {
+            d(jsonWithObjName(objName,"<Empty json content>"));
             return;
+        }
+        else {
+            log(formattedJson, logLevel, null);
+        }
+    }
+    public String getPrettyPrintedJson(String objName,String json) {
+        if (Helper.isEmpty(json)) {
+            return "";
         }
         try {
             json = json.trim();
             if(isCollapsed()) { //no json pretty printing if collapsed
-                log(jsonWithObjName(objName,json),logLevel,null);
-                return;
+                return jsonWithObjName(objName,json);
             }
             if (json.startsWith("{")) {
                 JSONObject jsonObject = new JSONObject(json);
-                String formatted_json = jsonObject.toString(JSON_INDENT);
-                log(jsonWithObjName(objName,formatted_json),logLevel,null);
-                return;
+                return jsonWithObjName(objName,jsonObject.toString(JSON_INDENT));
             }
             if (json.startsWith("[")) {
                 JSONArray jsonArray = new JSONArray(json);
-                String formatted_json = jsonArray.toString(JSON_INDENT);
-                log(jsonWithObjName(objName,formatted_json),logLevel,null);
-                return;
+                return jsonWithObjName(objName,jsonArray.toString(JSON_INDENT));
             }
-            e("Invalid Json");
         } catch (JSONException e) {
-            e("Invalid Json");
+            return  null;
         }
+        return null;
     }
     //TODO use stringbuilder here?
     String jsonWithObjName(String objName, String json) {
-        return objName+"="+json;
+        if(objName!=null&&objName.length()>0)
+            return objName+"="+json;
+        else return json;
     }
 
     public synchronized void log(String message,int loglevel, String tagSuffix) {
