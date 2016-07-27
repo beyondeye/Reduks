@@ -189,9 +189,7 @@ class LogFormatterPrinter {
         boolean isShowThreadInfo = settings.isShowThreadInfo();
         boolean isShowCallStack=settings.isShowCallStack();
         logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo,isShowCallStack);
-        if (isShowCallStack && methodCount > 0) {
-            logDivider(loglevel, tagSuffix);
-        }
+
         logMessageBodyChunked(loglevel, tagSuffix, message);
     }
 
@@ -219,9 +217,6 @@ class LogFormatterPrinter {
             boolean isShowThreadInfo = settings.isShowThreadInfo();
             boolean isShowCallStack=settings.isShowCallStack();
             logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
-            if (isShowCallStack&& methodCount > 0) {
-                logDivider(loglevel, tagSuffix);
-            }
         }
         msgbuffer.append(message);
     }
@@ -264,11 +259,12 @@ class LogFormatterPrinter {
         return settings.isBorderEnabled() ? HORIZONTAL_DOUBLE_LINE_STR : "";
     }
     @SuppressWarnings("StringBufferReplaceableByString")
-    private void logHeaderContent(int logType, String tagSuffix, int methodCount,boolean isShowThreadInfo,boolean isShowCallStack) {
+    private void logHeaderContent(int logLevel, String tagSuffix, int methodCount,boolean isShowThreadInfo,boolean isShowCallStack) {
+        if(!(isShowCallStack||isShowThreadInfo)) return; //return early if nothing to show
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         if (isShowThreadInfo) {
-            logChunk(logType, tagSuffix, HorizontalDoubleLine() + "Thread: " + Thread.currentThread().getName());
-            logDivider(logType, tagSuffix);
+            logChunk(logLevel, tagSuffix, HorizontalDoubleLine() + "Thread: " + Thread.currentThread().getName());
+            logDivider(logLevel, tagSuffix);
         }
         if(!isShowCallStack) return;
         String level = "";
@@ -298,7 +294,10 @@ class LogFormatterPrinter {
                     .append(trace[stackIndex].getLineNumber())
                     .append(")");
             level += "   ";
-            logChunk(logType, tagSuffix, builder.toString());
+            logChunk(logLevel, tagSuffix, builder.toString());
+        }
+        if (methodCount > 0) {
+            logDivider(logLevel, tagSuffix);
         }
     }
 
