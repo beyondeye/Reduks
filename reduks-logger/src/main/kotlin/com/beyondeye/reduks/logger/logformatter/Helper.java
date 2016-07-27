@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.UnknownHostException;
 
+//TODO convert to kotlin and rename to some more meaningful name
 /**
  * Helper util class to be used instead of Android methods to avoid direct dependency and enable
  * unit testing on Android projects.
