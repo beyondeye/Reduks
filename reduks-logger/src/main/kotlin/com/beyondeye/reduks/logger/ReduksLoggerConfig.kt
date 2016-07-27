@@ -32,7 +32,14 @@ data class ReduksLoggerConfig<S>(
          * parameter logElement must be one of values defined in [LogElement]
          * return null if you don't to print log for the specificied input parameters combination
          */
-        val level:(logElement:Int,Action:Any,prevState:S,nextState:S?,error:Throwable?)->Int?={le,a,ps,ns,e-> LogLevel.INFO },
+        val actionLevel:(logElement:Int,Action:Any,prevState:S,nextState:S?,error:Throwable?)->Int?=
+        {le,a,ps,ns,e-> LogLevel.INFO },
+        val errorLevel:(logElement:Int,Action:Any,prevState:S,nextState:S?,error:Throwable?)->Int?=
+        {le,a,ps,ns,e-> LogLevel.INFO },
+        val prevStateLevel:(logElement:Int,Action:Any,prevState:S,nextState:S?,error:Throwable?)->Int?=
+        {le,a,ps,ns,e-> LogLevel.INFO },
+        val nextStateLevel:(logElement:Int,Action:Any,prevState:S,nextState:S?,error:Throwable?)->Int?=
+        {le,a,ps,ns,e-> LogLevel.INFO },
         /**
          *  Returns `true` if current log entry should be collapsed
          */

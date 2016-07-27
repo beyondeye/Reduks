@@ -81,32 +81,31 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                 logger.log(title)
             }
 
-            val actionLevel = config.level(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
+            val actionLevel = config.actionLevel(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
             if (actionLevel != null) {
                 logger.json("",actionToJson(formattedAction), actionLevel)
             }
 
-            val prevStateLevel = config.level(LogElement.PREVSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action and prevState
-            val errorLevel = config.level(LogElement.ERROR, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action, error, prevState
-            val nextStateLevel = config.level(LogElement.NEXTSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action nextState
-
+            val prevStateLevel = config.prevStateLevel(LogElement.PREVSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action and prevState
             val prevStateJson=stateToJson(curEntry.prevState)
             if (prevStateLevel != null) {
                 logger.json("prev state", prevStateJson, prevStateLevel)
             }
 
-
+            val errorLevel = config.errorLevel(LogElement.ERROR, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action, error, prevState
             if (curEntry.error != null && errorLevel != null) {
                 logger.log("error" , errorLevel,null, curEntry.error)
             }
 
+            val nextStateLevel = config.nextStateLevel(LogElement.NEXTSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action nextState
             val nextStateJson:String=stateToJson(nextState)
             if (nextStateLevel != null) {
                 logger.json("next state", nextStateJson, nextStateLevel)
             }
 
+            val diffStateLevel=LogLevel.INFO
             if (config.logStateDiff) {
-                diffLogger(prevStateJson, nextStateJson, isCollapsed)
+                diffLogger(prevStateJson, nextStateJson, isCollapsed,diffStateLevel)
             }
 
             try {
@@ -127,20 +126,20 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         return gsonInstance.toJson(s, stateType.type)
     }
 
-    private fun diffLogger(prevStateJsonStr: String, nextStateJsonStr: String, collapsed: Boolean) {
+    private fun diffLogger(prevStateJsonStr: String, nextStateJsonStr: String, collapsed: Boolean, diffStateLogLevel: Int) {
         val prevStateJson=jsonParser.parse(prevStateJsonStr)
         val nextStateJson=jsonParser.parse(nextStateJsonStr)
         val stateDiff=jsonDiffer.asJson(prevStateJson,nextStateJson)
         if (collapsed) {
-            logger.groupCollapsed("diff")
+            logger.groupCollapsed("diff", diffStateLogLevel)
         } else {
-            logger.group("diff")
+            logger.group("diff", diffStateLogLevel)
         }
 
         if (stateDiff.size()>2) {
-            logger.json("",stateDiff.toString())
+            logger.json("",stateDiff.toString(),diffStateLogLevel)
         } else {
-            logger.log("—— no diff ——")
+            logger.log("—— no diff ——", diffStateLogLevel)
         }
 
         logger.groupEnd()
