@@ -25,7 +25,7 @@ allprojects {
     ext {
         VERSION_NAME='1.5.3-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
         POM_NAME='Reduks: Reduxjs for Kotlin+Android'
-        GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push:
+        GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
         sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
         targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
         junit_version = '4.12'
