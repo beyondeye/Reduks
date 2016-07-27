@@ -68,7 +68,12 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
             val tookstr = took.toString().padStart(7) //took.toFixed(2)
             val durationstr = if (config.logActionDuration) "(in $tookstr ms)" else ""
             val actiontypestr = config.actionTypeExtractor(formattedAction)
-            val title = "action: $actiontypestr $durationstr "
+            val title = "action: $actiontypestr $durationstr = "
+
+            val actionLevel = config.level(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
+            if (actionLevel != null) {
+                logger.json("",actionToJson(formattedAction), actionLevel)
+            }
 
             // Render
             try {
@@ -81,8 +86,9 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                 logger.log(title)
             }
 
+
+
             val prevStateLevel = config.level(LogElement.PREVSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action and prevState
-            val actionLevel = config.level(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
             val errorLevel = config.level(LogElement.ERROR, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action, error, prevState
             val nextStateLevel = config.level(LogElement.NEXTSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action nextState
 
@@ -91,10 +97,6 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                 logger.json("prev state", prevStateJson, prevStateLevel)
             }
 
-            if (actionLevel != null) {
-                val formattedActionJson=actionToJson(formattedAction)
-                logger.json("action ",formattedActionJson, actionLevel)
-            }
 
             if (curEntry.error != null && errorLevel != null) {
                 logger.log("error" , errorLevel,null, curEntry.error)
