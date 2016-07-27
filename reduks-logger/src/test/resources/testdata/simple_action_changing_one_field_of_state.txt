@@ -1,5 +1,5 @@
-I/_RDKS_:╔════════════════════
-I/_RDKS_:║ action: TestAction  =
+﻿I/_RDKS_:╔════════════════════
+I/_RDKS_:║ action: TestAction  = 
 I/_RDKS_:╟────────────────────
 I/_RDKS_:║ {
 I/_RDKS_:║   "type": "reduce component1"
