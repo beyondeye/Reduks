@@ -349,7 +349,8 @@ class LogFormatterPrinter {
     }
 
     private void logContent(int logLevel, String tagSuffix, String chunk) {
-        String[] lines = chunk.split(LINE_SEPARATOR_CHAR);
+//        String[] lines = chunk.split(LINE_SEPARATOR_CHAR);
+        String[] lines = chunk.split("\n");
         for (String line : lines) {
             logChunk(logLevel, tagSuffix, HorizontalDoubleLine() + line);
         }

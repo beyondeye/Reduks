@@ -91,8 +91,8 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                 logger.json("prev state", prevStateJson, prevStateLevel)
             }
 
-            val formattedActionJson=actionToJson(formattedAction)
             if (actionLevel != null) {
+                val formattedActionJson=actionToJson(formattedAction)
                 logger.json("action ",formattedActionJson, actionLevel)
             }
 
