@@ -42,17 +42,16 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         } else {
             returnedValue = next.dispatch(action)
         }
-        logEntry.took = Math.round((System.nanoTime() - logEntry.started) / 10.0) / 100.0 //in ms rounded to max two decimals
+        logEntry.took = nano2ms(logEntry.started,System.nanoTime())
         logEntry.nextState = config.stateTransformer(store.state)
         //check if diff is activated
-        logEntry.diffActivated = if (config.logStateDiff && config.logStateDiffFilter != null) config.logStateDiffFilter.invoke(logEntry.nextState!!, action) else config.logStateDiff
+        logEntry.diffActivated = if (config.logStateDiff && config.logStateDiffFilter != null) config.logStateDiffFilter!!.invoke(logEntry.nextState!!, action) else config.logStateDiff
         printBuffer(logBuffer)
         logBuffer.clear()
 
         if (logEntry.error != null) throw logEntry.error!!
         return returnedValue
     }
-
     private fun printBuffer(buffer: List<LogEntry<S>>) {
         buffer.forEachIndexed { key, curEntry ->
             var took = curEntry.took
@@ -60,7 +59,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
             val nextEntry: LogEntry<S>? = if (key < buffer.size) buffer[key + 1] else null
             if (nextEntry != null) {
                 nextState = nextEntry.prevState
-                took = Math.round((nextEntry.started - curEntry.started) / 10.0) / 100.0
+                took = nano2ms(curEntry.started,nextEntry.started)
             }
 
             //message
@@ -149,5 +148,9 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         }
 
         logger.groupEnd()
+    }
+    companion object {
+        //TODO move to Helper class
+        fun nano2ms(start:Long,end:Long):Double = Math.round((end - start) / 10000.0) / 100.0 //in ms rounded to max two decimals
     }
 }
