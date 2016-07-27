@@ -38,9 +38,9 @@ class LogFormatterPrinter {
     private static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER;
 
     /**
-     * single level group blanks
+     * single level indent blanks
      */
-    private static final String SINGLE_GROUP_BLANKS = "  ";
+    private static final String SINGLE_INDENT_BLANKS = "  ";
 
     /**
      * tag is used for the Log, the name is a little different
@@ -48,14 +48,14 @@ class LogFormatterPrinter {
      */
     private String tag;
 
-    /**
-     * Localize single tag and method count and groupBlanks for each thread
-     */
-//    private final ThreadLocal<String> localTag = new ThreadLocal<String>();
+
     private int localMethodCount;
-    private String groupBlanks = "";
-    private int  collapsedLevel = 0;
-    private int groupedLevel = 0;
+    private String indentBlanks = "";
+    private int collapsed = 0;
+    private int grouped = 0;
+    private int groupHeaderLogLevel=-1;
+    private String groupHeaderTagSuffix=null;
+    private StringBuilder collapsedMsgBuffer =new StringBuilder();
 
     /**
      * It is used to determine log settings such as method count, thread info visibility
@@ -90,42 +90,48 @@ class LogFormatterPrinter {
     }
 
     public void groupStart() {
-        groupBlanks += SINGLE_GROUP_BLANKS;
-        ++groupedLevel;
-    }
-    
-    public void groupEnd() {
-        int newlength = groupBlanks.length() - SINGLE_GROUP_BLANKS.length();
-        if (newlength >= 0) {
-            groupBlanks= groupBlanks.substring(0, newlength);
-        }
-        //remove one level of collapse
-        if (collapsedLevel>0) { //closed a collapsed group
-            if(--collapsedLevel==0) { //closed all collapse level: empty buffer
-                flushCollapsedBuffer();
-            }
-        }
-        //remove one level of group
-        if (groupedLevel>0) { //closed a collapsed group
-            if(--groupedLevel==0) { //closed all collapse level: empty buffer
-                flushGroup();
-            }
-        }
-
-    }
-
-
-    public boolean isInGroup() {
-        return groupedLevel>0;
-    }
-
-    public boolean isCollapsed() {
-        return collapsedLevel>0;
+        ++grouped;
     }
     public void groupCollapsedStart() {
         groupStart();
-        ++collapsedLevel;
+        ++collapsed;
     }
+    public void increaseIndent() {
+        indentBlanks += SINGLE_INDENT_BLANKS;
+    }
+    private void decreaseIndent() {
+        int newlength = indentBlanks.length() - SINGLE_INDENT_BLANKS.length();
+        if (newlength >= 0) {
+            indentBlanks = indentBlanks.substring(0, newlength);
+        }
+    }
+
+    public void groupEnd() {
+        //remove one level of collapse
+        if (collapsed >0) { //closed a collapsed group
+            if(--collapsed ==0) { //closed all collapse level: empty buffer
+                flushCollapsedBuffer(); //CALL BEFORE flushGroup()!
+            }
+        }
+        //remove one level of group
+        if (grouped >0) { //closed a collapsed group
+            if(--grouped ==0) { //closed all collapse level: empty buffer
+                flushGroup();
+            }
+        }
+        decreaseIndent();
+    }
+
+
+
+    public boolean isInGroup() {
+        return grouped >0;
+    }
+
+    public boolean isCollapsed() {
+        return collapsed >0;
+    }
+
 
 
     public void selLocalMethodCount(int methodCount) {
@@ -193,19 +199,24 @@ class LogFormatterPrinter {
         if (!settings.isLogEnabled()) {
             return;
         }
-        if (isCollapsed()) log_collapsed(message,loglevel,tagSuffix);
-
-        int methodCount = getMethodCount();
-        logTopBorder(loglevel, tagSuffix);
-
-        if(!isInGroup()) { //don't log header content if in group, log header only for group header, but log logDivider
-            logHeaderContent(loglevel, tagSuffix, methodCount,  settings.isShowThreadInfo(),settings.isShowCallStack());
+        boolean isGroupHeader=isInGroup()&& groupHeaderLogLevel<0;
+        if(isGroupHeader) {
+            groupHeaderTagSuffix =tagSuffix;
+            groupHeaderLogLevel=loglevel;
+        }
+        if(!isInGroup()||isGroupHeader) {
+            logTopBorder(loglevel, tagSuffix);
+            logHeaderContent(loglevel, tagSuffix, getMethodCount(), settings.isShowThreadInfo(), settings.isShowCallStack());
         } else {
-            logDivider(loglevel,tagSuffix);
+            if(!isCollapsed()) logDivider(loglevel,tagSuffix);
+
         }
 
-
-        logMessageBodyChunked(loglevel, tagSuffix, message);
+        if(isCollapsed()) {
+            collapsedMsgBuffer.append(message);
+        } else {
+            logMessageBodyChunked(loglevel, tagSuffix, message);
+        }
         if(!isInGroup()) {
             logBottomBorder(loglevel, tagSuffix);
         }
@@ -221,33 +232,15 @@ class LogFormatterPrinter {
         return message;
     }
 
-    private String msgBufferTagSuffix ="";
-    private int    msgBufferLogLevel=-1;
-    private StringBuilder msgbuffer=new StringBuilder();
-    //TODO remove synchronized from here and put on reduks_logger printBuffer
-    private void log_collapsed(String message,int loglevel, String tagSuffix) {
-        boolean isFirstLineInCollapsedGroup=msgbuffer.length()==0;
-        int methodCount = getMethodCount();
-        if(isFirstLineInCollapsedGroup) {
-            msgBufferTagSuffix =tagSuffix;
-            msgBufferLogLevel=loglevel;
-            logTopBorder(loglevel, tagSuffix);
-            logHeaderContent(loglevel, tagSuffix, methodCount, settings.isShowThreadInfo(), settings.isShowCallStack());
-        }
-        msgbuffer.append(message);
-    }
     private void flushCollapsedBuffer() {
-        logMessageBodyChunked(msgBufferLogLevel, msgBufferTagSuffix, msgbuffer.toString());
-        logBottomBorder(msgBufferLogLevel, msgBufferTagSuffix);
-        msgbuffer.setLength(0); //empty buffer
-        msgBufferTagSuffix="";
-        msgBufferLogLevel=-1;
+        logMessageBodyChunked(groupHeaderLogLevel, groupHeaderTagSuffix, collapsedMsgBuffer.toString());
+        collapsedMsgBuffer.setLength(0); //empty buffer
+
     }
     private void flushGroup() {
-        //TODO use loglevel and tagsuffix from group header
-        int groupLogLevel=LogLevel.INFO;
-        String groupTagSuffix=null;
-        logBottomBorder(groupLogLevel, groupTagSuffix);
+        logBottomBorder(groupHeaderLogLevel, groupHeaderTagSuffix);
+        groupHeaderLogLevel=-1;
+        groupHeaderTagSuffix=null;
     }
 
     private void logMessageBodyChunked(int loglevel, String tagSuffix, String message) {
@@ -374,7 +367,7 @@ class LogFormatterPrinter {
 
     private String formatTag(String suffixTag) {
         if (!Helper.isEmpty(suffixTag) && !Helper.equals(this.tag, suffixTag)) {
-            return this.tag + "-" + suffixTag + groupBlanks;
+            return this.tag + "-" + suffixTag + indentBlanks;
         }
         return this.tag;
     }

@@ -35,8 +35,9 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      * and call [log] with the specified argument
      */
     fun group(groupHeaderMessage: String, logLevel: Int= LogLevel.INFO,tagSuffix: String?=null) {
+        printer.groupStart()
         printer.log(groupHeaderMessage,logLevel, tagSuffix) //group header
-        printer.groupStart() //start indenting AFTER header
+        printer.increaseIndent() //increase indent AFTER header
     }
 
     /**
@@ -44,8 +45,9 @@ class LogFormatter(tag: String, settings: LogFormatterSettings) {
      * and call [log] with the specified argument
      */
     fun groupCollapsed(groupHeaderMessage: String, logLevel: Int=LogLevel.INFO,tagSuffix: String?=null) {
+        printer.groupCollapsedStart()
         printer.log(groupHeaderMessage,logLevel, tagSuffix)
-        printer.groupCollapsedStart() //start indenting and collapsing AFTER header
+        printer.increaseIndent() //increase indent AFTER header
     }
 
     fun groupEnd() {
