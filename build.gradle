@@ -60,7 +60,7 @@ subprojects {
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
     apply plugin: 'com.github.dcendents.android-maven'
-    group = 'com.github.beyondeye.reduks' //.reduks is appended automatically by jitpack
+    group = 'com.github.beyondeye.reduks' //required by jitpack
 
     android {
         compileSdkVersion compileSdkVersion_
