@@ -70,11 +70,6 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
             val actiontypestr = config.actionTypeExtractor(formattedAction)
             val title = "action: $actiontypestr $durationstr = "
 
-            val actionLevel = config.level(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
-            if (actionLevel != null) {
-                logger.json("",actionToJson(formattedAction), actionLevel)
-            }
-
             // Render
             try {
                 if (isCollapsed) {
@@ -86,7 +81,10 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                 logger.log(title)
             }
 
-
+            val actionLevel = config.level(LogElement.ACTION, formattedAction, curEntry.prevState, nextState, curEntry.error) ///use reduced info?: action
+            if (actionLevel != null) {
+                logger.json("",actionToJson(formattedAction), actionLevel)
+            }
 
             val prevStateLevel = config.level(LogElement.PREVSTATE, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action and prevState
             val errorLevel = config.level(LogElement.ERROR, formattedAction, curEntry.prevState, nextState, curEntry.error) //use reduced info?: action, error, prevState
