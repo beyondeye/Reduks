@@ -39,7 +39,7 @@ class ReduksLoggerTest {
     }
 
     @Test
-    fun test_logoutput_for_simple_action_changing_one_field_of_state() {
+    fun test_simple_action_changing_one_field_of_state() {
         val reducer = Reducer<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
@@ -52,13 +52,26 @@ class ReduksLoggerTest {
         }
 
         val store = SimpleStore(TestState(), reducer)
-        val loggerConfig=ReduksLoggerConfig<TestState>(reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true))
+        val loggerConfig=ReduksLoggerConfig<TestState>(reduksLoggerTag = "_RDKS_",formatterSettings = LogFormatterSettings(isLogToString = true,borderDividerLength = 20))
         val loggerMiddleware=ReduksLogger<TestState>(loggerConfig)
         store.applyMiddleware(loggerMiddleware)
 
         store.dispatch(TestAction(type = "reduce component1"))
-        val logstr=loggerMiddleware.getLogAsString()
 
-//        Assertions.assertThat(store.state.message).isEqualTo("reduced")
+        val expectedFilename="simple_action_changing_one_field_of_state"
+        val logstr=loggerMiddleware.getLogAsString()
+        assertTextEqualToFileContent(logstr, expectedFilename)
+    }
+
+    private fun assertTextEqualToFileContent(text: String, expectedTextFilename: String) {
+        val logstr = text.filterNot { it == '\r' }
+        val expected = getTextFromTestDataTextFile(expectedTextFilename);
+        assertThat(logstr).isEqualTo(expected)
+    }
+
+    private fun getTextFromTestDataTextFile(fileName: String): String {
+        val path = "/testdata/$fileName.txt"
+        val resourceAsStream = ReduksLoggerTest::class.java.getResourceAsStream(path)
+        return IOUtils.toString(resourceAsStream, "UTF-8").filterNot { it=='\r' || it=='\uFEFF' }  //clean up text read, from spurious chars
     }
 }
