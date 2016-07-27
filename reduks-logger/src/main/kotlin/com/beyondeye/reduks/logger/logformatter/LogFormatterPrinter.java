@@ -54,7 +54,8 @@ class LogFormatterPrinter {
 //    private final ThreadLocal<String> localTag = new ThreadLocal<String>();
     private int localMethodCount;
     private String groupBlanks = "";
-    private String  groupCollapsed = "";
+    private int  collapsedLevel = 0;
+    private int groupedLevel = 0;
 
     /**
      * It is used to determine log settings such as method count, thread info visibility
@@ -90,6 +91,7 @@ class LogFormatterPrinter {
 
     public void groupStart() {
         groupBlanks += SINGLE_GROUP_BLANKS;
+        ++groupedLevel;
     }
     
     public void groupEnd() {
@@ -98,22 +100,31 @@ class LogFormatterPrinter {
             groupBlanks= groupBlanks.substring(0, newlength);
         }
         //remove one level of collapse
-        int newcollapsed = groupCollapsed.length() -1;
-        if (newcollapsed >= 0) { //closed a collapsed group
-            groupCollapsed = groupCollapsed.substring(0, newcollapsed);
-            if(newcollapsed==0) { //closed all collapse level: empty buffer
+        if (collapsedLevel>0) { //closed a collapsed group
+            if(--collapsedLevel==0) { //closed all collapse level: empty buffer
                 flushCollapsedBuffer();
             }
         }
+        //remove one level of group
+        if (groupedLevel>0) { //closed a collapsed group
+            if(--groupedLevel==0) { //closed all collapse level: empty buffer
+                flushGroup();
+            }
+        }
+
     }
 
 
+    public boolean isInGroup() {
+        return groupedLevel>0;
+    }
+
     public boolean isCollapsed() {
-        return groupCollapsed.length()>0;
+        return collapsedLevel>0;
     }
     public void groupCollapsedStart() {
         groupStart();
-        groupCollapsed +='c';
+        ++collapsedLevel;
     }
 
 
@@ -186,11 +197,18 @@ class LogFormatterPrinter {
 
         int methodCount = getMethodCount();
         logTopBorder(loglevel, tagSuffix);
-        boolean isShowThreadInfo = settings.isShowThreadInfo();
-        boolean isShowCallStack=settings.isShowCallStack();
-        logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo,isShowCallStack);
+
+        if(!isInGroup()) { //don't log header content if in group, log header only for group header, but log logDivider
+            logHeaderContent(loglevel, tagSuffix, methodCount,  settings.isShowThreadInfo(),settings.isShowCallStack());
+        } else {
+            logDivider(loglevel,tagSuffix);
+        }
+
 
         logMessageBodyChunked(loglevel, tagSuffix, message);
+        if(!isInGroup()) {
+            logBottomBorder(loglevel, tagSuffix);
+        }
     }
 
     public String addFormattedThrowableToMessage(String message, Throwable throwable) {
@@ -214,17 +232,22 @@ class LogFormatterPrinter {
             msgBufferTagSuffix =tagSuffix;
             msgBufferLogLevel=loglevel;
             logTopBorder(loglevel, tagSuffix);
-            boolean isShowThreadInfo = settings.isShowThreadInfo();
-            boolean isShowCallStack=settings.isShowCallStack();
-            logHeaderContent(loglevel, tagSuffix, methodCount, isShowThreadInfo, isShowCallStack);
+            logHeaderContent(loglevel, tagSuffix, methodCount, settings.isShowThreadInfo(), settings.isShowCallStack());
         }
         msgbuffer.append(message);
     }
     private void flushCollapsedBuffer() {
         logMessageBodyChunked(msgBufferLogLevel, msgBufferTagSuffix, msgbuffer.toString());
+        logBottomBorder(msgBufferLogLevel, msgBufferTagSuffix);
         msgbuffer.setLength(0); //empty buffer
         msgBufferTagSuffix="";
         msgBufferLogLevel=-1;
+    }
+    private void flushGroup() {
+        //TODO use loglevel and tagsuffix from group header
+        int groupLogLevel=LogLevel.INFO;
+        String groupTagSuffix=null;
+        logBottomBorder(groupLogLevel, groupTagSuffix);
     }
 
     private void logMessageBodyChunked(int loglevel, String tagSuffix, String message) {
@@ -234,7 +257,6 @@ class LogFormatterPrinter {
         int CHUNK_SIZE=settings.getLogAdapter().max_message_size();
         if (length <= CHUNK_SIZE) {
             logContent(loglevel, tagSuffix, message);
-            logBottomBorder(loglevel, tagSuffix);
             return;
         }
 
@@ -243,7 +265,7 @@ class LogFormatterPrinter {
             //create a new String with system's default charset (which is UTF-8 for Android)
             logContent(loglevel, tagSuffix, new String(bytes, i, count));
         }
-        logBottomBorder(loglevel, tagSuffix);
+
     }
 
     public void resetSettings() {
@@ -251,9 +273,9 @@ class LogFormatterPrinter {
     }
 
 
-    private void logTopBorder(int logType, String tagSuffix) {
+    private void logTopBorder(int logLevel, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tagSuffix, TOP_BORDER);
+        logChunk(logLevel, tagSuffix, TOP_BORDER);
     }
     private String HorizontalDoubleLine() {
         return settings.isBorderEnabled() ? HORIZONTAL_DOUBLE_LINE_STR : "";
@@ -301,27 +323,27 @@ class LogFormatterPrinter {
         }
     }
 
-    private void logBottomBorder(int logType, String tagSuffix) {
+    private void logBottomBorder(int logLevel, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tagSuffix, BOTTOM_BORDER);
+        logChunk(logLevel, tagSuffix, BOTTOM_BORDER);
     }
 
-    private void logDivider(int logType, String tagSuffix) {
+    private void logDivider(int logLevel, String tagSuffix) {
         if (!settings.isBorderEnabled()) return;
-        logChunk(logType, tagSuffix, MIDDLE_BORDER);
+        logChunk(logLevel, tagSuffix, MIDDLE_BORDER);
     }
 
-    private void logContent(int logType, String tagSuffix, String chunk) {
+    private void logContent(int logLevel, String tagSuffix, String chunk) {
         String[] lines = chunk.split(LINE_SEPARATOR_CHAR);
         for (String line : lines) {
-            logChunk(logType, tagSuffix, HorizontalDoubleLine() + line);
+            logChunk(logLevel, tagSuffix, HorizontalDoubleLine() + line);
         }
     }
 
 
-    private void logChunk(int logType, String tagSuffix, String chunk) {
+    private void logChunk(int logLevel, String tagSuffix, String chunk) {
         String finalTag = formatTag(tagSuffix);
-        switch (logType) {
+        switch (logLevel) {
             case LogLevel.ERROR:
                 settings.getLogAdapter().e(finalTag, chunk);
                 break;
