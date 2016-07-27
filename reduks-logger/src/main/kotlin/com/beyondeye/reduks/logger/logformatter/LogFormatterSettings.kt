@@ -2,6 +2,7 @@ package com.beyondeye.reduks.logger.logformatter
 
 data class LogFormatterSettings(
         var methodCount:Int = 2,
+        var borderDividerLength:Int=90,
         var isShowThreadInfo:Boolean = false,
         var isShowCallStack:Boolean = false,
         var methodOffset:Int = 0,
@@ -64,6 +65,7 @@ data class LogFormatterSettings(
 
     fun reset() {
         methodCount = 2
+        borderDividerLength =90
         methodOffset = 0
         isShowThreadInfo = false
         isShowCallStack = false

@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 class LogFormatterPrinter {
 
-    private static final String DEFAULT_TAG = "PRETTYLOGGER";
+    private static final String DEFAULT_TAG = "RDKS";
 
 
     /**
@@ -31,11 +31,11 @@ class LogFormatterPrinter {
     private static final char MIDDLE_CORNER = '╟';
     private static final char HORIZONTAL_DOUBLE_LINE = '║';
     private static final String HORIZONTAL_DOUBLE_LINE_STR = HORIZONTAL_DOUBLE_LINE+" ";
-    private static final String DOUBLE_DIVIDER = "════════════════════════════════════════════";
-    private static final String SINGLE_DIVIDER = "────────────────────────────────────────────";
-    private static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
-    private static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
-    private static final String MIDDLE_BORDER = MIDDLE_CORNER + SINGLE_DIVIDER + SINGLE_DIVIDER;
+    private static final String DOUBLE_DIVIDER_CHAR = "═";
+    private static final String SINGLE_DIVIDER_CHAR = "─";
+    private String TOP_BORDER;
+    private String BOTTOM_BORDER;
+    private String MIDDLE_BORDER;
 
     /**
      * single level indent blanks
@@ -68,6 +68,28 @@ class LogFormatterPrinter {
         else
             this.settings=new LogFormatterSettings();
         setTag(DEFAULT_TAG);
+        initDividerString();
+    }
+
+    private void initDividerString() {
+        int dl=settings.getBorderDividerLength();
+        StringBuilder sb=new StringBuilder();
+        //TOP_BORDER
+        sb.append(TOP_LEFT_CORNER);
+        for(int i=0;i<dl;++i) sb.append(DOUBLE_DIVIDER_CHAR);
+        TOP_BORDER=sb.toString();
+        sb.setLength(0);
+
+        //BOTTOM_BORDER
+        sb.append(BOTTOM_LEFT_CORNER);
+        for(int i=0;i<dl;++i) sb.append(DOUBLE_DIVIDER_CHAR);
+        BOTTOM_BORDER=sb.toString();
+        sb.setLength(0);
+
+        //MIDDLE BORDER
+        sb.append(MIDDLE_CORNER);
+        for(int i=0;i<dl;++i) sb.append(SINGLE_DIVIDER_CHAR);
+        MIDDLE_BORDER=sb.toString();
     }
 
     /**
