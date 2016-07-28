@@ -27,6 +27,9 @@ AWS_SECRET_KEY=<YOUR SECRET KEY>
 # *IMPORTANT* changing library versions here will not always be automatically detected by gradle/android studio
 # you will probably have to manually force a gradle sync, for example by editing your build.gradle
 
+#gradle plugins
+dcendents_maven_plugin_version=1.4.1
+
 #general libs
 kotlin_version=1.0.3
 junit_version=4.12
