@@ -49,6 +49,7 @@ compile 'com.github.beyondeye.reduks:reduks-devtools:1.5.2'
 
 #An introduction to Reduks
 Reduks (similarly to Reduxjs) is basically a simplified Reactive Functional Programming approach for implementing UI for Android
+
 A very good source of material for understanding redux/reduks is [the official reduxjs docs](http://redux.js.org/), but I will try to describe here the main principles, and how they blend with Android and Kotlin
 
 Reduks main components are:
@@ -59,7 +60,8 @@ Reduks main components are:
 * __Middlewares__: additional pluggable layers (functions) on top of Reducers for implementing logic for responding to the stream of events (Actions) or even modify them before they reach the reducers that implement the State change logic.
  Middlewares (together with event change subscribers) have also the main purpose to allow implementing 'side effects', that are prohibited in reducers, that must be pure functions.
 
-There is also an additional component that is called the __Store__ but it is basically nothing more that the implementation details of the "glue" used to connect all the other components
+There is also an additional component that is called the __Store__ but it is basically nothing more than the implementation details of the "glue" used to connect all the other components
+
 Its responsibilities are 
 
 * Allows access to the current state
@@ -68,11 +70,12 @@ Its responsibilities are
 
 This is Reduks in brief. let us now discuss it more in detail
 
-##the State
-The State is the full information that uniquely identify the current state of the application (typically in Android, the state of the current Activity).
+##The State
+The state is the set of data that uniquely identify the current state of the application. 
+Typically in Android, this is the state of the current Activity.
 
-An important property of the State data is that it is __immutable__, or in other words it is prohibited to update the state directly. The only way to mutate the 
-state is to send an action via the Store dispatch method, to be processed by the registered state reducers(more on this later), that will generate a new updated state. The old state must be never modified.
+An important requirement for the data inside the state object  is that it is required to be __immutable__, or in other words it is prohibited to update the state directly.
+The only way to mutate the state is to send an action via the store dispatch method, to be processed by the registered state reducers(more on this later), that will generate a new updated state. The old state must be never modified.
 
 In Kotlin  you will typically implement the state as a Data Class will all fields defined as val's (immutable)
 
