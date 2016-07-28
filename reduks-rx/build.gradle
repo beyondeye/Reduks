@@ -1,9 +1,9 @@
 dependencies {
     compile project(':reduks-core')
-    compile "io.reactivex:rxjava:$rxjavaVersion"
-    compile "io.reactivex:rxandroid:$rxandroidVersion"
+    compile "io.reactivex:rxjava:$rxjava_version"
+    compile "io.reactivex:rxandroid:$rxandroid_version"
     //  // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$supportVersion"
+    provided "com.android.support:appcompat-v7:$support_version"
 
 }
 

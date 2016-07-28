@@ -1,6 +1,6 @@
 dependencies {
     compile project(':reduks-core')
-    testCompile "io.reactivex:rxjava:$rxjavaVersion"
+    testCompile "io.reactivex:rxjava:$rxjava_version"
 }
 
 apply from: '../maven-push.gradle'

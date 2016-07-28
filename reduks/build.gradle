@@ -1,7 +1,7 @@
 dependencies {
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$supportVersion"
-    testCompile "io.reactivex:rxjava:$rxjavaVersion"
+    provided "com.android.support:appcompat-v7:$support_version"
+    testCompile "io.reactivex:rxjava:$rxjava_version"
 }
 
 apply from: '../maven-push.gradle'
