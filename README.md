@@ -75,9 +75,12 @@ The state is the set of data that uniquely identify the current state of the app
 Typically in Android, this is the state of the current Activity.
 
 An important requirement for the data inside the state object  is that it is required to be __immutable__, or in other words it is prohibited to update the state directly.
-The only way to mutate the state is to send an action via the store dispatch method, to be processed by the registered state reducers(more on this later), that will generate a new updated state. The old state must be never modified.
 
-In Kotlin  you will typically implement the state as a Data Class will all fields defined as val's (immutable)
+The only way to mutate the state is to send an action via the store dispatch method, to be processed by the registered state reducers(more on this later), that will generate a new updated state. 
+
+The old state must be never modified.
+
+In Kotlin  we will typically implement the state as a data class with all fields defined as val's (immutable)
 
 Example:
 
