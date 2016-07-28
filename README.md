@@ -52,23 +52,25 @@ compile 'com.github.beyondeye.reduks:reduks-devtools:1.5.2'
 #An introduction to Reduks
 Reduks (similarly to Reduxjs) is basically a simplified Reactive Functional Programming approach for implementing UI for Android
 
-A very good source of material for understanding redux/reduks is [the official reduxjs docs](http://redux.js.org/), but I will try to describe here the main principles, and how they blend with Android and Kotlin
+A very good source of material for understanding redux/reduks are [the official reduxjs docs](http://redux.js.org/), but I will try to describe here the main principles, and how they blend with Android and Kotlin
 
 Reduks main components are:
 
 * the __State__: it is basically the same as the Model in the  standard MVC programming paradigm
 * State change __subscribers__: their purpose is similar to Controllers in  MVC 
-* __Actions__ and __Reducers__: Reducers are (pure)functions that specify how the State change in response to events (Actions)
+* __Actions__ and __Reducers__: Reducers are (pure)functions that specify how the State change in response to a stream of events (Actions)
 * __Middlewares__: additional pluggable layers (functions) on top of Reducers for implementing logic for responding to the stream of events (Actions) or even modify them before they reach the reducers that implement the State change logic.
  Middlewares (together with event change subscribers) have also the main purpose to allow implementing 'side effects', that are prohibited in reducers, that must be pure functions.
 
-There is also an additional component that is called the __Store__ but it is basically nothing more than the implementation details of the "glue" used to connect all the other components
+There is also an additional component that is called the __Store__ but it is basically nothing more than the implementation details of the "glue" used to connect all the other components.
 
 Its responsibilities are 
 
 * Allows access to the current state
 * Allows to send update events to the state  via `dispatch(action)`
 * Registers and unregister state change listeners via `subscribe(listener)`
+
+The implementation details of the Store  and their variations can be quite important, but for understanding Reduks, we can start by focusing first on the other components
 
 This is Reduks in brief. let us now discuss it more in detail
 
