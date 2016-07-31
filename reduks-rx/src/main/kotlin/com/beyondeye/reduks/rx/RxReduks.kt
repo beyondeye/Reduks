@@ -19,7 +19,7 @@ class RxReduks<State>(startState:State, startAction:Any,
         store = RxStore(startState,reducer,allRxSubscriptions)
         store.applyStandardMiddlewares()
         storeSubscriber=getSubscriber(store)
-        storeSubscription = store.subscribe(storeSubscriber)
+        storeSubscription = store.subscribeRx(storeSubscriber)
         store.dispatch(startAction)
     }
 }

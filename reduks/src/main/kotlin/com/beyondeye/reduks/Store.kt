@@ -7,4 +7,9 @@ interface Store<S> {
      * An action can be of Any type
      */
     var dispatch: (action: Any) -> Any
+
+    /**
+     * return a subscription
+     */
+    fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription
 }

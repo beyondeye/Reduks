@@ -13,6 +13,9 @@ infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Except
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
  */
 class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
+    class Factory<S>( val observeOnUiThread: Boolean = true) : StoreFactory<S> {
+        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = KovenantStore<S>(initialState,reducer,observeOnUiThread)
+    }
     val observeContext =
             if (!observeOnUiThread)
             {
@@ -67,7 +70,7 @@ class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUi
                 }
 
             }
-            return action;
+            return action
         }
     }
     private fun notifySubscribers(newState:S) {
@@ -84,7 +87,7 @@ class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUi
         mainDispatcher.dispatch(this, NullDispatcher(), action)
     }
 
-    fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
         this.subscribers.add(storeSubscriber)
         return object : StoreSubscription {
             override fun unsubscribe() {

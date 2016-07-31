@@ -1,16 +1,15 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.Reducer
-import com.beyondeye.reduks.SimpleStore
-import com.beyondeye.reduks.Store
-import com.beyondeye.reduks.StoreSubscriber
-import com.beyondeye.reduks.StoreSubscription
+import com.beyondeye.reduks.*
 import com.beyondeye.reduks.middlewares.applyMiddleware
 
 class DevToolsStore<S>
 @SafeVarargs
 constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware<S>) : Store<S> {
+    class Factory<S>(vararg middlewares_: Middleware<S>) : StoreFactory<S> {
+        val middlewares=middlewares_
+        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = DevToolsStore<S>(initialState,reducer,*middlewares)
+    }
     private val devToolsStore: SimpleStore<DevToolsState<S>>
 
     init {
@@ -46,7 +45,7 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
             devToolsStore.dispatch(DevToolsAction.createPerformAction(action))
         }
     }
-    fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
         return devToolsStore.subscribe(StoreSubscriber<DevToolsState<S>> { devstate -> storeSubscriber.onStateChange(state) })
     }
 }

@@ -3,6 +3,9 @@ package com.beyondeye.reduks
 import java.util.ArrayList
 
 class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
+    class Factory<S>: StoreFactory<S> {
+        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = SimpleStore<S>(initialState,reducer)
+    }
     override var state: S = initialState
     private val subscribers = ArrayList<StoreSubscriber<S>>()
     private val mainDispatcher = object : Middleware<S> {
@@ -13,7 +16,7 @@ class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
             for (i in subscribers.indices) {
                 subscribers[i].onStateChange(state)
             }
-            return action;
+            return action
         }
     }
 
@@ -29,7 +32,7 @@ class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
         mainDispatcher.dispatch(this, NullDispatcher(),action )
     }
 
-    fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
         this.subscribers.add(storeSubscriber)
         return object : StoreSubscription {
             override fun unsubscribe() {

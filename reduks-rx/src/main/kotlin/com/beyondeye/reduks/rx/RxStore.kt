@@ -1,7 +1,6 @@
 package com.beyondeye.reduks.rx
 
-import com.beyondeye.reduks.Reducer
-import com.beyondeye.reduks.Store
+import com.beyondeye.reduks.*
 import rx.Observable
 import rx.subjects.PublishSubject
 import rx.subjects.SerializedSubject
@@ -17,7 +16,9 @@ class RxStore<S>(
          */
         val allRxSubscriptions: CompositeSubscription?=null
 ) : Store<S> {
-
+    class Factory<S>( val allRxSubscriptions: CompositeSubscription?=null) : StoreFactory<S> {
+        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
+    }
     val stateChanges: Observable<S>
     private val dispatcher = SerializedSubject<Any, Any>(PublishSubject.create<Any>()) //Any: is the typo of an Action
 
@@ -37,11 +38,17 @@ class RxStore<S>(
     }
 
     /**
-     * note: subscribe take as input an rx.Subscriber which is a base class for RxStoreSubscriber
+     * note: subscribe method that take as input an rx.Subscriber which is a base class for RxStoreSubscriber
      * The only advantage of using RxStoreSubscriber is that we avoid the need to override all onNext,onCompleted,onError methods
      * we just need to override RxStoreSubscriber.onStateChange that is binded to onNext
      */
-    fun subscribe(subscriber: rx.Subscriber<S>, observeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
+    fun subscribeRx(subscriber: rx.Subscriber<S>, observeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
         return RxStoreSubscription(this,subscriber, observeOnAndroidMainThread)
     }
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+        if(storeSubscriber !is RxStoreSubscriber)
+            throw IllegalArgumentException("wrong subscriber type")
+        return subscribeRx(storeSubscriber)
+    }
+
 }
