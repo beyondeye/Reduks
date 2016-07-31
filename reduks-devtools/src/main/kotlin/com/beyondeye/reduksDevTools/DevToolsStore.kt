@@ -7,8 +7,9 @@ class DevToolsStore<S>
 @SafeVarargs
 constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware<S>) : Store<S> {
     class Factory<S>(vararg middlewares_: Middleware<S>) : StoreFactory<S> {
-        val middlewares=middlewares_
-        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = DevToolsStore<S>(initialState,reducer,*middlewares)
+        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = DevToolsStore<S>(initialState,reducer)
+        override val storeStandardMiddlewares=middlewares_
+
     }
     private val devToolsStore: SimpleStore<DevToolsState<S>>
 

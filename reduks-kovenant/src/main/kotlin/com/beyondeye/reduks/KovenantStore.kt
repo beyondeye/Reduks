@@ -1,5 +1,7 @@
 package com.beyondeye.reduks
 
+import com.beyondeye.reduks.middlewares.AsyncActionMiddleWare
+import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import nl.komponents.kovenant.*
 import nl.komponents.kovenant.android.androidUiDispatcher
 import nl.komponents.kovenant.ui.promiseOnUi
@@ -15,6 +17,8 @@ infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Except
 class KovenantStore<S>(initialState: S, val reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
     class Factory<S>( val observeOnUiThread: Boolean = true) : StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = KovenantStore<S>(initialState,reducer,observeOnUiThread)
+        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>(),AsyncActionMiddleWare<S>())
+
     }
     val observeContext =
             if (!observeOnUiThread)

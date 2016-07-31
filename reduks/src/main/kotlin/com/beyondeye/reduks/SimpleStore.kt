@@ -1,10 +1,12 @@
 package com.beyondeye.reduks
 
+import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import java.util.ArrayList
 
 class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
     class Factory<S>: StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = SimpleStore<S>(initialState,reducer)
+        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
     }
     override var state: S = initialState
     private val subscribers = ArrayList<StoreSubscriber<S>>()
