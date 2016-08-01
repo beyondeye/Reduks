@@ -25,7 +25,7 @@ class WrappedActionMiddlewareTests {
             else -> state
         }
     }
-    val actionContext=ActionContext("moduleid","moduleinstanceid")
+    val actionContext=ActionContext("moduleid")
     @Test
     fun test_action_get_wrapped() {
         //----GIVEN
