@@ -2,7 +2,6 @@ package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.Reducer
 import com.beyondeye.reduks.SimpleStore
-import com.beyondeye.reduks.SimpleStoreTest
 import com.beyondeye.reduks.modules.ActionContext
 import com.beyondeye.reduks.modules.ActionWithContext
 import org.assertj.core.api.Assertions.assertThat
