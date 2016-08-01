@@ -2,8 +2,8 @@ package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.Reducer
 import com.beyondeye.reduks.SimpleStore
-import com.beyondeye.reduks.modules.ActionContext
 import com.beyondeye.reduks.modules.ActionWithContext
+import com.beyondeye.reduks.modules.ReduksContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
@@ -25,7 +25,7 @@ class WrappedActionMiddlewareTests {
             else -> state
         }
     }
-    val actionContext=ActionContext("moduleid")
+    val actionContext= ReduksContext("moduleid")
     @Test
     fun test_action_get_wrapped() {
         //----GIVEN
