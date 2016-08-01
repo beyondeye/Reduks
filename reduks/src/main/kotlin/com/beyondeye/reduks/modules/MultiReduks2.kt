@@ -28,8 +28,8 @@ class MultiReduks2<S1:Any,S2:Any>(def1:ReduksModuleDef<S1>,ctx1:ReduksContext,
     init {
 //        r1.store.applyMiddleware(UnwrapActionMiddleware())
 //        r2.store.applyMiddleware(UnwrapActionMiddleware())
-        r1.store.dispatch(def1.startAction)
-        r2.store.dispatch(def2.startAction)
+        r1.dispatch(def1.startAction)
+        r2.dispatch(def2.startAction)
     }
 }
 

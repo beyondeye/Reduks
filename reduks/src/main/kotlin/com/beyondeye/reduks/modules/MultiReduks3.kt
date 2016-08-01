@@ -30,8 +30,8 @@ class MultiReduks3<S1:Any,S2:Any,S3:Any>(def1: ReduksModuleDef<S1>, ctx1: Reduks
     /* empty subscription: if you want to add a  susbscriber on global state changes, call [subscribe] function above */
     override val storeSubscription= StoreSubscription {}
     init {
-        r1.store.dispatch(def1.startAction)
-        r2.store.dispatch(def2.startAction)
-        r3.store.dispatch(def3.startAction)
+        r1.dispatch(def1.startAction)
+        r2.dispatch(def2.startAction)
+        r3.dispatch(def3.startAction)
     }
 }
