@@ -6,10 +6,10 @@ import com.beyondeye.reduks.modules.ReduksModuleDef
 
 /**
  * generic redux Redux
- * TODO substistute KovenantReduks, SimpleReduks, and RxReduks using only GenericReduks and make them deprecated
+ * TODO substistute KovenantReduks, SimpleReduks, and RxReduks using only ReduksModule and make them deprecated
  * Created by daely on 6/8/2016.
  */
-class GenericReduks<State>(def: ReduksModuleDef<State>,val context: ReduksContext?=null) :Reduks<State> {
+class ReduksModule<State>(def: ReduksModuleDef<State>, val context: ReduksContext?=null) :Reduks<State> {
     override val store: Store<State>
     override val storeSubscriber: StoreSubscriber<State>
     override val storeSubscription: StoreSubscription
@@ -17,7 +17,7 @@ class GenericReduks<State>(def: ReduksModuleDef<State>,val context: ReduksContex
         val storeFactory= def.storeFactory
         store = storeFactory.newStore(def.initialState, def.stateReducer)
         store.applyMiddleware(*storeFactory.storeStandardMiddlewares)
-        storeSubscriber= def.getStoreSubscriber()(store)
+        storeSubscriber= def.getStoreSubscriber(store)
         storeSubscription = store.subscribe(storeSubscriber)
         if(context==null) //if we have a context, it means this reduks instance is actually part of a multireduks
             store.dispatch(def.startAction)

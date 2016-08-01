@@ -34,8 +34,8 @@ abstract class MultiReduks {
 
 class MultiReduks2<S1:Any,S2:Any>(def1:ReduksModuleDef<S1>,ctx1:ReduksContext,
                                   def2:ReduksModuleDef<S2>,ctx2:ReduksContext) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
-    val r1=GenericReduks<S1>(def1,ctx1)
-    val r2=GenericReduks<S2>(def2,ctx2)
+    val r1= ReduksModule<S1>(def1,ctx1)
+    val r2= ReduksModule<S2>(def2,ctx2)
     override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
             r1.context -> r1.dispatch(a.action)
             r2.context -> r2.dispatch(a.action)

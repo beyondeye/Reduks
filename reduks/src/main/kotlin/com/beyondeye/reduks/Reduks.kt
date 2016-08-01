@@ -1,7 +1,7 @@
 package com.beyondeye.reduks
 
 /**
- * Redux based on [SimpleStore]
+ * Redux module containing all Reduks component: store and its (main) subscriber
  * Created by daely on 6/8/2016.
  */
 interface Reduks<State> {

@@ -31,6 +31,9 @@ abstract class ReduksModuleDef<S> {
 
     /**
      * return the main store subscriber
+     * we pass as argument the store itself, so that we can create an object that implement the
+     * [StoreSubscriber] interface that keep a reference to the store itself, in case the we need call dispatch
+     * in the subscriber
      */
-    abstract fun getStoreSubscriber(): (Store<S>) -> StoreSubscriber<S>
+    abstract fun getStoreSubscriber(store:Store<S>): StoreSubscriber<S>
 }
