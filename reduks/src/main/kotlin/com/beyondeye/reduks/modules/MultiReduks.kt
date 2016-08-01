@@ -11,6 +11,9 @@ import java.util.*
  */
 data class MultiState2<S1:Any,S2:Any>(val s1:S1,val s2:S2)
 data class MultiState3<S1:Any,S2:Any,S3:Any>(val s1:S1,val s2:S2,val s3:S3)
+data class MultiState4<S1:Any,S2:Any,S3:Any,S4:Any>(val s1:S1,val s2:S2,val s3:S3,val s4:S4)
+data class MultiState5<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any>(val s1:S1,val s2:S2,val s3:S3,val s4:S4,val s5:S5)
+data class MultiState6<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any,S6:Any>(val s1:S1,val s2:S2,val s3:S3,val s4:S4,val s5:S5,val s6:S6)
 
 
 /**
@@ -31,45 +34,5 @@ abstract class MultiReduks {
                                             m2:ReduksModuleDef<S2>,ctx2:ReduksContext)=MultiReduks2(m1,ctx1,m2,ctx2)
     }
 }
-
-class MultiReduks2<S1:Any,S2:Any>(def1:ReduksModuleDef<S1>,ctx1:ReduksContext,
-                                  def2:ReduksModuleDef<S2>,ctx2:ReduksContext) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
-    val r1= ReduksModule<S1>(def1,ctx1)
-    val r2= ReduksModule<S2>(def2,ctx2)
-    override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
-            r1.context -> r1.dispatch(a.action)
-            r2.context -> r2.dispatch(a.action)
-            else -> throw IllegalArgumentException("no registered module with id ${a.context.moduleId}")
-        }
-    override val store= object:Store<MultiState2<S1, S2>> {
-        override val state: MultiState2<S1, S2> get()= MultiState2(r1.store.state,r2.store.state)
-        override var dispatch=dispatchWrappedAction
-        override fun subscribe(storeSubscriber: StoreSubscriber<MultiState2<S1, S2>>): StoreSubscription {
-            val s1=r1.subscribe(StoreSubscriber { storeSubscriber.onStateChange(state) })
-            val s2=r2.subscribe(StoreSubscriber { storeSubscriber.onStateChange(state) })
-            return MultiStoreSubscription(s1, s2)
-        }
-    }
-
-    fun subscribe(storeSubscriber: StoreSubscriber<MultiState2<S1, S2>>): StoreSubscription =store.subscribe(storeSubscriber)
-    /**
-     * empty subscriber: if you want to add a subscriber on global state changes, call [subscribe] function above
-     */
-    override val storeSubscriber = StoreSubscriber<MultiState2<S1, S2>>{}
-
-    /**
-     * empty subscription: if you want to add a  susbscriber on global state changes, call [subscribe] function above
-     */
-    override val storeSubscription= StoreSubscription {}
-    init {
-//        r1.store.applyMiddleware(UnwrapActionMiddleware())
-//        r2.store.applyMiddleware(UnwrapActionMiddleware())
-        r1.store.dispatch(def1.startAction)
-        r2.store.dispatch(def2.startAction)
-    }
-
-
-}
-
 
 
