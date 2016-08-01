@@ -1,15 +1,17 @@
-package com.beyondeye.reduks
+package com.beyondeye.reduks.modules
 
+import com.beyondeye.reduks.Reduks
+import com.beyondeye.reduks.Store
+import com.beyondeye.reduks.StoreSubscriber
+import com.beyondeye.reduks.StoreSubscription
 import com.beyondeye.reduks.middlewares.applyMiddleware
-import com.beyondeye.reduks.modules.ReduksContext
-import com.beyondeye.reduks.modules.ReduksModuleDef
 
 /**
  * generic redux Redux
  * TODO substistute KovenantReduks, SimpleReduks, and RxReduks using only ReduksModule and make them deprecated
  * Created by daely on 6/8/2016.
  */
-class ReduksModule<State>(def: ReduksModuleDef<State>, val context: ReduksContext?=null) :Reduks<State> {
+class ReduksModule<State>(def: ReduksModuleDef<State>, val context: ReduksContext?=null) : Reduks<State> {
     override val store: Store<State>
     override val storeSubscriber: StoreSubscriber<State>
     override val storeSubscription: StoreSubscription

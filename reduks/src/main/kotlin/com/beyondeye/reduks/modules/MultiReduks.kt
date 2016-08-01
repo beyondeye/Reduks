@@ -1,10 +1,5 @@
 package com.beyondeye.reduks.modules
 
-import com.beyondeye.reduks.*
-import com.beyondeye.reduks.middlewares.UnwrapActionMiddleware
-import com.beyondeye.reduks.middlewares.applyMiddleware
-import java.util.*
-
 /**
  * same interface as regular reduks but allows to delegate actions to installed modules
  * Created by daely on 7/31/2016.
