@@ -27,20 +27,22 @@ abstract class MultiReduks {
     }
     internal abstract fun dispatchActionWithContext(a: ActionWithContext): Any
     companion object {
-        fun <S1:Any,S2:Any>buildFromModules(m1:ReduksModuleDef<S1>,m2:ReduksModuleDef<S2>)=MultiReduks2(m1,m2)
+        fun <S1:Any,S2:Any>buildFromModules(m1:ReduksModuleDef<S1>,ctx1:ReduksContext,
+                                            m2:ReduksModuleDef<S2>,ctx2:ReduksContext)=MultiReduks2(m1,ctx1,m2,ctx2)
     }
 }
 
-class MultiReduks2<S1:Any,S2:Any>(def1:ReduksModuleDef<S1>, def2:ReduksModuleDef<S2>) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
-    val r1=GenericReduks<S1>(def1)
-    val r2=GenericReduks<S2>(def2)
+class MultiReduks2<S1:Any,S2:Any>(def1:ReduksModuleDef<S1>,ctx1:ReduksContext,
+                                  def2:ReduksModuleDef<S2>,ctx2:ReduksContext) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
+    val r1=GenericReduks<S1>(def1,ctx1)
+    val r2=GenericReduks<S2>(def2,ctx2)
     override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
             r1.context -> r1.dispatch(a.action)
             r2.context -> r2.dispatch(a.action)
             else -> throw IllegalArgumentException("no registered module with id ${a.context.moduleId}")
         }
     override val store= object:Store<MultiState2<S1, S2>> {
-        override val state: MultiState2<S1, S2> = MultiState2(r1.store.state,r2.store.state)
+        override val state: MultiState2<S1, S2> get()= MultiState2(r1.store.state,r2.store.state)
         override var dispatch=dispatchWrappedAction
         override fun subscribe(storeSubscriber: StoreSubscriber<MultiState2<S1, S2>>): StoreSubscription {
             val s1=r1.subscribe(StoreSubscriber { storeSubscriber.onStateChange(state) })
