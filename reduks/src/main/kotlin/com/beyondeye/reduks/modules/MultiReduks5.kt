@@ -12,6 +12,7 @@ class MultiReduks5<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any>(def1: ReduksModuleDef<S1>
     val r3= ReduksModule<S3>(def3, ctx3)
     val r4= ReduksModule<S4>(def4, ctx4)
     val r5= ReduksModule<S5>(def5, ctx5)
+    override val rmap= mapOf(ctx1 to r1,ctx2 to r2,ctx3 to r3,ctx4 to r4,ctx5 to r5)
     override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
         r1.context -> r1.dispatch(a.action)
         r2.context -> r2.dispatch(a.action)

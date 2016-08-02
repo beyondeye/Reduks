@@ -15,6 +15,10 @@ data class MultiState6<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any,S6:Any>(val s1:S1,val 
  * base class for all MultiReduksN generic classes (MultiReduks2, MultiReduks3, ....)
  */
 abstract class MultiReduks {
+    /**
+     *     map of all modules with  [ReduksContext] as index
+     */
+    abstract val rmap:Map<ReduksContext,ReduksModule<out Any>>
     internal var dispatchWrappedAction: (Any) -> Any = { action ->
         when(action) {
             is ActionWithContext -> {

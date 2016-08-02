@@ -8,6 +8,7 @@ class MultiReduks3<S1:Any,S2:Any,S3:Any>(def1: ReduksModuleDef<S1>, ctx1: Reduks
     val r1= ReduksModule<S1>(def1, ctx1)
     val r2= ReduksModule<S2>(def2, ctx2)
     val r3= ReduksModule<S3>(def3, ctx3)
+    override val rmap= mapOf(ctx1 to r1,ctx2 to r2,ctx3 to r3)
     override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
         r1.context -> r1.dispatch(a.action)
         r2.context -> r2.dispatch(a.action)
