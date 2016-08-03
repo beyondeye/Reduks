@@ -2,9 +2,11 @@ package com.beyondeye.reduks.activity
 
 import android.os.Bundle
 import android.os.Parcelable
-import com.beyondeye.reduks.KovenantReduks
+import com.beyondeye.reduks.KovenantStore
 import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.StoreSubscriberBuilder
 import com.beyondeye.reduks.combineReducers
+import com.beyondeye.reduks.modules.ReduksModule
 
 /**
  * same as KovenantReduksActivity but for Parcelable state S, automatically handle save and
@@ -25,8 +27,17 @@ abstract class KovenantParcelableReduksActivity<S: Parcelable> : KovenantReduksA
             reduks.dispatch(ActionRestoreState(restoredState))
         }
     }
-    override  fun initReduks() {
-        reduks = KovenantReduks(activityStartState(), activityStartAction(), combineReducers(getActivityStateReducer(),restoreStateReducer), getActivityStoreSubscriber())
+
+    override fun initReduks() {
+        reduks = ReduksModule<S>(
+                ReduksModule.Def<S>(
+                        KovenantStore.Factory(),
+                        activityStartState(),
+                        activityStartAction(),
+                        combineReducers(getActivityStateReducer(), restoreStateReducer),
+                        StoreSubscriberBuilder { getActivityStoreSubscriber(it) }
+                )
+        )
     }
 
     @Suppress("UNCHECKED_CAST")
