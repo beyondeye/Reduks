@@ -1,4 +1,9 @@
-package com.beyondeye.reduks
+package com.beyondeye.reduks.activity
+
+import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.Reduks
+import com.beyondeye.reduks.Store
+import com.beyondeye.reduks.StoreSubscriber
 
 interface ReduksActivity<S> {
     var reduks: Reduks<S>
