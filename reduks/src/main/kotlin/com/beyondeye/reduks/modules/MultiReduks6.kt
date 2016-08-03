@@ -2,12 +2,12 @@ package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.*
 
-class MultiReduks6<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any,S6:Any>(def1: ReduksModule.Def<S1>, ctx1: ReduksContext,
-                                         def2: ReduksModule.Def<S2>, ctx2: ReduksContext,
-                                         def3: ReduksModule.Def<S3>, ctx3: ReduksContext,
-                                         def4: ReduksModule.Def<S4>, ctx4: ReduksContext,
-                                         def5: ReduksModule.Def<S5>, ctx5: ReduksContext,
-                                         def6: ReduksModule.Def<S6>, ctx6: ReduksContext) : MultiReduks(), Reduks<MultiState6<S1, S2, S3, S4, S5, S6>> {
+class MultiReduks6<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any,S6:Any>(ctx1: ReduksContext, def1: IReduksModuleDef<S1>,
+                                                              ctx2: ReduksContext, def2: IReduksModuleDef<S2>,
+                                                              ctx3: ReduksContext, def3: IReduksModuleDef<S3>,
+                                                              ctx4: ReduksContext, def4: IReduksModuleDef<S4>,
+                                                              ctx5: ReduksContext, def5: IReduksModuleDef<S5>,
+                                                              ctx6: ReduksContext, def6: IReduksModuleDef<S6>) : MultiReduks(), Reduks<MultiState6<S1, S2, S3, S4, S5, S6>> {
     val r1= ReduksModule<S1>(def1, ctx1)
     val r2= ReduksModule<S2>(def2, ctx2)
     val r3= ReduksModule<S3>(def3, ctx3)

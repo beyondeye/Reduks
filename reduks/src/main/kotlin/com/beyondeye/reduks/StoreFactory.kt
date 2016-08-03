@@ -14,4 +14,9 @@ interface StoreFactory<S> {
      * get list of standard middlewares available for the type of Store associated with this factory
      */
     val storeStandardMiddlewares: Array<out Middleware<S>>
+
+    /**
+     * return new factory with same parameter but for new state type S2
+     */
+    fun<S2> ofType():StoreFactory<S2>
 }

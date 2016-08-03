@@ -9,6 +9,10 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
     class Factory<S>(vararg middlewares_: Middleware<S>) : StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = DevToolsStore<S>(initialState,reducer)
         override val storeStandardMiddlewares=middlewares_
+        override fun <S2> ofType(): StoreFactory<S2> {
+            throw NotImplementedError("TODO how to create standardmiddlewares for the new state type?")
+            return Factory<S2>()
+        }
 
     }
     private val devToolsStore: SimpleStore<DevToolsState<S>>
