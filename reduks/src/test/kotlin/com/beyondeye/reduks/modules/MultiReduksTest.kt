@@ -38,43 +38,41 @@ class MultiReduksTest {
     }
     var nStateChanges1 = 0
     var nStateChangeCalls1 = 0
-    val m1 = object : ReduksModuleDef<TestState1>() {
-        override val storeFactory = SimpleStore.Factory<TestState1>()
-        override val initialState = TestState1()
-        override val startAction: Any = TestAction1("start1")
-        override val stateReducer = reducer1
-        override fun getStoreSubscriber(store_: Store<TestState1>) =
-                object : StoreSubscriber<TestState1> {
-                    val store = store_
-                    val selector = SelectorBuilder<TestState1>()
-                    val selForLastAction = selector.withSingleField { this.lastActionType }
-                    override fun onStateChange(state: TestState1) {
-                        ++nStateChangeCalls1
-                        selForLastAction.onChangeIn(state) {
-                            ++nStateChanges1
-                        }
+    val m1 = ReduksModuleDef<TestState1>(
+            storeFactory = SimpleStore.Factory<TestState1>(),
+            initialState = TestState1(),
+            startAction = TestAction1("start1"),
+            stateReducer = reducer1,
+            subscriberBuilder = StoreSubscriberBuilder { store ->
+                val selector = SelectorBuilder<TestState1>()
+                val selForLastAction = selector.withSingleField { this.lastActionType }
+                StoreSubscriber { state ->
+                    ++nStateChangeCalls1
+                    selForLastAction.onChangeIn(state) {
+                        ++nStateChanges1
                     }
                 }
-    }
+            }
+    )
     var nStateChanges2 = 0
     var nStateChangeCalls2 = 0
-    val m2 = object : ReduksModuleDef<TestState2>() {
-        override val storeFactory = SimpleStore.Factory<TestState2>()
-        override val initialState = TestState2()
-        override val startAction: Any = TestAction2("start2")
-        override val stateReducer = reducer2
-        override fun getStoreSubscriber(store_: Store<TestState2>) = object : StoreSubscriber<TestState2> {
-            val store = store_
-            val selector = SelectorBuilder<TestState2>()
-            val selForLastAction = selector.withSingleField { this.lastActionType }
-            override fun onStateChange(state: TestState2) {
-                ++nStateChangeCalls2
-                selForLastAction.onChangeIn(state) {
-                    ++nStateChanges2
+    val m2 = ReduksModuleDef<TestState2>(
+            storeFactory = SimpleStore.Factory<TestState2>(),
+            initialState = TestState2(),
+            startAction = TestAction2("start2"),
+            stateReducer = reducer2,
+            subscriberBuilder = StoreSubscriberBuilder { store ->
+                val selector = SelectorBuilder<TestState2>()
+                val selForLastAction = selector.withSingleField { this.lastActionType }
+                StoreSubscriber { state ->
+                    ++nStateChangeCalls2
+                    selForLastAction.onChangeIn(state) {
+                        ++nStateChanges2
+                    }
                 }
             }
-        }
-    }
+    )
+
     val ctx1 = ReduksContext("m1")
     val ctx2 = ReduksContext("m2")
     @Test
