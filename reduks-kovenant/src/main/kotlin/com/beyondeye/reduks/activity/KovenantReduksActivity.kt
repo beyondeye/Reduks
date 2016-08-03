@@ -10,8 +10,8 @@ import nl.komponents.kovenant.android.stopKovenant
 /**
  * Created by daely on 6/13/2016.
  */
-abstract class KovenantReduksActivity<S>: AppCompatActivity() {
-    lateinit var reduks: Reduks<S>
+abstract class KovenantReduksActivity<S>: AppCompatActivity(),ReduksActivity<S> {
+    override lateinit var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)
@@ -39,21 +39,6 @@ abstract class KovenantReduksActivity<S>: AppCompatActivity() {
         )
     }
 
-    /**
-     * return the initial state of the activity
-     */
-    abstract fun activityStartState():S
-
-    /**
-     * return the initial action to dispatch to the RxStore in onCreate
-     */
-    abstract fun activityStartAction():Any
-
-    /**
-     * return the activity state reducer
-     */
-    abstract fun getActivityStateReducer(): Reducer<S>
-
     //override for making this function visible to inheritors
     override fun onStop() {
         super.onStop()
@@ -62,10 +47,5 @@ abstract class KovenantReduksActivity<S>: AppCompatActivity() {
     override fun onStart() {
         super.onStart()
     }
-
-    /**
-     * return the activity main store subscriber
-     */
-    abstract fun getActivityStoreSubscriber(store:Store<S>): StoreSubscriber<S>
 
 }

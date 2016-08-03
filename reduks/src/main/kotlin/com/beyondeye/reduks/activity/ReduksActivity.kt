@@ -13,7 +13,7 @@ interface ReduksActivity<S> {
     fun activityStartState(): S
 
     /**
-     * return the initial action to dispatch to the RxStore in onCreate
+     * return the initial action to dispatch to the Store in onCreate
      */
     fun activityStartAction(): Any
 
@@ -25,6 +25,6 @@ interface ReduksActivity<S> {
     /**
      * return the activity main store subscriber
      */
-    fun getActivityStoreSubscriber(): (Store<S>) -> StoreSubscriber<S>
+    fun getActivityStoreSubscriber(store:Store<S>): StoreSubscriber<S>
 
 }
