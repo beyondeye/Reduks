@@ -38,8 +38,8 @@ class MultiReduksTest {
     }
     var nStateChanges1 = 0
     var nStateChangeCalls1 = 0
-    val m1 = ReduksModuleDef<TestState1>(
-            storeFactory = SimpleStore.Factory<TestState1>(),
+    val mdef1 = ReduksModule.Def<TestState1>(
+            storeFactory = SimpleStore.Factory(),
             initialState = TestState1(),
             startAction = TestAction1("start1"),
             stateReducer = reducer1,
@@ -56,8 +56,8 @@ class MultiReduksTest {
     )
     var nStateChanges2 = 0
     var nStateChangeCalls2 = 0
-    val m2 = ReduksModuleDef<TestState2>(
-            storeFactory = SimpleStore.Factory<TestState2>(),
+    val mdef2 = ReduksModule.Def<TestState2>(
+            storeFactory = SimpleStore.Factory(),
             initialState = TestState2(),
             startAction = TestAction2("start2"),
             stateReducer = reducer2,
@@ -77,7 +77,7 @@ class MultiReduksTest {
     val ctx2 = ReduksContext("m2")
     @Test
     fun test_multireduks2_correctly_initialized() {
-        val mr = MultiReduks.buildFromModules(m1, ctx1, m2, ctx2)
+        val mr = MultiReduks.buildFromModules(mdef1, ctx1, mdef2, ctx2)
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("start1") //check that start action dispatched
         assertThat(nStateChanges1).isEqualTo(1) //start action
         assertThat(nStateChangeCalls1).isEqualTo(1) //start action
@@ -89,7 +89,7 @@ class MultiReduksTest {
     @Test
     fun test_multireduks2_dispatch() {
         //----GIVEN
-        val mr = MultiReduks.buildFromModules(m1, ctx1, m2, ctx2)
+        val mr = MultiReduks.buildFromModules(mdef1, ctx1, mdef2, ctx2)
         //-----WHEN
         mr.dispatch(ActionWithContext(TestAction1("1"), ctx1))
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")

@@ -29,8 +29,8 @@ abstract class MultiReduks {
     }
     internal abstract fun dispatchActionWithContext(a: ActionWithContext): Any
     companion object {
-        fun <S1:Any,S2:Any>buildFromModules(m1:ReduksModuleDef<S1>,ctx1:ReduksContext,
-                                            m2:ReduksModuleDef<S2>,ctx2:ReduksContext)=MultiReduks2(m1,ctx1,m2,ctx2)
+        fun <S1:Any,S2:Any>buildFromModules(m1:ReduksModule.Def<S1>,ctx1:ReduksContext,
+                                            m2:ReduksModule.Def<S2>,ctx2:ReduksContext)=MultiReduks2(m1,ctx1,m2,ctx2)
     }
 }
 

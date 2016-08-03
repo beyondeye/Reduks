@@ -2,10 +2,10 @@ package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.*
 
-class MultiReduks4<S1:Any,S2:Any,S3:Any,S4:Any>(def1: ReduksModuleDef<S1>, ctx1: ReduksContext,
-                                         def2: ReduksModuleDef<S2>, ctx2: ReduksContext,
-                                         def3: ReduksModuleDef<S3>, ctx3: ReduksContext,
-                                         def4: ReduksModuleDef<S4>, ctx4: ReduksContext) : MultiReduks(), Reduks<MultiState4<S1, S2, S3, S4>> {
+class MultiReduks4<S1:Any,S2:Any,S3:Any,S4:Any>(def1: ReduksModule.Def<S1>, ctx1: ReduksContext,
+                                         def2: ReduksModule.Def<S2>, ctx2: ReduksContext,
+                                         def3: ReduksModule.Def<S3>, ctx3: ReduksContext,
+                                         def4: ReduksModule.Def<S4>, ctx4: ReduksContext) : MultiReduks(), Reduks<MultiState4<S1, S2, S3, S4>> {
     val r1= ReduksModule<S1>(def1, ctx1)
     val r2= ReduksModule<S2>(def2, ctx2)
     val r3= ReduksModule<S3>(def3, ctx3)
