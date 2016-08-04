@@ -47,7 +47,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     init {
         ctx=moduleDef.ctx
         val storeFactory= moduleDef.storeFactory
-        store=newStore(moduleDef, storeFactory)
+        store=storeFactory.newStore(moduleDef.initialState, moduleDef.stateReducer)
         store.applyMiddleware(*storeFactory.storeStandardMiddlewares)
         storeSubscriber= moduleDef.subscriberBuilder.build(store)
         storeSubscription = store.subscribe(storeSubscriber)
@@ -55,9 +55,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
         val actionList: List<Any> = MultiActionWithContext.toActionList(moduleDef.startAction)
         actionList.forEach { store.dispatch(it) }
     }
-    private fun newStore(moduleDef: ReduksModule.Def<State>, storeFactory: StoreFactory<State>):Store<State> {
-        return storeFactory.newStore(moduleDef.initialState, moduleDef.stateReducer)
-    }
+
 
     fun  subscribe(storeSubscriber: StoreSubscriber<State>): StoreSubscription =store.subscribe(storeSubscriber)
     companion object {
