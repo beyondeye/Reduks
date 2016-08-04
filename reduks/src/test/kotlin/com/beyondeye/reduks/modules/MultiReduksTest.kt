@@ -78,51 +78,6 @@ class MultiReduksTest {
     )
 
     @Test
-    fun test_multireduks2_correctly_initialized() {
-        val mr = MultiReduks.buildFromModules(mdef1, mdef2)
-        assertThat(mr.store.state.s1.lastActionType).isEqualTo("start1") //check that start action dispatched
-        assertThat(nStateChanges1).isEqualTo(1) //start action
-        assertThat(nStateChangeCalls1).isEqualTo(1) //start action
-        assertThat(mr.store.state.s2.lastActionType).isEqualTo("start2") //check that start action dispatched
-        assertThat(nStateChanges2).isEqualTo(1) //start action
-        assertThat(nStateChangeCalls2).isEqualTo(1) //start action
-    }
-
-    @Test
-    fun test_multireduks2_dispatch() {
-        //----GIVEN
-        val mr = MultiReduks.buildFromModules( mdef1,  mdef2)
-        //-----WHEN
-        mr.dispatch(ActionWithContext(TestAction1("1"), ctx1))
-        assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")
-        assertThat(mr.store.state.s2.lastActionType).isEqualTo("start2")
-        //-----THEN
-        assertThat(nStateChanges1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(1) //start action
-        assertThat(nStateChangeCalls2).isEqualTo(1) //start action
-        //-----AND WHEN
-        mr.dispatch(ActionWithContext(TestAction2("2"), ctx2))
-        assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")
-        assertThat(mr.store.state.s2.lastActionType).isEqualTo("2")
-        //-----THEN
-        assertThat(nStateChanges1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChangeCalls2).isEqualTo(2) //start action and one additional dispatch
-        //-----AND WHEN
-        mr.dispatch(ActionWithContext("unknown action", ctx2))
-        //-----THEN
-        assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")
-        assertThat(mr.store.state.s2.lastActionType).isEqualTo("2")
-        assertThat(nStateChanges1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(2) //start action and one additional dispatch
-        assertThat(nStateChangeCalls2).isEqualTo(3) //start action and one additional dispatch+unknown actions
-
-    }
-
-    @Test
     fun test_multireduks2_from_multidef_dispatch() {
         val multidef=MultiReduksDef.create(SimpleStore.Factory(),mdef1,mdef2)
         val mr = ReduksModule(multidef)

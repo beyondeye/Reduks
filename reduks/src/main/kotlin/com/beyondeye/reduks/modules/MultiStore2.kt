@@ -5,7 +5,7 @@ import com.beyondeye.reduks.*
 /**
  * Created by daely on 8/3/2016.
  */
-open class MultiStore2<S1:Any,S2:Any>(
+class MultiStore2<S1:Any,S2:Any>(
         val ctx1:ReduksContext,val store1:Store<S1>,
         val ctx2:ReduksContext,val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore()
 {
