@@ -14,7 +14,7 @@ open class MultiStore2<S1:Any,S2:Any>(
                                  val ctx2:ReduksContext): StoreFactory< MultiState2<S1,S2> > {
         override fun newStore(initialState: MultiState2<S1, S2>,
                               reducer: Reducer<MultiState2<S1, S2>>): Store<MultiState2<S1, S2>> {
-            if(reducer !is MultiReducer2<S1,S2>) throw IllegalArgumentException()
+            if(reducer !is MultiReducer2<S1, S2>) throw IllegalArgumentException()
             return MultiStore2<S1,S2>(
                     ctx1,storeFactory.ofType<S1>().newStore(initialState.s1,reducer.r1),
                     ctx2,storeFactory.ofType<S2>().newStore(initialState.s2,reducer.r2))
