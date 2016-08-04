@@ -2,8 +2,33 @@ package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.Reducer
 
-interface MultiReducer3<S1:Any,S2:Any,S3:Any> : Reducer<MultiState3<S1, S2, S3>> {
-    val r1: Reducer<S1>
-    val r2: Reducer<S2>
-    val r3: Reducer<S3>
+/**
+ * set of  separate reducers for  separate states
+ * Created by daely on 8/3/2016.
+ */
+class MultiReducer3<S1 : Any, S2 : Any, S3 : Any>(
+        m1: ReduksModule.Def<S1>,
+        m2: ReduksModule.Def<S2>,
+        m3: ReduksModule.Def<S3>) : Reducer<MultiState3<S1, S2, S3>> {
+    val r1: Reducer<S1> = m1.stateReducer
+    val r2: Reducer<S2> = m2.stateReducer
+    val r3: Reducer<S3> = m3.stateReducer
+    val ctx1 = m1.ctx
+    val ctx2 = m2.ctx
+    val ctx3 = m3.ctx
+    override fun reduce(s: MultiState3<S1, S2, S3>, a: Any): MultiState3<S1, S2, S3> {
+        val actionList: List<Any> = MultiActionWithContext.toActionList(a)
+        var newS = s
+        actionList.forEach {
+            if (a is ActionWithContext) {
+                newS = when (a.context) {
+                    ctx1 -> newS.copy(s1 = r1.reduce(newS.s1, a.action))
+                    ctx2 -> newS.copy(s2 = r2.reduce(newS.s2, a.action))
+                    ctx3 -> newS.copy(s3 = r3.reduce(newS.s3, a.action))
+                    else -> newS
+                }
+            }
+        }
+        return newS
+    }
 }

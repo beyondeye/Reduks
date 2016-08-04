@@ -37,7 +37,7 @@ class MultiStore6<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any, S6 : Any>(
 
     }
 
-    override val ctx = MultiReduksDef.multiContext(ctx1, ctx2, ctx3, ctx4, ctx5, ctx6)
+    override val ctx = ReduksModule.multiContext(ctx1, ctx2, ctx3, ctx4, ctx5, ctx6)
 
     override val storeMap = mapOf(
             ctx1 to store1,
