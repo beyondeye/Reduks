@@ -7,6 +7,10 @@ import com.beyondeye.reduks.Store
  */
 abstract class MultiStore {
     /**
+     * ReduksContext associated to this Store
+     */
+    abstract val ctx:ReduksContext
+    /**
      *     map of all modules with  [ReduksContext] as index
      */
     abstract val storeMap:Map<ReduksContext, Store<out Any>>
