@@ -8,7 +8,7 @@ import com.beyondeye.reduks.middlewares.applyMiddleware
  * TODO substistute KovenantReduks, SimpleReduks, and RxReduks using only ReduksModule and make them deprecated
  * Created by daely on 6/8/2016.
  */
-class ReduksModule<State>(moduleDef: IReduksModuleDef<State>) : Reduks<State> {
+class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     /**
      * all data needed for creating a ReduksModule
      */
@@ -16,31 +16,30 @@ class ReduksModule<State>(moduleDef: IReduksModuleDef<State>) : Reduks<State> {
             /**
              * an id that identify the module
              */
-            override val ctx: ReduksContext,
+            val ctx: ReduksContext,
             /**
              * factory method for store
              */
-            override val  storeFactory:StoreFactory<State>,
+            val  storeFactory:StoreFactory<State>,
             /**
              * return the initial state
              */
-            override val initialState: State,
+            val initialState: State,
             /**
              * return the initial action to dispatch to the Store
              */
-            override val startAction: Any,
+            val startAction: Any,
             /**
              * return the state reducer
              */
-            override val stateReducer: Reducer<State>,
+            val stateReducer: Reducer<State>,
             /**
              * return the main store subscriber
              * we pass as argument the store itself, so that we can create an object that implement the
              * [StoreSubscriber] interface that keep a reference to the store itself, in case the we need call dispatch
              * in the subscriber
              */
-            override val subscriberBuilder: StoreSubscriberBuilder<State>)  : IReduksModuleDef<State> {
-    }
+            val subscriberBuilder: StoreSubscriberBuilder<State>)
     override val ctx: ReduksContext
     override val store: Store<State>
     override val storeSubscriber: StoreSubscriber<State>
@@ -56,7 +55,7 @@ class ReduksModule<State>(moduleDef: IReduksModuleDef<State>) : Reduks<State> {
         val actionList: List<Any> = MultiActionWithContext.toActionList(moduleDef.startAction)
         actionList.forEach { store.dispatch(it) }
     }
-    private fun newStore(moduleDef: IReduksModuleDef<State>, storeFactory: StoreFactory<State>):Store<State> {
+    private fun newStore(moduleDef: ReduksModule.Def<State>, storeFactory: StoreFactory<State>):Store<State> {
         return storeFactory.newStore(moduleDef.initialState, moduleDef.stateReducer)
     }
 

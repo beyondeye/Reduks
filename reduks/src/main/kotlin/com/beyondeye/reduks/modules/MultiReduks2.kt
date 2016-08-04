@@ -2,8 +2,8 @@ package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.*
 
-class MultiReduks2<S1:Any,S2:Any>(def1: IReduksModuleDef<S1>,
-                                  def2: IReduksModuleDef<S2>) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
+class MultiReduks2<S1:Any,S2:Any>(def1: ReduksModule.Def<S1>,
+                                  def2: ReduksModule.Def<S2>) : MultiReduks(),Reduks<MultiState2<S1,S2>>{
     override val ctx: ReduksContext=def1.ctx+def2.ctx
     val r1= ReduksModule<S1>(def1)
     val r2= ReduksModule<S2>(def2)
