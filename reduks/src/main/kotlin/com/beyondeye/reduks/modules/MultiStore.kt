@@ -17,10 +17,13 @@ abstract class MultiStore {
     internal var dispatchWrappedAction: (Any) -> Any = { action ->
         when(action) {
             is ActionWithContext -> {
-                dispatchActionWithContext(action)
+                val actionContext=action.context
+                val selectedStore=storeMap[actionContext]
+                if(selectedStore==null)
+                    throw IllegalArgumentException("no registered module with context $actionContext")
+                selectedStore.dispatch(action.action)
             }
             else -> throw IllegalArgumentException("Action missing context $action")
         }
     }
-    abstract fun dispatchActionWithContext(a: ActionWithContext): Any
 }
