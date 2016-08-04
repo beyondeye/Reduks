@@ -8,9 +8,9 @@ import com.beyondeye.reduks.*
 class MultiReduksDef {
     companion object {
         //calculate context for multiple modules
-        fun multiContext(vararg ctxs:ReduksContext):ReduksContext {
-            val res=ctxs.reduce { prevCtx, ctx -> prevCtx+ctx }
-            if(ctxs.toSet().size<ctxs.size)
+        fun multiContext(vararg ctxs: ReduksContext): ReduksContext {
+            val res = ctxs.reduce { prevCtx, ctx -> prevCtx + ctx }
+            if (ctxs.toSet().size < ctxs.size)
                 throw IllegalArgumentException("Invalid MultiContext: when combining multiple modules, each module MUST have a distinct context!: $res")
             return res
         }
@@ -18,7 +18,7 @@ class MultiReduksDef {
         fun <S1 : Any, S2 : Any> create(storeFactory_: StoreFactory<MultiState2<S1, S2>>,
                                         m1: ReduksModule.Def<S1>,
                                         m2: ReduksModule.Def<S2>): ReduksModule.Def<MultiState2<S1, S2>> {
-            val mctx=multiContext(m1.ctx, m2.ctx)
+            val mctx = multiContext(m1.ctx, m2.ctx)
             return ReduksModule.Def<MultiState2<S1, S2>>(
                     ctx = mctx,
                     storeFactory = MultiStore2.Factory<S1, S2>(storeFactory_.ofType(), m1.ctx, m2.ctx),
