@@ -7,8 +7,8 @@ class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
     class Factory<S>: StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = SimpleStore<S>(initialState,reducer)
         override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
-        override fun <S2> ofType(): StoreFactory<S2> {
-            return Factory<S2>()
+        override fun <S_> ofType(): StoreFactory<S_> {
+            return Factory<S_>()
         }
     }
     override var state: S = initialState

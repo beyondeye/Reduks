@@ -3,7 +3,7 @@ package com.beyondeye.reduks.modules
 import com.beyondeye.reduks.Reducer
 
 /**
- * set of two separate reducers for two separate states
+ * set of  separate reducers for  separate states
  * Created by daely on 8/3/2016.
  */
 interface MultiReducer2<S1:Any,S2:Any> : Reducer<MultiState2<S1,S2>> {

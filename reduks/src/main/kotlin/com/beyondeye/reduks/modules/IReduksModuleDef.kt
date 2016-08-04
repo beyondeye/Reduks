@@ -10,6 +10,10 @@ import com.beyondeye.reduks.StoreSubscriberBuilder
 interface IReduksModuleDef<State>
 {
     /**
+     * an id that identify the module
+     */
+    val ctx:ReduksContext
+    /**
      * factory method for store
      */
     val  storeFactory: StoreFactory<State>

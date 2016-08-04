@@ -2,17 +2,18 @@ package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.*
 
-class MultiReduks3<S1:Any,S2:Any,S3:Any>(ctx1: ReduksContext, def1: IReduksModuleDef<S1>,
-                                         ctx2: ReduksContext, def2: IReduksModuleDef<S2>,
-                                         ctx3: ReduksContext, def3: IReduksModuleDef<S3>) : MultiReduks(), Reduks<MultiState3<S1, S2, S3>> {
-    val r1= ReduksModule<S1>(def1, ctx1)
-    val r2= ReduksModule<S2>(def2, ctx2)
-    val r3= ReduksModule<S3>(def3, ctx3)
-    override val rmap= mapOf(ctx1 to r1,ctx2 to r2,ctx3 to r3)
+class MultiReduks3<S1:Any,S2:Any,S3:Any>(def1: IReduksModuleDef<S1>,
+                                         def2: IReduksModuleDef<S2>,
+                                         def3: IReduksModuleDef<S3>) : MultiReduks(), Reduks<MultiState3<S1, S2, S3>> {
+    override val ctx: ReduksContext=def1.ctx+def2.ctx+def3.ctx
+    val r1= ReduksModule<S1>(def1)
+    val r2= ReduksModule<S2>(def2)
+    val r3= ReduksModule<S3>(def3)
+    override val rmap= mapOf(def1.ctx to r1,def2.ctx to r2,def3.ctx to r3)
     override fun dispatchActionWithContext(a: ActionWithContext): Any = when (a.context) {
-        r1.context -> r1.dispatch(a.action)
-        r2.context -> r2.dispatch(a.action)
-        r3.context -> r3.dispatch(a.action)
+        r1.ctx -> r1.dispatch(a.action)
+        r2.ctx -> r2.dispatch(a.action)
+        r3.ctx -> r3.dispatch(a.action)
         else -> throw IllegalArgumentException("no registered module with id ${a.context.moduleId}")
     }
     override val store= object: Store<MultiState3<S1, S2, S3>> {

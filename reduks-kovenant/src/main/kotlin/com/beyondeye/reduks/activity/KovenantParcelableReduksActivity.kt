@@ -31,6 +31,7 @@ abstract class KovenantParcelableReduksActivity<S: Parcelable> : KovenantReduksA
     override fun initReduks() {
         reduks = ReduksModule<S>(
                 ReduksModule.Def<S>(
+                        activityReduksContext(),
                         KovenantStore.Factory(),
                         activityStartState(),
                         activityStartAction(),

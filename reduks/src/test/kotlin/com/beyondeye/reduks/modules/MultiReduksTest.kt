@@ -38,7 +38,10 @@ class MultiReduksTest {
     }
     var nStateChanges1 = 0
     var nStateChangeCalls1 = 0
+    val ctx1 = ReduksContext("m1")
+    val ctx2 = ReduksContext("m2")
     val mdef1 = ReduksModule.Def<TestState1>(
+            ctx = ctx1,
             storeFactory = SimpleStore.Factory(),
             initialState = TestState1(),
             startAction = TestAction1("start1"),
@@ -57,6 +60,7 @@ class MultiReduksTest {
     var nStateChanges2 = 0
     var nStateChangeCalls2 = 0
     val mdef2 = ReduksModule.Def<TestState2>(
+            ctx = ctx2,
             storeFactory = SimpleStore.Factory(),
             initialState = TestState2(),
             startAction = TestAction2("start2"),
@@ -73,11 +77,9 @@ class MultiReduksTest {
             }
     )
 
-    val ctx1 = ReduksContext("m1")
-    val ctx2 = ReduksContext("m2")
     @Test
     fun test_multireduks2_correctly_initialized() {
-        val mr = MultiReduks.buildFromModules(ctx1, mdef1, ctx2, mdef2)
+        val mr = MultiReduks.buildFromModules(mdef1, mdef2)
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("start1") //check that start action dispatched
         assertThat(nStateChanges1).isEqualTo(1) //start action
         assertThat(nStateChangeCalls1).isEqualTo(1) //start action
@@ -89,7 +91,7 @@ class MultiReduksTest {
     @Test
     fun test_multireduks2_dispatch() {
         //----GIVEN
-        val mr = MultiReduks.buildFromModules(ctx1, mdef1, ctx2, mdef2)
+        val mr = MultiReduks.buildFromModules( mdef1,  mdef2)
         //-----WHEN
         mr.dispatch(ActionWithContext(TestAction1("1"), ctx1))
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")
@@ -122,7 +124,7 @@ class MultiReduksTest {
 
     @Test
     fun test_multireduks2_from_multidef_dispatch() {
-        val multidef=MultiReduksDef.create(SimpleStore.Factory(),mdef1,ctx1,mdef2,ctx2)
+        val multidef=MultiReduksDef.create(SimpleStore.Factory(),mdef1,mdef2)
         val mr = ReduksModule(multidef)
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("start1") //check that start action dispatched
         assertThat(mr.store.state.s2.lastActionType).isEqualTo("start2") //check that start action dispatched

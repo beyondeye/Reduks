@@ -18,5 +18,5 @@ interface StoreFactory<S> {
     /**
      * return new factory with same parameter but for new state type S2
      */
-    fun<S2> ofType():StoreFactory<S2>
+    fun<S_> ofType():StoreFactory<S_>
 }

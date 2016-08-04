@@ -25,6 +25,7 @@ abstract class RxReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
         //       startKovenant()
         reduks = ReduksModule<S>(
                 ReduksModule.Def<S>(
+                        activityReduksContext(),
                         RxStore.Factory<S>(allActivitySubscriptions),
                         activityStartState(),
                         activityStartAction(),

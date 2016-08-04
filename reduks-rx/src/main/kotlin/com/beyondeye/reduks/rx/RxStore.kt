@@ -18,8 +18,8 @@ class RxStore<S>(
         val allRxSubscriptions: CompositeSubscription?=null
 ) : Store<S> {
     class Factory<S>( val allRxSubscriptions: CompositeSubscription?=null) : StoreFactory<S> {
-        override fun <S2> ofType(): StoreFactory<S2> {
-            return Factory<S2>(allRxSubscriptions)
+        override fun <S_> ofType(): StoreFactory<S_> {
+            return Factory<S_>(allRxSubscriptions)
         }
 
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)

@@ -31,6 +31,7 @@ abstract class KovenantReduksActivity<S>: AppCompatActivity(),ReduksActivity<S> 
     open fun initReduks() {
         reduks = ReduksModule<S>(
                 ReduksModule.Def<S>(
+                activityReduksContext(),
                 KovenantStore.Factory<S>(),
                 activityStartState(),
                 activityStartAction(),
