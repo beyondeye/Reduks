@@ -9,6 +9,7 @@ import com.beyondeye.reduks.StoreSubscriberBuilder
 import com.beyondeye.reduks.modules.ReduksModule
 import com.beyondeye.reduks.rx.RxStore
 import com.beyondeye.reduks.rx.RxStoreSubscriber
+import com.beyondeye.reduksAndroid.activity.ReduksActivity
 import rx.subscriptions.CompositeSubscription
 
 /**

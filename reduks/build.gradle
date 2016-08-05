@@ -1,8 +1,23 @@
+apply plugin: 'kotlin'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = 'com.github.beyondeye.reduks' //required by jitpack
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+}
+
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$support_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile "junit:junit:$junit_version"
+    testCompile 'org.assertj:assertj-core:1.7.1'
     testCompile "io.reactivex:rxjava:$rxjava_version"
 }
 
-apply from: '../maven-push.gradle'
+//apply from: '../maven-push.gradle'
 

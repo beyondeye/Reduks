@@ -1,4 +1,4 @@
-include ':reduks'
+include ':reduks', ':reduks-android'
 include ':reduks-devtools'
 include ':reduks-rx'
 include ':reduks-kovenant'

@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.modules.ReduksModule
+import com.beyondeye.reduksAndroid.activity.ReduksActivity
 import nl.komponents.kovenant.android.startKovenant
 import nl.komponents.kovenant.android.stopKovenant
 
 /**
  * Created by daely on 6/13/2016.
  */
-abstract class KovenantReduksActivity<S>: AppCompatActivity(),ReduksActivity<S> {
+abstract class KovenantReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
     override lateinit var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
