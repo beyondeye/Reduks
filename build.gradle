@@ -34,19 +34,18 @@ allprojects {
     }
 }
 
+
+//config for android specific libs
+//configure(subprojects.findAll {it.name != 'reduks-core' && it.name != 'zjsonpatch'}) {
+//
+//}
+//config for java specific libs
+//configure(subprojects.findAll {it.name == 'reduks-core' || it.name == 'zjsonpatch'}) {
+//
+//}
 configure(subprojects - project(':reduks-core')) {
     repositories {
         mavenCentral()
-//        jcenter()
-//        maven {
-//            url 'http://oss.sonatype.org/content/repositories/snapshots'
-//        }
-//        maven {
-//            url 'https://oss.sonatype.org/content/groups/staging'
-//        }
-//        maven {
-//            url "http://repository.jetbrains.com/all"
-//        }
     }
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
