@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':reduks-core')
+    compile project(':reduks-android')
     compile "nl.komponents.kovenant:kovenant:$kovenant_version"
     compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
     compile "nl.komponents.kovenant:kovenant-android:$kovenant_version"

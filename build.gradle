@@ -34,7 +34,7 @@ allprojects {
     }
 }
 
-subprojects {
+configure(subprojects - project(':reduks-core')) {
     repositories {
         mavenCentral()
 //        jcenter()
@@ -76,7 +76,7 @@ subprojects {
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-        testCompile "junit:junit:${junit_version}"
+        testCompile "junit:junit:$junit_version"
         testCompile 'org.assertj:assertj-core:1.7.1'
         // testCompile "com.google.truth:truth:0.28"
         testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'

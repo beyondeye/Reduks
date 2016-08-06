@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.activity
+package com.beyondeye.reduksAndroid.activity
 
 import com.beyondeye.reduks.Reducer
 import com.beyondeye.reduks.Reduks
@@ -30,6 +30,6 @@ interface ReduksActivity<S> {
     /**
      * return the activity main store subscriber
      */
-    fun getActivityStoreSubscriber(store:Store<S>): StoreSubscriber<S>
+    fun getActivityStoreSubscriber(store: Store<S>): StoreSubscriber<S>
 
 }
