@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.logger.logformatter
 
-data class LogFormatterSettings(
+class LogFormatterSettings(
         var methodCount:Int = 2,
         var borderDividerLength:Int=90,
         var isShowThreadInfo:Boolean = false,

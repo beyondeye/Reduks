@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.logger
 
-internal data class LogEntry<S>(
+internal  class LogEntry<S>(
         val started: Long,
         val prevState: S,
         val action: Any,

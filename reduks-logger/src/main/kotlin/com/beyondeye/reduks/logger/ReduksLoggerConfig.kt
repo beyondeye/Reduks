@@ -6,7 +6,7 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatterSettings
  *
  * Created by daely on 7/21/2016.
  */
-data class ReduksLoggerConfig<S>(
+class ReduksLoggerConfig<S>(
         /**
          *  activate log only if filter function returns true
          */

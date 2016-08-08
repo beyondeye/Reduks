@@ -46,7 +46,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         logEntry.took = nano2ms(logEntry.started,System.nanoTime())
         logEntry.nextState = config.stateTransformer(store.state)
         //check if diff is activated
-        logEntry.diffActivated = if (config.logStateDiff && config.logStateDiffFilter != null) config.logStateDiffFilter!!.invoke(logEntry.nextState!!, action) else config.logStateDiff
+        logEntry.diffActivated = if (config.logStateDiff && config.logStateDiffFilter != null) config.logStateDiffFilter.invoke(logEntry.nextState!!, action) else config.logStateDiff
         printBuffer(logBuffer)
         logBuffer.clear()
 

@@ -12,7 +12,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     /**
      * all data needed for creating a ReduksModule
      */
-    data class Def<State>(
+    class Def<State>(
             /**
              * an id that identify the module
              */
