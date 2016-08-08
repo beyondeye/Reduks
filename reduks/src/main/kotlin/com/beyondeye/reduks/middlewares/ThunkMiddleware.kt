@@ -32,8 +32,9 @@ import com.beyondeye.reduks.Thunk
 class ThunkMiddleware<S> : Middleware<S> {
     override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any):Any {
         if(action is Thunk<*>) {
+            @Suppress("UNCHECKED_CAST")
             val a=(action as Thunk<S>).execute(store.dispatch ,store.state)
-            return next(a);
+            return next(a)
         }
         return  next(action)
     }
