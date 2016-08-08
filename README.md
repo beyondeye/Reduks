@@ -23,6 +23,7 @@ it currently has the following features that bansa misses.
   formatting engine based on a heavily customized version of https://github.com/orhanobut/logger. 
   The reduks logger middleware allows to print Json diff of subsequent reduks states  thanks to a port to Kotlin of https://github.com/flipkart-incubator/zjsonpatch, with Jackson substituted with Gson and guava dependency removed
 
+ - Support for easily combining multiple reduks modules
 ##Planned:
 support for persisting store state on activity/fragment lifecycle events. Reduks modules composing utilities
 
@@ -35,17 +36,19 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:1.5.2'
+compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b1'
 
-//rx-java based state store
-compile 'com.github.beyondeye.reduks:reduks-rx:1.5.2'
+//rx-java based state store+ additional required dep for android support
+compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b1'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b1'
 
 //kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:1.5.2'
+compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b1'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b1'
 
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:1.5.2'
+compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b1'
 
 ```
 
