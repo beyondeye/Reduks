@@ -47,7 +47,7 @@ class KovenantStoreMiddlewareTest {
         val middleWare1 = Middleware<TestState> { store, next, action ->
             counter += 1
             order.add("first")
-            val nextAction = next(action)
+            next(action)
             order.add("third")
         }
 
@@ -146,12 +146,12 @@ class KovenantStoreMiddlewareTest {
             counter += 1
             order.add("first")
 
-            val nextAction = next(action)
+            next(action)
 
             // Redispatch an action that goes through the whole chain
             // (useful for async middleware)
             if ((action as TestAction).type == "around!") {
-                store.dispatch(TestAction());
+                store.dispatch(TestAction())
             }
         }
 

@@ -45,7 +45,7 @@ class DevToolsMiddlewareTest {
         val middleWare1 = Middleware<TestState> { store, next, action ->
             counter += 1
             order.add("first")
-            val nextAction = next.dispatch(action)
+            next.dispatch(action)
             order.add("third")
         }
 
@@ -137,12 +137,12 @@ class DevToolsMiddlewareTest {
             counter += 1
             order.add("first")
 
-            val nextAction = next.dispatch(action)
+            next.dispatch(action)
 
             // Redispatch an action that goes through the whole chain
             // (useful for async middleware)
             if (action is Around) {
-                store.dispatch(TestAction());
+                store.dispatch(TestAction())
             }
         }
 
