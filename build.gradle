@@ -22,7 +22,7 @@ allprojects {
     }
     //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
     ext {
-        VERSION_NAME='1.5.3-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
+        VERSION_NAME='2.0.0b1-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
         POM_NAME='Reduks: Reduxjs for Kotlin+Android'
         GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
         sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
@@ -43,6 +43,30 @@ allprojects {
 //configure(subprojects.findAll {it.name == 'reduks-core' || it.name == 'zjsonpatch'}) {
 //
 //}
+configure(project(':reduks-core')) {
+    repositories {
+        mavenCentral()
+    }
+    apply plugin: 'kotlin'
+    apply plugin: 'maven'
+    group = 'com.github.beyondeye.reduks' //required by jitpack
+
+    sourceCompatibility = sourceCompatibility_ //I want this library to be linkable from android projects
+    targetCompatibility = targetCompatibility_ //I want this library to be linkable from android projects
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        testCompile "junit:junit:$junit_version"
+        testCompile 'org.assertj:assertj-core:1.7.1'
+        testCompile "io.reactivex:rxjava:$rxjava_version"
+    }
+
+}
 configure(subprojects - project(':reduks-core')) {
     repositories {
         mavenCentral()
