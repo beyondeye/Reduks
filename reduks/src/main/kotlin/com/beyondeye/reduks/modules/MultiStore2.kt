@@ -4,14 +4,17 @@ import com.beyondeye.reduks.*
 
 /**
  * Created by daely on 8/3/2016.
+ * use @JvmField for avoiding generation of useless getter methods
  */
 class MultiStore2<S1:Any,S2:Any>(
-        ctx1:ReduksContext,val store1:Store<S1>,
-        ctx2:ReduksContext,val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore()
+        ctx1:ReduksContext,
+        @JvmField val store1:Store<S1>,
+        ctx2:ReduksContext,
+        @JvmField val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore()
 {
-    class Factory<S1:Any,S2:Any>(val storeFactory: StoreFactory<Any>,
-                                 val ctx1:ReduksContext,
-                                 val ctx2:ReduksContext): StoreFactory< MultiState2<S1,S2> > {
+    class Factory<S1:Any,S2:Any>(@JvmField val storeFactory: StoreFactory<Any>,
+                                 @JvmField val ctx1:ReduksContext,
+                                 @JvmField val ctx2:ReduksContext): StoreFactory< MultiState2<S1,S2> > {
         override fun newStore(initialState: MultiState2<S1, S2>,
                               reducer: Reducer<MultiState2<S1, S2>>): Store<MultiState2<S1, S2>> {
             if(reducer !is MultiReducer2<S1, S2>) throw IllegalArgumentException()

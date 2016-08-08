@@ -3,18 +3,19 @@ package com.beyondeye.reduks.modules
 import com.beyondeye.reduks.*
 
 /**
+ * use @JvmField for avoiding generation of useless getter methods
  * Created by daely on 8/3/2016.
  */
 class MultiStore4<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(
-        ctx1: ReduksContext, val store1: Store<S1>,
-        ctx2: ReduksContext, val store2: Store<S2>,
-        ctx3: ReduksContext, val store3: Store<S3>,
-        ctx4: ReduksContext, val store4: Store<S4>) : Store<MultiState4<S1, S2, S3, S4>>, MultiStore() {
-    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(val storeFactory: StoreFactory<Any>,
-                                                                    val ctx1: ReduksContext,
-                                                                    val ctx2: ReduksContext,
-                                                                    val ctx3: ReduksContext,
-                                                                    val ctx4: ReduksContext) : StoreFactory<MultiState4<S1, S2, S3, S4>> {
+        ctx1: ReduksContext, @JvmField val store1: Store<S1>,
+        ctx2: ReduksContext, @JvmField val store2: Store<S2>,
+        ctx3: ReduksContext, @JvmField val store3: Store<S3>,
+        ctx4: ReduksContext, @JvmField val store4: Store<S4>) : Store<MultiState4<S1, S2, S3, S4>>, MultiStore() {
+    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
+                                                          @JvmField val ctx1: ReduksContext,
+                                                          @JvmField val ctx2: ReduksContext,
+                                                          @JvmField val ctx3: ReduksContext,
+                                                          @JvmField val ctx4: ReduksContext) : StoreFactory<MultiState4<S1, S2, S3, S4>> {
         override fun newStore(initialState: MultiState4<S1, S2, S3, S4>,
                               reducer: Reducer<MultiState4<S1, S2, S3, S4>>): Store<MultiState4<S1, S2, S3, S4>> {
             if (reducer !is MultiReducer4<S1, S2, S3, S4>) throw IllegalArgumentException()

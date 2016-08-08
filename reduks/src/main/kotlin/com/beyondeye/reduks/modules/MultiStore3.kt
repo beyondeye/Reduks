@@ -3,16 +3,17 @@ package com.beyondeye.reduks.modules
 import com.beyondeye.reduks.*
 
 /**
+ * use @JvmField for avoiding generation of useless getter methods
  * Created by daely on 8/3/2016.
  */
 class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
-        ctx1: ReduksContext, val store1: Store<S1>,
-        ctx2: ReduksContext, val store2: Store<S2>,
-        ctx3: ReduksContext, val store3: Store<S3>) : Store<MultiState3<S1, S2, S3>>, MultiStore() {
-    class Factory<S1 : Any, S2 : Any, S3 : Any>(val storeFactory: StoreFactory<Any>,
-                                                val ctx1: ReduksContext,
-                                                val ctx2: ReduksContext,
-                                                val ctx3: ReduksContext) : StoreFactory<MultiState3<S1, S2, S3>> {
+        ctx1: ReduksContext, @JvmField val store1: Store<S1>,
+        ctx2: ReduksContext, @JvmField val store2: Store<S2>,
+        ctx3: ReduksContext, @JvmField val store3: Store<S3>) : Store<MultiState3<S1, S2, S3>>, MultiStore() {
+    class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
+                                                @JvmField val ctx1: ReduksContext,
+                                                @JvmField val ctx2: ReduksContext,
+                                                @JvmField val ctx3: ReduksContext) : StoreFactory<MultiState3<S1, S2, S3>> {
         override fun newStore(initialState: MultiState3<S1, S2, S3>,
                               reducer: Reducer<MultiState3<S1, S2, S3>>): Store<MultiState3<S1, S2, S3>> {
             if (reducer !is MultiReducer3<S1, S2, S3>) throw IllegalArgumentException()

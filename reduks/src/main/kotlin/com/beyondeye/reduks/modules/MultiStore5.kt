@@ -3,20 +3,21 @@ package com.beyondeye.reduks.modules
 import com.beyondeye.reduks.*
 
 /**
+ * use @JvmField for avoiding generation of useless getter methods
  * Created by daely on 8/3/2016.
  */
 class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
-        ctx1: ReduksContext, val store1: Store<S1>,
-        ctx2: ReduksContext, val store2: Store<S2>,
-        ctx3: ReduksContext, val store3: Store<S3>,
-        ctx4: ReduksContext, val store4: Store<S4>,
-        ctx5: ReduksContext, val store5: Store<S5>) : Store<MultiState5<S1, S2, S3, S4, S5>>, MultiStore() {
-    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(val storeFactory: StoreFactory<Any>,
-                                                                    val ctx1: ReduksContext,
-                                                                    val ctx2: ReduksContext,
-                                                                    val ctx3: ReduksContext,
-                                                                    val ctx4: ReduksContext,
-                                                                    val ctx5: ReduksContext) : StoreFactory<MultiState5<S1, S2, S3, S4, S5>> {
+        ctx1: ReduksContext, @JvmField val store1: Store<S1>,
+        ctx2: ReduksContext, @JvmField val store2: Store<S2>,
+        ctx3: ReduksContext, @JvmField val store3: Store<S3>,
+        ctx4: ReduksContext, @JvmField val store4: Store<S4>,
+        ctx5: ReduksContext, @JvmField val store5: Store<S5>) : Store<MultiState5<S1, S2, S3, S4, S5>>, MultiStore() {
+    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
+                                                                    @JvmField val ctx1: ReduksContext,
+                                                                    @JvmField val ctx2: ReduksContext,
+                                                                    @JvmField val ctx3: ReduksContext,
+                                                                    @JvmField val ctx4: ReduksContext,
+                                                                    @JvmField val ctx5: ReduksContext) : StoreFactory<MultiState5<S1, S2, S3, S4, S5>> {
         override fun newStore(initialState: MultiState5<S1, S2, S3, S4, S5>,
                               reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>): Store<MultiState5<S1, S2, S3, S4, S5>> {
             if (reducer !is MultiReducer5<S1, S2, S3, S4, S5>) throw IllegalArgumentException()
