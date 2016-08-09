@@ -4,17 +4,14 @@ import com.beyondeye.reduks.Store
 
 /**
  * Created by daely on 8/4/2016.
+ * ctx= ReduksContext associated to this Store
  */
-abstract class MultiStore {
-    /**
-     * ReduksContext associated to this Store
-     */
-    abstract val ctx:ReduksContext
+abstract class MultiStore(@JvmField val ctx:ReduksContext) {
     /**
      *     map of all modules with  [ReduksContext] as index
      */
     abstract val storeMap:Map<ReduksContext, Store<out Any>>
-    internal var dispatchWrappedAction: (Any) -> Any = { action ->
+    @JvmField internal var dispatchWrappedAction: (Any) -> Any = { action ->
         when(action) {
             is ActionWithContext -> {
                 val actionContext=action.context

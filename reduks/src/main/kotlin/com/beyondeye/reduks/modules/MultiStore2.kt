@@ -10,7 +10,7 @@ class MultiStore2<S1:Any,S2:Any>(
         ctx1:ReduksContext,
         @JvmField val store1:Store<S1>,
         ctx2:ReduksContext,
-        @JvmField val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore()
+        @JvmField val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore(ReduksModule.multiContext(ctx1,ctx2))
 {
     class Factory<S1:Any,S2:Any>(@JvmField val storeFactory: StoreFactory<Any>,
                                  @JvmField val ctx1:ReduksContext,
@@ -27,8 +27,6 @@ class MultiStore2<S1:Any,S2:Any>(
                 storeFactory.ofType<MultiState2<S1,S2>>().storeStandardMiddlewares
 
     }
-    override val ctx = ReduksModule.multiContext(ctx1,ctx2)
-
     override val storeMap = mapOf(
             ctx1 to store1,
             ctx2 to store2)

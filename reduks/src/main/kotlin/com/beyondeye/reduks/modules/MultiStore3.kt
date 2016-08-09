@@ -9,7 +9,7 @@ import com.beyondeye.reduks.*
 class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
         ctx1: ReduksContext, @JvmField val store1: Store<S1>,
         ctx2: ReduksContext, @JvmField val store2: Store<S2>,
-        ctx3: ReduksContext, @JvmField val store3: Store<S3>) : Store<MultiState3<S1, S2, S3>>, MultiStore() {
+        ctx3: ReduksContext, @JvmField val store3: Store<S3>) : Store<MultiState3<S1, S2, S3>>, MultiStore(ReduksModule.multiContext(ctx1, ctx2, ctx3)) {
     class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
                                                 @JvmField val ctx1: ReduksContext,
                                                 @JvmField val ctx2: ReduksContext,
@@ -28,8 +28,6 @@ class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
                 storeFactory.ofType<MultiState3<S1, S2, S3>>().storeStandardMiddlewares
 
     }
-
-    override val ctx = ReduksModule.multiContext(ctx1, ctx2, ctx3)
 
     override val storeMap = mapOf(
             ctx1 to store1,
