@@ -70,8 +70,8 @@ interface Selector<S, O> : SelectorInput<S, O> {
  * abstract base class for all selectors
  */
 abstract class AbstractSelector<S, O> : Selector<S, O> {
-    protected var recomputationsLastChanged = 0L
-    protected var _recomputations = 0L
+    @JvmField protected var recomputationsLastChanged = 0L
+    @JvmField protected var _recomputations = 0L
     override val recomputations: Long get() = _recomputations
 
 
@@ -90,11 +90,12 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
 
 }
 
-class SelectorForP5<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(val si0: SelectorInput<S, I0>,
-                                                                         val si1: SelectorInput<S, I1>,
-                                                                         val si2: SelectorInput<S, I2>,
-                                                                         val si3: SelectorInput<S, I3>,
-                                                                         val si4: SelectorInput<S, I4>
+//use @JvmField annotation for avoiding generation useless getter methods
+class SelectorForP5<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+                                                                         @JvmField val si1: SelectorInput<S, I1>,
+                                                                         @JvmField val si2: SelectorInput<S, I2>,
+                                                                         @JvmField val si3: SelectorInput<S, I3>,
+                                                                         @JvmField val si4: SelectorInput<S, I4>
 ) {
     fun<O> compute(computeFun: (I0, I1, I2, I3, I4) -> O) = object : AbstractSelector<S, O>() {
         override val computeAndCount = fun(i: Array<out Any>): O {
@@ -115,11 +116,11 @@ class SelectorForP5<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(val si0
     }
 }
 
-
-class SelectorForP4<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(val si0: SelectorInput<S, I0>,
-                                                               val si1: SelectorInput<S, I1>,
-                                                               val si2: SelectorInput<S, I2>,
-                                                               val si3: SelectorInput<S, I3>
+//use @JvmField annotation for avoiding generation useless getter methods
+class SelectorForP4<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+                                                               @JvmField val si1: SelectorInput<S, I1>,
+                                                               @JvmField val si2: SelectorInput<S, I2>,
+                                                               @JvmField val si3: SelectorInput<S, I3>
 ) {
     fun<I4 : Any> withField(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn))
     fun<I4 : Any> withSelector(si: SelectorInput<S, I4>) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, si)
@@ -141,10 +142,10 @@ class SelectorForP4<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(val si0: Selector
     }
 }
 
-
-class SelectorForP3<S, I0 : Any, I1 : Any, I2 : Any>(val si0: SelectorInput<S, I0>,
-                                                     val si1: SelectorInput<S, I1>,
-                                                     val si2: SelectorInput<S, I2>
+//use @JvmField annotation for avoiding generation useless getter methods
+class SelectorForP3<S, I0 : Any, I1 : Any, I2 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+                                                     @JvmField val si1: SelectorInput<S, I1>,
+                                                     @JvmField val si2: SelectorInput<S, I2>
 ) {
     fun<I3 : Any> withField(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn))
     fun<I3 : Any> withSelector(si: SelectorInput<S, I3>) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, si)
@@ -165,8 +166,9 @@ class SelectorForP3<S, I0 : Any, I1 : Any, I2 : Any>(val si0: SelectorInput<S, I
     }
 }
 
-class SelectorForP2<S, I0 : Any, I1 : Any>(val si0: SelectorInput<S, I0>,
-                                           val si1: SelectorInput<S, I1>) {
+//use @JvmField annotation for avoiding generation useless getter methods
+class SelectorForP2<S, I0 : Any, I1 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+                                           @JvmField val si1: SelectorInput<S, I1>) {
     fun<I2 : Any> withField(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn))
     fun<I2 : Any> withSelector(si: SelectorInput<S, I2>) = SelectorForP3<S, I0, I1, I2>(si0, si1, si)
     fun<O> compute(computeFun: (I0, I1) -> O) = object : AbstractSelector<S, O>() {
@@ -185,7 +187,8 @@ class SelectorForP2<S, I0 : Any, I1 : Any>(val si0: SelectorInput<S, I0>,
     }
 }
 
-class SelectorForP1<S, I0 : Any>(val si0: SelectorInput<S, I0>) {
+//use @JvmField annotation for avoiding generation useless getter methods
+class SelectorForP1<S, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
     fun<I1 : Any> withField(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn))
     fun<I1 : Any> withSelector(si: SelectorInput<S, I1>) = SelectorForP2<S, I0, I1>(si0, si)
     fun<O> compute(computeFun: (I0) -> O) = object : AbstractSelector<S, O>() {
