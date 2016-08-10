@@ -205,54 +205,6 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                         }
                     })
         }
-
-        //--------------------------------
-        fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any, S6 : Any> MultiDef(storeFactory_: StoreFactory<MultiState6<S1, S2, S3, S4, S5, S6>>,
-                                                                                        m1: ReduksModule.Def<S1>,
-                                                                                        m2: ReduksModule.Def<S2>,
-                                                                                        m3: ReduksModule.Def<S3>,
-                                                                                        m4: ReduksModule.Def<S4>,
-                                                                                        m5: ReduksModule.Def<S5>,
-                                                                                        m6: ReduksModule.Def<S6>): ReduksModule.Def<MultiState6<S1, S2, S3, S4, S5, S6>> {
-            val mctx = multiContext(m1.ctx, m2.ctx, m3.ctx, m4.ctx, m5.ctx, m6.ctx)
-            return ReduksModule.Def<MultiState6<S1, S2, S3, S4, S5, S6>>(
-                    ctx = mctx,
-                    storeFactory = MultiStore6.Factory<S1, S2, S3, S4, S5, S6>(storeFactory_.ofType(), m1.ctx, m2.ctx, m3.ctx, m4.ctx, m5.ctx, m6.ctx),
-                    initialState = MultiState6(mctx, m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState, m6.initialState),
-                    startAction = MultiActionWithContext(
-                            ActionWithContext(m1.startAction, m1.ctx),
-                            ActionWithContext(m2.startAction, m2.ctx),
-                            ActionWithContext(m3.startAction, m3.ctx),
-                            ActionWithContext(m4.startAction, m4.ctx),
-                            ActionWithContext(m5.startAction, m5.ctx),
-                            ActionWithContext(m6.startAction, m6.ctx)),
-                    stateReducer = MultiReducer6<S1, S2, S3, S4, S5, S6>(m1, m2, m3, m4, m5, m6),
-                    subscriberBuilder = StoreSubscriberBuilder { store ->
-                        if (store !is MultiStore6<S1, S2, S3, S4, S5, S6>) throw IllegalArgumentException("error")
-                        val selector = SelectorBuilder<MultiState6<S1, S2, S3, S4, S5, S6>>()
-                        val s1sel = selector.withSingleField { s1 }
-                        val s2sel = selector.withSingleField { s2 }
-                        val s3sel = selector.withSingleField { s3 }
-                        val s4sel = selector.withSingleField { s4 }
-                        val s5sel = selector.withSingleField { s5 }
-                        val s6sel = selector.withSingleField { s6 }
-                        val sub1 = m1.subscriberBuilder.build(store.store1)
-                        val sub2 = m2.subscriberBuilder.build(store.store2)
-                        val sub3 = m3.subscriberBuilder.build(store.store3)
-                        val sub4 = m4.subscriberBuilder.build(store.store4)
-                        val sub5 = m5.subscriberBuilder.build(store.store5)
-                        val sub6 = m6.subscriberBuilder.build(store.store6)
-                        StoreSubscriber { newS ->
-                            s1sel.onChangeIn(newS) { sub1.onStateChange(newS.s1) }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange(newS.s2) }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange(newS.s3) }
-                            s4sel.onChangeIn(newS) { sub4.onStateChange(newS.s4) }
-                            s5sel.onChangeIn(newS) { sub5.onStateChange(newS.s5) }
-                            s6sel.onChangeIn(newS) { sub6.onStateChange(newS.s6) }
-                        }
-                    })
-        }
-        //--------------------------------
     }
 
 }

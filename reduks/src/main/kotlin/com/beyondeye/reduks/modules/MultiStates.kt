@@ -34,13 +34,3 @@ class MultiState5<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any>(@JvmField val ctx:ReduksCo
     fun copy(s1: S1?=null, s2:S2?=null, s3:S3?=null, s4:S4?=null, s5:S5?=null) =
             MultiState5(ctx,s1?:this.s1,s2?:this.s2,s3?:this.s3,s4?:this.s4,s5?:this.s5)
 }
-class MultiState6<S1:Any,S2:Any,S3:Any,S4:Any,S5:Any,S6:Any>(@JvmField val ctx:ReduksContext,
-                                                             @JvmField val s1:S1,
-                                                             @JvmField val s2:S2,
-                                                             @JvmField val s3:S3,
-                                                             @JvmField val s4:S4,
-                                                             @JvmField val s5:S5,
-                                                             @JvmField val s6:S6) {
-    fun copy(s1: S1?=null, s2:S2?=null, s3:S3?=null, s4:S4?=null, s5:S5?=null, s6:S6?=null) =
-            MultiState6(ctx,s1?:this.s1,s2?:this.s2,s3?:this.s3,s4?:this.s4,s5?:this.s5,s6?:this.s6)
-}
