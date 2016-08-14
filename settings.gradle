@@ -5,5 +5,5 @@ include ':reduks-rx'
 include ':reduks-kovenant'
 include ':reduks-logger'
 include ':zjsonpatch'
-
+include ':examples'
 project(':reduks').name = 'reduks-core'
