@@ -3,23 +3,42 @@ package com.beyondeye.reduks.activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.beyondeye.reduks.*
-import com.beyondeye.reduks.modules.ReduksModule
-import com.beyondeye.reduksAndroid.activity.ReduksActivity
+import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import nl.komponents.kovenant.android.startKovenant
 import nl.komponents.kovenant.android.stopKovenant
 
 /**
+ * An activity base class for avoiding writing boilerplate code for initializing reduks and handling save and restoring reduks state
+ * on onSaveInstanceState/onRestoreInstanceState activity life-cycle events
+ * automatically handle save and restore of store state on activity recreation using a special custom action [ActionRestoreState]
  * Created by daely on 6/13/2016.
  */
-abstract class KovenantReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
-    override lateinit var reduks: Reduks<S>
+abstract class KovenantReduksActivity<S>: AppCompatActivity() {
+    lateinit var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)
         startKovenant() //(before  initReduks()!!)
-        initReduks()
+        reduks=initReduks(KovenantStore.Factory<S>())
     }
 
+
+    /**
+     * function that create the reduks module that should control this activity
+     * If your activity also inherit from SingleModuleReduksActivity, then you can simply
+     * define this function as
+     * override fun initReduks(storeFactory:StoreFactory<S>) = initReduksSingleModule(storeFactory)
+     */
+    abstract fun initReduks(storeFactory:StoreFactory<S>): Reduks<S>
+
+    //override for making this function visible to inheritors
+    override fun onStop() {
+        super.onStop()
+    }
+    //override for making this function visible to inheritors
+    override fun onStart() {
+        super.onStart()
+    }
     override fun onDestroy() {
         // Dispose of the Kovenant thread pools
         // for quicker shutdown you could use
@@ -29,25 +48,13 @@ abstract class KovenantReduksActivity<S>: AppCompatActivity(), ReduksActivity<S>
         stopKovenant()
         super.onDestroy()
     }
-    open fun initReduks() {
-        reduks = ReduksModule<S>(
-                ReduksModule.Def<S>(
-                activityReduksContext(),
-                KovenantStore.Factory<S>(),
-                activityStartState(),
-                activityStartAction(),
-                getActivityStateReducer(),
-                StoreSubscriberBuilder<S> {getActivityStoreSubscriber(it)})
-        )
+    override fun onSaveInstanceState(outState: Bundle?) {
+        ActionRestoreState.saveReduksState(reduks,outState)
+        super.onSaveInstanceState(outState)
     }
-
-    //override for making this function visible to inheritors
-    override fun onStop() {
-        super.onStop()
-    }
-    //override for making this function visible to inheritors
-    override fun onStart() {
-        super.onStart()
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        ActionRestoreState.restoreReduksState(reduks,savedInstanceState)
     }
 
 }

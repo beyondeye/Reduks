@@ -3,7 +3,7 @@ package com.beyondeye.reduks
 import com.beyondeye.reduks.modules.ReduksContext
 
 /**
- * Redux module containing all Reduks component: store and its (main) subscriber
+ * Redux module containing all Reduks components: store and its (main) subscriber
  * Created by daely on 6/8/2016.
  */
 interface Reduks<State> {

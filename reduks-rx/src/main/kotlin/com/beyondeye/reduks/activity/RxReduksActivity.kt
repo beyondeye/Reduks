@@ -2,44 +2,45 @@ package com.beyondeye.reduks.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.beyondeye.reduks.Reduks
-import com.beyondeye.reduks.Store
-import com.beyondeye.reduks.StoreSubscriber
-import com.beyondeye.reduks.StoreSubscriberBuilder
-import com.beyondeye.reduks.modules.ReduksModule
+import com.beyondeye.reduks.*
 import com.beyondeye.reduks.rx.RxStore
 import com.beyondeye.reduks.rx.RxStoreSubscriber
-import com.beyondeye.reduksAndroid.activity.ReduksActivity
+import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import rx.subscriptions.CompositeSubscription
 
 /**
+ * An activity base class for avoiding writing boilerplate code for handling RxJava subscriptions and handling save and restoring reduks state
+ * on onSaveInstanceState/onRestoreInstanceState activity life-cycle events
+ * automatically handle save and restore of store state on activity recreation using a special custom action [ActionRestoreState]
  * Created by daely on 6/13/2016.
  */
-abstract class RxReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
-    lateinit override var reduks: Reduks<S>
+abstract class RxReduksActivity<S>: AppCompatActivity() {
+    lateinit var reduks: Reduks<S>
     lateinit var allActivitySubscriptions: CompositeSubscription //all rx subscriptions
     var isGetActivityRxStoreSubscriberCalled =false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         allActivitySubscriptions= CompositeSubscription()
-        //       startKovenant()
-        reduks = ReduksModule<S>(
-                ReduksModule.Def<S>(
-                        activityReduksContext(),
-                        RxStore.Factory<S>(allActivitySubscriptions),
-                        activityStartState(),
-                        activityStartAction(),
-                        getActivityStateReducer(),
-                        StoreSubscriberBuilder<S> {getActivityStoreSubscriber(it)})
-        )
+
+        reduks=initReduks(RxStore.Factory<S>(allActivitySubscriptions))
+
         if(!isGetActivityRxStoreSubscriberCalled) throw IllegalArgumentException("It seems that you have overridden getActivityStoreSubscriber(): you should override getActivityRxStoreSubscriber() instead!! ")
     }
-    //override for make this function visible to inheritors
+
+    /**
+     * function that create the reduks module that should control this activity
+     * If your activity also inherit from SingleModuleReduksActivity, then you can simply
+     * define this function as
+     * override fun initReduks(storeFactory:StoreFactory<S>) = initReduksSingleModule(storeFactory)
+     */
+    abstract fun initReduks(storeFactory:StoreFactory<S>): Reduks<S>
+
+    //override for making this function visible to inheritors
     override fun onStop() {
         super.onStop()
     }
-    //override for make this function visible to inheritors
+    //override for making this function visible to inheritors
     override fun onStart() {
         super.onStart()
     }
@@ -48,7 +49,7 @@ abstract class RxReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
         allActivitySubscriptions.unsubscribe()
         super.onDestroy()
     }
-    override fun getActivityStoreSubscriber(store: Store<S>): StoreSubscriber<S> {
+    fun getActivityStoreSubscriber(store: Store<S>): StoreSubscriber<S> {
         isGetActivityRxStoreSubscriberCalled =true
         return getActivityRxStoreSubscriber(store)
     }
@@ -56,5 +57,14 @@ abstract class RxReduksActivity<S>: AppCompatActivity(), ReduksActivity<S> {
      * return the activity main store subscriber
      */
     abstract  fun getActivityRxStoreSubscriber(store: Store<S>): RxStoreSubscriber<S>
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        ActionRestoreState.saveReduksState(reduks,outState)
+        super.onSaveInstanceState(outState)
+    }
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        ActionRestoreState.restoreReduksState(reduks,savedInstanceState)
+    }
 
 }
