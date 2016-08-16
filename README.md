@@ -119,9 +119,9 @@ Notice that we **cannot** subscribe for changes of some **specific field** of th
  At first this seems strange. But now we will show how using some advanced features of Reduks, we can turn this to an advantage.
  The idea behind Reduks is that all that happens in the application is put into a single stream of events so that debugging and testing the application behavior is much easier.
  
- Being a single stream of events we can apply functional programming ideas to application state changes that also make the behaviour of the application more easy to reason about and allow avoid many bugs.
+ Being a single stream of events we can apply functional programming ideas to application state changes that also make the behaviour of the application more easy to reason about and allow avoiding many bugs.
  
-Reduks allows all this but also working with state changes in a way very similar to traditional callbacks. This is enabled by the reselect library: instead of writing
+Reduks allows all this but also working with state changes in a way very similar to traditional callbacks. This is enabled by Reduks selectors: instead of writing
  the subscriber as above we can write the following code:
  
 ```kotlin
@@ -153,10 +153,12 @@ There are a few things to note in this new version of our sample subscriber:
   in the same block of code, which can be an advantage, since we don't have go and hunt all the callbacks in different places.
   The selector library can detect quite efficiently changes in the new state, thanks to a technique called *memoization* that works because we have embraced immutable data structures for representing the application state
  
- Look at [reselect test code](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
+ Look at [this file](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
  
  A final note about subscribers: although Reduks allows for multiple subscribers to state changes, we can basically write all
  the code we need in a single subscriber, and this is the recommended way to do it, unless you have special requirements.
+ 
+ 
 ###Actions and Reducers
 As we mentioned above, whenever we want to change the state of the application we need to send an *Action*  object, that will be processed by the *Reducers*,
 that are pure functions that take as input an action object and the current state and outputs a new modified state.
