@@ -114,9 +114,13 @@ val subscriber=StoreSubscriber<LoginActivityState> { newState ->
     }
 }
 ```
-Notice that we **cannot** subscribe for changes of some specific field of the activity state. At first this seems strange. But now we will show how using some advanced features of Reduks, we can turn this to an advantage.
+Notice that we **cannot** subscribe for changes of some **specific field** of the activity state.
+ 
+ At first this seems strange. But now we will show how using some advanced features of Reduks, we can turn this to an advantage.
  The idea behind Reduks is that all that happens in the application is put into a single stream of events so that debugging and testing the application behavior is much easier.
+ 
  Being a single stream of events we can apply functional programming ideas to application state changes that also make the behaviour of the application more easy to reason about and allow avoid many bugs.
+ 
 Reduks allows all this but also working with state changes in a way very similar to traditional callbacks. This is enabled by the reselect library: instead of writing
  the subscriber as above we can write the following code:
  
