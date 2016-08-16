@@ -149,14 +149,14 @@ There are a few things to note in this new version of our sample subscriber:
  * We are creating *selector objects*: their purpose is to automatically detect change in one or more state fields, lazily compute a function of these fields
   and pass them to a lambda when the method `onChangeIn(newState)` is called.
   
-  As you can see the code now looks similar to code with Callbacks traditionally used for subscribing to asynchronous updates. But now all the callbacks are defined
-  in the same block of code, which can be an advantage, since we don't have go and hunt all the callbacks in different places.
-  The selector library can detect quite efficiently changes in the new state, thanks to a technique called *memoization* that works because we have embraced immutable data structures for representing the application state
+As you can see the code now looks similar to code with Callbacks traditionally used for subscribing to asynchronous updates. But now all the callbacks are defined
+in the same block of code, which can be an advantage, since we don't have go and hunt all the callbacks in different places.
+The selector library can detect quite efficiently changes in the new state, thanks to a technique called *memoization* that works because we have embraced immutable data structures for representing the application state
  
- Look at [this file](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
+Look at [this file](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
  
- A final note about subscribers: although Reduks allows for multiple subscribers to state changes, we can basically write all
- the code we need in a single subscriber, and this is the recommended way to do it, unless you have special requirements.
+A final note about subscribers: although Reduks allows for multiple subscribers to state changes, we can basically write all
+the code we need in a single subscriber, and this is the recommended way to do it, unless you have special requirements.
  
  
 ###Actions and Reducers
