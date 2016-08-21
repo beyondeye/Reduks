@@ -223,6 +223,34 @@ If you find yourself in this situation then you should defer dispatching an acti
 At a later stage you can eventually also split the chain into multiple actions (so that you can update the UI at different stages of the user authentication process), 
 but always keep the chain logic in the original place. We will discuss later the [Thunk middleware](./reduks/src/main/kotlin/com/beyondeye/reduks/middlewares/ThunkMiddleware.kt)
 and [AsyncAction middleware](./reduks-kovenant/src/main/kotlin/com/beyondeye/reduks/middlewares/AsyncActionMiddleWare.kt) that will help you handle these chains of actions better
+####Combining Reducers
+TODO
+###Reduks Modules
+TODO
+####Combining Reduks modules
+TODO
+###Reduks Activity
+TODO
+####Reduks as a communication channel between fragments
+TODO
+####Persisting Reduks state and activity lifecycle
+TODO
+###Middlewares
+TODO
+####Thunk Middleware
+TODO
+####Promise Middleware
+TODO
+####Logger Middleware
+TODO
+###Types of Reduks Stores
+TODO
+####Simple Store
+TODO
+####RxJava based Store
+TODO
+####Promise based (Kovenant) Store
+TODO
 ## License
 
 ~~~
