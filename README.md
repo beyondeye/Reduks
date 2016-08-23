@@ -5,7 +5,7 @@
 
 This library was started as a fork of https://github.com/brianegan/bansa.
 
-While bansa is focused on Java, Reduks is totally focused on making the best, fully battery included port of reduxjs for Kotlin+Android.
+While bansa is focused on Java, Reduks is totally focused on making the best, fully "batteries included" port of reduxjs for Kotlin+Android.
 it currently has the following features that bansa misses.
 
  - RxJava+RxAndroid support
@@ -225,6 +225,7 @@ At a later stage you can eventually also split the chain into multiple actions (
 but always keep the chain logic in the original place. We will discuss later the [Thunk middleware](./reduks/src/main/kotlin/com/beyondeye/reduks/middlewares/ThunkMiddleware.kt)
 and [AsyncAction middleware](./reduks-kovenant/src/main/kotlin/com/beyondeye/reduks/middlewares/AsyncActionMiddleWare.kt) that will help you handle these chains of actions better
 ####Combining Reducers
+
 TODO
 ###Reduks Modules
 TODO
