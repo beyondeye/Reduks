@@ -12,6 +12,10 @@ class MultiStore2<S1:Any,S2:Any>(
         ctx2:ReduksContext,
         @JvmField val store2:Store<S2>) :Store<MultiState2<S1,S2>>,MultiStore(ReduksModule.multiContext(ctx1,ctx2))
 {
+    override fun replaceReducer(reducer: Reducer<MultiState2<S1, S2>>) {
+        throw UnsupportedOperationException("MultiStore does not support replacing reducer")
+    }
+
     class Factory<S1:Any,S2:Any>(@JvmField val storeFactory: StoreFactory<Any>,
                                  @JvmField val ctx1:ReduksContext,
                                  @JvmField val ctx2:ReduksContext): StoreFactory< MultiState2<S1,S2> > {

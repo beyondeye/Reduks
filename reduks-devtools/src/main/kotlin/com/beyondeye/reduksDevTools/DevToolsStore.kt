@@ -6,6 +6,10 @@ import com.beyondeye.reduks.middlewares.applyMiddleware
 class DevToolsStore<S>
 @SafeVarargs
 constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware<S>) : Store<S> {
+    override fun replaceReducer(reducer: Reducer<S>) {
+        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     class Factory<S>(vararg middlewares_: Middleware<S>) : StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = DevToolsStore<S>(initialState,reducer)
         override val storeStandardMiddlewares=middlewares_

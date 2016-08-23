@@ -3,7 +3,12 @@ package com.beyondeye.reduks
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import java.util.ArrayList
 
-class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
+class SimpleStore<S>(initialState: S,  reducer_: Reducer<S>) : Store<S> {
+    var reducer:Reducer<S> = reducer_
+        private set
+    override fun replaceReducer(reducer: Reducer<S>) {
+        this.reducer=reducer
+    }
     class Factory<S>: StoreFactory<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = SimpleStore<S>(initialState,reducer)
         override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
@@ -28,6 +33,7 @@ class SimpleStore<S>(initialState: S, val reducer: Reducer<S>) : Store<S> {
     init {
         this.state = initialState
     }
+
 
     /**
      * dispach an action to the store and return it (eventually after it is transformed by middlewares)
