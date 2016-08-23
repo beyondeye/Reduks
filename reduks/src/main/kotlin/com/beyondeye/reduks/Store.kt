@@ -1,5 +1,8 @@
 package com.beyondeye.reduks
 
+/**
+ * see also https://github.com/reactjs/redux/blob/master/docs/Glossary.md#store
+ */
 interface Store<S> {
     val state: S
     /**
