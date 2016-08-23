@@ -20,11 +20,11 @@ class KovenantStore<S>(initialState: S, reducer_: Reducer<S>, val observeOnUiThr
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }
-    class Factory<S>( val observeOnUiThread: Boolean = true) : StoreFactory<S> {
+    class Creator<S>( val observeOnUiThread: Boolean = true) : StoreCreator<S> {
         override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = KovenantStore<S>(initialState,reducer,observeOnUiThread)
         override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>(),AsyncActionMiddleWare<S>())
-        override fun <S_> ofType(): StoreFactory<S_> {
-            return Factory<S_>(observeOnUiThread)
+        override fun <S_> ofType(): StoreCreator<S_> {
+            return Creator<S_>(observeOnUiThread)
         }
     }
     val observeContext =

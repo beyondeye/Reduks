@@ -11,10 +11,10 @@ import com.beyondeye.reduks.modules.ReduksModule
  * or RxReduksActivity (RxJava based story)
  */
 interface SingleModuleReduksActivity<S> {
-    fun initReduksSingleModule(storeFactory:StoreFactory<S>): Reduks<S> = ReduksModule<S>(
+    fun initReduksSingleModule(storeCreator:StoreCreator<S>): Reduks<S> = ReduksModule<S>(
             ReduksModule.Def<S>(
                     activityReduksContext(),
-                    storeFactory,
+                    storeCreator,
                     activityStartState(),
                     activityStartAction(),
                     combineReducers(getActivityStateReducer(), ActionRestoreState.getRestoreStateReducer()),

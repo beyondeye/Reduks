@@ -23,7 +23,7 @@ abstract class RxReduksActivity<S>: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         allActivitySubscriptions= CompositeSubscription()
 
-        reduks=initReduks(RxStore.Factory<S>(allActivitySubscriptions))
+        reduks=initReduks(RxStore.Creator<S>(allActivitySubscriptions))
 
         if(!isGetActivityRxStoreSubscriberCalled) throw IllegalArgumentException("It seems that you have overridden getActivityStoreSubscriber(): you should override getActivityRxStoreSubscriber() instead!! ")
     }
@@ -32,9 +32,9 @@ abstract class RxReduksActivity<S>: AppCompatActivity() {
      * function that create the reduks module that should control this activity
      * If your activity also inherit from SingleModuleReduksActivity, then you can simply
      * define this function as
-     * override fun initReduks(storeFactory:StoreFactory<S>) = initReduksSingleModule(storeFactory)
+     * override fun initReduks(storeCreator:StoreCreator<S>) = initReduksSingleModule(storeCreator)
      */
-    abstract fun initReduks(storeFactory:StoreFactory<S>): Reduks<S>
+    abstract fun initReduks(storeCreator:StoreCreator<S>): Reduks<S>
 
     //override for making this function visible to inheritors
     override fun onStop() {

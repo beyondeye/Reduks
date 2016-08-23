@@ -16,26 +16,26 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         throw UnsupportedOperationException("MultiStore does not support replacing reducer")
     }
 
-    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
+    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(@JvmField val storeCreator: StoreCreator<Any>,
                                                                     @JvmField val ctx1: ReduksContext,
                                                                     @JvmField val ctx2: ReduksContext,
                                                                     @JvmField val ctx3: ReduksContext,
                                                                     @JvmField val ctx4: ReduksContext,
-                                                                    @JvmField val ctx5: ReduksContext) : StoreFactory<MultiState5<S1, S2, S3, S4, S5>> {
+                                                                    @JvmField val ctx5: ReduksContext) : StoreCreator<MultiState5<S1, S2, S3, S4, S5>> {
         override fun newStore(initialState: MultiState5<S1, S2, S3, S4, S5>,
                               reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>): Store<MultiState5<S1, S2, S3, S4, S5>> {
             if (reducer !is MultiReducer5<S1, S2, S3, S4, S5>) throw IllegalArgumentException()
             return MultiStore5<S1, S2, S3, S4, S5>(
-                    ctx1, storeFactory.ofType<S1>().newStore(initialState.s1, reducer.r1),
-                    ctx2, storeFactory.ofType<S2>().newStore(initialState.s2, reducer.r2),
-                    ctx3, storeFactory.ofType<S3>().newStore(initialState.s3, reducer.r3),
-                    ctx4, storeFactory.ofType<S4>().newStore(initialState.s4, reducer.r4),
-                    ctx5, storeFactory.ofType<S5>().newStore(initialState.s5, reducer.r5))
+                    ctx1, storeCreator.ofType<S1>().newStore(initialState.s1, reducer.r1),
+                    ctx2, storeCreator.ofType<S2>().newStore(initialState.s2, reducer.r2),
+                    ctx3, storeCreator.ofType<S3>().newStore(initialState.s3, reducer.r3),
+                    ctx4, storeCreator.ofType<S4>().newStore(initialState.s4, reducer.r4),
+                    ctx5, storeCreator.ofType<S5>().newStore(initialState.s5, reducer.r5))
         }
 
-        override fun <S_> ofType(): StoreFactory<S_> = storeFactory.ofType<S_>()
+        override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
         override val storeStandardMiddlewares: Array<out Middleware<MultiState5<S1, S2, S3, S4, S5>>> =
-                storeFactory.ofType<MultiState5<S1, S2, S3, S4, S5>>().storeStandardMiddlewares
+                storeCreator.ofType<MultiState5<S1, S2, S3, S4, S5>>().storeStandardMiddlewares
 
     }
 

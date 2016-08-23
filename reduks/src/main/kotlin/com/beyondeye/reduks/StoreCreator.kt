@@ -4,7 +4,7 @@ package com.beyondeye.reduks
  * Factory for some specific Store type
  * Created by daely on 7/31/2016.
  */
-interface StoreFactory<S> {
+interface StoreCreator<S> {
     /**
      * create a new store associated to this specific factory type
      */
@@ -18,5 +18,5 @@ interface StoreFactory<S> {
     /**
      * return new factory with same parameter but for new state type S2
      */
-    fun<S_> ofType():StoreFactory<S_>
+    fun<S_> ofType():StoreCreator<S_>
 }

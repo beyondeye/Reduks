@@ -14,22 +14,22 @@ class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
         throw UnsupportedOperationException("MultiStore does not support replacing reducer")
     }
 
-    class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val storeFactory: StoreFactory<Any>,
+    class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val storeCreator: StoreCreator<Any>,
                                                 @JvmField val ctx1: ReduksContext,
                                                 @JvmField val ctx2: ReduksContext,
-                                                @JvmField val ctx3: ReduksContext) : StoreFactory<MultiState3<S1, S2, S3>> {
+                                                @JvmField val ctx3: ReduksContext) : StoreCreator<MultiState3<S1, S2, S3>> {
         override fun newStore(initialState: MultiState3<S1, S2, S3>,
                               reducer: Reducer<MultiState3<S1, S2, S3>>): Store<MultiState3<S1, S2, S3>> {
             if (reducer !is MultiReducer3<S1, S2, S3>) throw IllegalArgumentException()
             return MultiStore3<S1, S2, S3>(
-                    ctx1, storeFactory.ofType<S1>().newStore(initialState.s1, reducer.r1),
-                    ctx2, storeFactory.ofType<S2>().newStore(initialState.s2, reducer.r2),
-                    ctx3, storeFactory.ofType<S3>().newStore(initialState.s3, reducer.r3))
+                    ctx1, storeCreator.ofType<S1>().newStore(initialState.s1, reducer.r1),
+                    ctx2, storeCreator.ofType<S2>().newStore(initialState.s2, reducer.r2),
+                    ctx3, storeCreator.ofType<S3>().newStore(initialState.s3, reducer.r3))
         }
 
-        override fun <S_> ofType(): StoreFactory<S_> = storeFactory.ofType<S_>()
+        override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
         override val storeStandardMiddlewares: Array<out Middleware<MultiState3<S1, S2, S3>>> =
-                storeFactory.ofType<MultiState3<S1, S2, S3>>().storeStandardMiddlewares
+                storeCreator.ofType<MultiState3<S1, S2, S3>>().storeStandardMiddlewares
 
     }
 

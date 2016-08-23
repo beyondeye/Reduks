@@ -20,7 +20,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * factory method for store
              */
-            val  storeFactory:StoreFactory<State>,
+            val  storeCreator:StoreCreator<State>,
             /**
              * return the initial state
              */
@@ -46,9 +46,9 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     override val storeSubscription: StoreSubscription
     init {
         ctx=moduleDef.ctx
-        val storeFactory= moduleDef.storeFactory
-        store=storeFactory.newStore(moduleDef.initialState, moduleDef.stateReducer)
-        store.applyMiddleware(*storeFactory.storeStandardMiddlewares)
+        val storeCreator= moduleDef.storeCreator
+        store=storeCreator.newStore(moduleDef.initialState, moduleDef.stateReducer)
+        store.applyMiddleware(*storeCreator.storeStandardMiddlewares)
         storeSubscriber= moduleDef.subscriberBuilder.build(store)
         storeSubscription = store.subscribe(storeSubscriber)
         //split multiaction to list if required
@@ -67,13 +67,13 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             return res
         }
 
-        fun <S1 : Any, S2 : Any> MultiDef(storeFactory_: StoreFactory<MultiState2<S1, S2>>,
+        fun <S1 : Any, S2 : Any> MultiDef(storeCreator_: StoreCreator<MultiState2<S1, S2>>,
                                           m1: ReduksModule.Def<S1>,
                                           m2: ReduksModule.Def<S2>): ReduksModule.Def<MultiState2<S1, S2>> {
             val mctx = multiContext(m1.ctx, m2.ctx)
             return ReduksModule.Def<MultiState2<S1, S2>>(
                     ctx = mctx,
-                    storeFactory = MultiStore2.Factory<S1, S2>(storeFactory_.ofType(), m1.ctx, m2.ctx),
+                    storeCreator = MultiStore2.Factory<S1, S2>(storeCreator_.ofType(), m1.ctx, m2.ctx),
                     initialState = MultiState2(mctx, m1.initialState, m2.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
@@ -97,14 +97,14 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                     })
         }
         //--------------------------------
-        fun <S1 : Any, S2 : Any, S3 : Any> MultiDef(storeFactory_: StoreFactory<MultiState3<S1, S2, S3>>,
+        fun <S1 : Any, S2 : Any, S3 : Any> MultiDef(storeCreator_: StoreCreator<MultiState3<S1, S2, S3>>,
                                                           m1: ReduksModule.Def<S1>,
                                                           m2: ReduksModule.Def<S2>,
                                                           m3: ReduksModule.Def<S3>): ReduksModule.Def<MultiState3<S1, S2, S3>> {
             val mctx = multiContext(m1.ctx, m2.ctx, m3.ctx)
             return ReduksModule.Def<MultiState3<S1, S2, S3>>(
                     ctx = mctx,
-                    storeFactory = MultiStore3.Factory<S1, S2, S3>(storeFactory_.ofType(), m1.ctx, m2.ctx, m3.ctx),
+                    storeCreator = MultiStore3.Factory<S1, S2, S3>(storeCreator_.ofType(), m1.ctx, m2.ctx, m3.ctx),
                     initialState = MultiState3(mctx, m1.initialState, m2.initialState, m3.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
@@ -128,7 +128,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                     })
         }
         //--------------------------------
-        fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any> MultiDef(storeFactory_: StoreFactory<MultiState4<S1, S2, S3, S4>>,
+        fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any> MultiDef(storeCreator_: StoreCreator<MultiState4<S1, S2, S3, S4>>,
                                                                     m1: ReduksModule.Def<S1>,
                                                                     m2: ReduksModule.Def<S2>,
                                                                     m3: ReduksModule.Def<S3>,
@@ -136,7 +136,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val mctx = multiContext(m1.ctx, m2.ctx, m3.ctx, m4.ctx)
             return ReduksModule.Def<MultiState4<S1, S2, S3, S4>>(
                     ctx = mctx,
-                    storeFactory = MultiStore4.Factory<S1, S2, S3, S4>(storeFactory_.ofType(), m1.ctx, m2.ctx, m3.ctx, m4.ctx),
+                    storeCreator = MultiStore4.Factory<S1, S2, S3, S4>(storeCreator_.ofType(), m1.ctx, m2.ctx, m3.ctx, m4.ctx),
                     initialState = MultiState4(mctx, m1.initialState, m2.initialState, m3.initialState, m4.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
@@ -165,7 +165,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
         }
 
         //--------------------------------
-        fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any> MultiDef(storeFactory_: StoreFactory<MultiState5<S1, S2, S3, S4, S5>>,
+        fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any> MultiDef(storeCreator_: StoreCreator<MultiState5<S1, S2, S3, S4, S5>>,
                                                                               m1: ReduksModule.Def<S1>,
                                                                               m2: ReduksModule.Def<S2>,
                                                                               m3: ReduksModule.Def<S3>,
@@ -174,7 +174,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val mctx = multiContext(m1.ctx, m2.ctx, m3.ctx, m4.ctx, m5.ctx)
             return ReduksModule.Def<MultiState5<S1, S2, S3, S4, S5>>(
                     ctx = mctx,
-                    storeFactory = MultiStore5.Factory<S1, S2, S3, S4, S5>(storeFactory_.ofType(), m1.ctx, m2.ctx, m3.ctx, m4.ctx, m5.ctx),
+                    storeCreator = MultiStore5.Factory<S1, S2, S3, S4, S5>(storeCreator_.ofType(), m1.ctx, m2.ctx, m3.ctx, m4.ctx, m5.ctx),
                     initialState = MultiState5(mctx, m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
