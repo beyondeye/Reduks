@@ -3,9 +3,7 @@ package com.beyondeye.reduks
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import java.util.ArrayList
 
-class SimpleStore<S>(initialState: S,  reducer_: Reducer<S>) : Store<S> {
-    var reducer:Reducer<S> = reducer_
-        private set
+class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }

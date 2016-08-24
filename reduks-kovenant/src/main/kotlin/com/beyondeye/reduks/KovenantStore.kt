@@ -14,9 +14,7 @@ infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Except
 /**
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
  */
-class KovenantStore<S>(initialState: S, reducer_: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
-    var reducer:Reducer<S> = reducer_
-        private set
+class KovenantStore<S>(initialState: S,private var reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }

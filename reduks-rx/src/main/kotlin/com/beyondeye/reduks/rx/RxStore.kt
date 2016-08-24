@@ -9,7 +9,7 @@ import rx.subscriptions.CompositeSubscription
 
 class RxStore<S>(
         override var state: S,
-        reducer_: Reducer<S>,
+        private var reducer: Reducer<S>,
         /**
          * in android we need to keep track of all rx.Subscriptions and unsubscribe on Activity.onDestroy or Fragment.onDestroyView.
          * A common practice is put all subscription in a CompositeSubscription that can be unsubscribed with a single call.
@@ -17,8 +17,6 @@ class RxStore<S>(
          */
         val allRxSubscriptions: CompositeSubscription?=null
 ) : Store<S> {
-    var reducer:Reducer<S> = reducer_
-        private set
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }
