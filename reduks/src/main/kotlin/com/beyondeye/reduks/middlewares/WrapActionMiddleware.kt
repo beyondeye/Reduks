@@ -6,7 +6,7 @@ import com.beyondeye.reduks.modules.ReduksContext
 
 
 /**
- * A middleware for unwrapping an action that has some module context
+ * A middleware for unwrapping an action that has some reduks context
  */
 
 class WrapActionMiddleware<S>(val context: ReduksContext) : Middleware<S> {

@@ -5,7 +5,7 @@ import com.beyondeye.reduks.modules.ActionWithContext
 
 
 /**
- * A middleware for unwrapping an action that has some module context
+ * A middleware for unwrapping an action that has some reudks context
  */
 
 class UnwrapActionMiddleware<S> : Middleware<S> {
