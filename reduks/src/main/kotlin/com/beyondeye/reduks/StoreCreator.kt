@@ -19,14 +19,15 @@ interface StoreCreator<S> {
      * return new factory with same parameter but for new state type S2
      */
     fun <S_> ofType(): StoreCreator<S_>
+}
 
-    /**
-     * create an enhanced store
-     */
-    fun create(
-            reducer: Reducer<S>,
-            initialState: S,
-            enhancer: StoreEnhancer<S>): Store<S> {
-        return enhancer.enhance(this).create(reducer, initialState)
-    }
+/**
+ * create an enhanced store
+ * extension method, so we save on method count
+ */
+fun<S> StoreCreator<S>.create(
+        reducer: Reducer<S>,
+        initialState: S,
+        enhancer: StoreEnhancer<S>): Store<S> {
+    return enhancer.enhance(this).create(reducer, initialState)
 }
