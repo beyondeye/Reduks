@@ -72,7 +72,7 @@ class LogFormatterPrinter {
     }
 
     private void initDividerString() {
-        int dl=settings.getBorderDividerLength();
+        int dl=settings.borderDividerLength;
         StringBuilder sb=new StringBuilder();
         //TOP_BORDER
         sb.append(TOP_LEFT_CORNER);
@@ -191,7 +191,6 @@ class LogFormatterPrinter {
         }
         else if (formattedJson.length()==0) {
             d(jsonWithObjName(objName,"<Empty json content>"));
-            return;
         }
         else {
             log(formattedJson, logLevel, null);
@@ -227,7 +226,7 @@ class LogFormatterPrinter {
     }
 
     public synchronized void log(String message,int loglevel, String tagSuffix) {
-        if (!settings.isLogEnabled()) {
+        if (!settings.isLogEnabled) {
             return;
         }
         boolean isGroupHeader=isInGroup()&& groupHeaderLogLevel<0;
@@ -237,7 +236,7 @@ class LogFormatterPrinter {
         }
         if(!isInGroup()||isGroupHeader) {
             logTopBorder(loglevel, tagSuffix);
-            logHeaderContent(loglevel, tagSuffix, getMethodCount(), settings.isShowThreadInfo(), settings.isShowCallStack());
+            logHeaderContent(loglevel, tagSuffix, getMethodCount(), settings.isShowThreadInfo, settings.isShowCallStack);
         } else {
             if(!isCollapsed()) logDivider(loglevel,tagSuffix);
 
@@ -298,11 +297,11 @@ class LogFormatterPrinter {
 
 
     private void logTopBorder(int logLevel, String tagSuffix) {
-        if (!settings.isBorderEnabled()) return;
+        if (!settings.isBorderEnabled) return;
         logChunk(logLevel, tagSuffix, TOP_BORDER);
     }
     private String HorizontalDoubleLine() {
-        return settings.isBorderEnabled() ? HORIZONTAL_DOUBLE_LINE_STR : "";
+        return settings.isBorderEnabled ? HORIZONTAL_DOUBLE_LINE_STR : "";
     }
     @SuppressWarnings("StringBufferReplaceableByString")
     private void logHeaderContent(int logLevel, String tagSuffix, int methodCount,boolean isShowThreadInfo,boolean isShowCallStack) {
@@ -315,7 +314,7 @@ class LogFormatterPrinter {
         if(!isShowCallStack) return;
         String level = "";
 
-        int stackOffset = getStackOffset(trace) + settings.getMethodOffset();
+        int stackOffset = getStackOffset(trace) + settings.methodOffset;
 
         //corresponding method count with the current stack may exceeds the stack trace. Trims the count
         if (methodCount + stackOffset > trace.length) {
@@ -348,12 +347,12 @@ class LogFormatterPrinter {
     }
 
     private void logBottomBorder(int logLevel, String tagSuffix) {
-        if (!settings.isBorderEnabled()) return;
+        if (!settings.isBorderEnabled) return;
         logChunk(logLevel, tagSuffix, BOTTOM_BORDER);
     }
 
     private void logDivider(int logLevel, String tagSuffix) {
-        if (!settings.isBorderEnabled()) return;
+        if (!settings.isBorderEnabled) return;
         logChunk(logLevel, tagSuffix, MIDDLE_BORDER);
     }
 
@@ -407,7 +406,7 @@ class LogFormatterPrinter {
 
     private int getMethodCount() {
         int count = localMethodCount;
-        int result = settings.getMethodCount();
+        int result = settings.methodCount;
         if (count >=0) {
             localMethodCount=-1;
             result = count;
