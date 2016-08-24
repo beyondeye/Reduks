@@ -22,15 +22,15 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
                                                                     @JvmField val ctx3: ReduksContext,
                                                                     @JvmField val ctx4: ReduksContext,
                                                                     @JvmField val ctx5: ReduksContext) : StoreCreator<MultiState5<S1, S2, S3, S4, S5>> {
-        override fun newStore(initialState: MultiState5<S1, S2, S3, S4, S5>,
-                              reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>): Store<MultiState5<S1, S2, S3, S4, S5>> {
+        override fun create(reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>,
+                            initialState: MultiState5<S1, S2, S3, S4, S5>): Store<MultiState5<S1, S2, S3, S4, S5>> {
             if (reducer !is MultiReducer5<S1, S2, S3, S4, S5>) throw IllegalArgumentException()
             return MultiStore5<S1, S2, S3, S4, S5>(
-                    ctx1, storeCreator.ofType<S1>().newStore(initialState.s1, reducer.r1),
-                    ctx2, storeCreator.ofType<S2>().newStore(initialState.s2, reducer.r2),
-                    ctx3, storeCreator.ofType<S3>().newStore(initialState.s3, reducer.r3),
-                    ctx4, storeCreator.ofType<S4>().newStore(initialState.s4, reducer.r4),
-                    ctx5, storeCreator.ofType<S5>().newStore(initialState.s5, reducer.r5))
+                    ctx1, storeCreator.ofType<S1>().create(reducer.r1, initialState.s1),
+                    ctx2, storeCreator.ofType<S2>().create(reducer.r2, initialState.s2),
+                    ctx3, storeCreator.ofType<S3>().create(reducer.r3, initialState.s3),
+                    ctx4, storeCreator.ofType<S4>().create(reducer.r4, initialState.s4),
+                    ctx5, storeCreator.ofType<S5>().create(reducer.r5, initialState.s5))
         }
 
         override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()

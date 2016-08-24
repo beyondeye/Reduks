@@ -18,13 +18,13 @@ class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
                                                 @JvmField val ctx1: ReduksContext,
                                                 @JvmField val ctx2: ReduksContext,
                                                 @JvmField val ctx3: ReduksContext) : StoreCreator<MultiState3<S1, S2, S3>> {
-        override fun newStore(initialState: MultiState3<S1, S2, S3>,
-                              reducer: Reducer<MultiState3<S1, S2, S3>>): Store<MultiState3<S1, S2, S3>> {
+        override fun create(reducer: Reducer<MultiState3<S1, S2, S3>>,
+                            initialState: MultiState3<S1, S2, S3>): Store<MultiState3<S1, S2, S3>> {
             if (reducer !is MultiReducer3<S1, S2, S3>) throw IllegalArgumentException()
             return MultiStore3<S1, S2, S3>(
-                    ctx1, storeCreator.ofType<S1>().newStore(initialState.s1, reducer.r1),
-                    ctx2, storeCreator.ofType<S2>().newStore(initialState.s2, reducer.r2),
-                    ctx3, storeCreator.ofType<S3>().newStore(initialState.s3, reducer.r3))
+                    ctx1, storeCreator.ofType<S1>().create(reducer.r1, initialState.s1),
+                    ctx2, storeCreator.ofType<S2>().create(reducer.r2, initialState.s2),
+                    ctx3, storeCreator.ofType<S3>().create(reducer.r3, initialState.s3))
         }
 
         override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()

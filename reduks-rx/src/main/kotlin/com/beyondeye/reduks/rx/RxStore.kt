@@ -27,7 +27,7 @@ class RxStore<S>(
             return Creator<S_>(allRxSubscriptions)
         }
 
-        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
         override val storeStandardMiddlewares =  arrayOf(ThunkMiddleware<S>())
     }
     val stateChanges: Observable<S>

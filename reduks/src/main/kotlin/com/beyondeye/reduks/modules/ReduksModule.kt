@@ -47,7 +47,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     init {
         ctx=moduleDef.ctx
         val storeCreator= moduleDef.storeCreator
-        store=storeCreator.newStore(moduleDef.initialState, moduleDef.stateReducer)
+        store=storeCreator.create(moduleDef.stateReducer, moduleDef.initialState)
         store.applyMiddleware(*storeCreator.storeStandardMiddlewares)
         storeSubscriber= moduleDef.subscriberBuilder.build(store)
         storeSubscription = store.subscribe(storeSubscriber)

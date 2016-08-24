@@ -10,7 +10,7 @@ class SimpleStore<S>(initialState: S,  reducer_: Reducer<S>) : Store<S> {
         this.reducer=reducer
     }
     class Creator<S>: StoreCreator<S> {
-        override fun newStore(initialState: S, reducer: Reducer<S>): Store<S> = SimpleStore<S>(initialState,reducer)
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
         override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>()

@@ -19,12 +19,12 @@ class MultiStore2<S1:Any,S2:Any>(
     class Factory<S1:Any,S2:Any>(@JvmField val storeCreator: StoreCreator<Any>,
                                  @JvmField val ctx1:ReduksContext,
                                  @JvmField val ctx2:ReduksContext): StoreCreator< MultiState2<S1,S2> > {
-        override fun newStore(initialState: MultiState2<S1, S2>,
-                              reducer: Reducer<MultiState2<S1, S2>>): Store<MultiState2<S1, S2>> {
+        override fun create(reducer: Reducer<MultiState2<S1, S2>>,
+                            initialState: MultiState2<S1, S2>): Store<MultiState2<S1, S2>> {
             if(reducer !is MultiReducer2<S1, S2>) throw IllegalArgumentException()
             return MultiStore2<S1,S2>(
-                    ctx1,storeCreator.ofType<S1>().newStore(initialState.s1,reducer.r1),
-                    ctx2,storeCreator.ofType<S2>().newStore(initialState.s2,reducer.r2))
+                    ctx1,storeCreator.ofType<S1>().create(reducer.r1, initialState.s1),
+                    ctx2,storeCreator.ofType<S2>().create(reducer.r2, initialState.s2))
         }
         override fun <S_> ofType(): StoreCreator<S_> =storeCreator.ofType<S_>()
         override val storeStandardMiddlewares: Array<out Middleware<MultiState2<S1, S2>>> =

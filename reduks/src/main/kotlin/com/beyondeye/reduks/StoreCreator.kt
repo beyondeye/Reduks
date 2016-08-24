@@ -8,7 +8,7 @@ interface StoreCreator<S> {
     /**
      * create a new store associated to this specific factory type
      */
-    fun newStore(initialState:S, reducer: Reducer<S>):Store<S>
+    fun create(reducer: Reducer<S>, initialState: S):Store<S>
 
     /**
      * get list of standard middlewares available for the type of Store associated with this factory
@@ -18,5 +18,15 @@ interface StoreCreator<S> {
     /**
      * return new factory with same parameter but for new state type S2
      */
-    fun<S_> ofType():StoreCreator<S_>
+    fun <S_> ofType(): StoreCreator<S_>
+
+    /**
+     * create an enhanced store
+     */
+    fun create(
+            reducer: Reducer<S>,
+            initialState: S,
+            enhancer: StoreEnhancer<S>): Store<S> {
+        return enhancer.enhance(this).create(reducer, initialState)
+    }
 }
