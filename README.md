@@ -28,6 +28,9 @@ it currently has the following features that bansa misses.
  
  - support for saving/restoring store state on activity onSaveInstanceState/onRestoreInstanceState
 
+ - support for [Store Enhancers](https://github.com/reactjs/redux/blob/master/docs/Glossary.md#store-enhancer) (a generalization of middlewares),
+  with helper functions to transform middlewares to store enhancers and combine them with other enhancers.
+
 ## dependencies for gradle
 ```groovy
 // First, add JitPack to your repositories
@@ -37,21 +40,21 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b3'
+compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b4'
 
 //rx-java based state store+ additional required dep for android support
 compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b3'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b3'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b4'
 
 //kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b3'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b3'
+compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b4'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b4'
 
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b3'
-
+compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b4'
 ```
+
 
 #An introduction to Reduks
 Reduks (similarly to Reduxjs) is basically a simplified Reactive Functional Programming approach for implementing UI for Android
@@ -252,6 +255,10 @@ TODO
 ####RxJava based Store
 TODO
 ####Promise based (Kovenant) Store
+TODO
+###Store Enhancers
+TODO
+####Reduks DevTools
 TODO
 ## License
 
