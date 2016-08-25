@@ -26,3 +26,6 @@ android:
 script:
 #    - ./gradlew build connectedCheck
     - ./gradlew clean check
+
+jdk:
+    - oraclejdk8
