@@ -1,9 +1,11 @@
 package com.beyondeye.reduksDevTools
 
+import com.beyondeye.reduks.Action
+
 
 class DevToolsAction private constructor(val type: String,
                                          val appAction: Any?,
-                                         private val position: Int?) {
+                                         private val position: Int?) : Action {
 
     fun getPosition(): Int {
         return position!!

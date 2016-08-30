@@ -25,7 +25,7 @@ val subscriberBuilder = StoreSubscriberBuilder<ActivityState> { store ->
         sel4LoginInfo.onChangeIn(newState) { newLogInfo ->
             //log info changed...send to server for verification
             //...then we received notification that email was verified
-            store.dispatch(Action.EmailConfirmed())
+            store.dispatch(LoginAction.EmailConfirmed())
         }
         sel4email.onChangeIn(newState) { newEmail ->
             //email changed : do something

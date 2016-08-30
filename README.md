@@ -168,28 +168,16 @@ the code we need into a single subscriber, and this is the recommended way to do
  
  
 ###Actions and Reducers
-As we mentioned above, whenever we want to change the state of the application we need to send an *Action*  object, that will be processed by the *Reducers*,
+As we mentioned above, whenever we want to change the state of the application we need to send(dispatch) an *Action*  object, that will be processed by the *Reducers*,
 that are pure functions that take as input the action and the current state and outputs a new modified state.
 An action object can be literally any object. For example we can define the following actions
 ```kotlin
-class Action {
+class LoginAction {
     class EmailUpdated(val email:String)
     class PasswordUpdated(val pw:String)
     class EmailConfirmed
 }
 ```
-or alternatively we can define
-```kotlin
-class Action(val type:String,val payload:String)
-
-val emailUpdated = Action(type="email",payload="some@email")
-val pwUpdated = Action(type="pw",payload="123456")
-val emailConfirmed =  Action(type="emailConfirmed")
-```
-or in many other ways
-####Sending an Action
-The term used for denoting sending an action for updating the current state is __dispatch__. The [Store interface](./reduks/src/main/kotlin/com/beyondeye/reduks/Store.kt) has a __dispatch__ method
-that should be called for this purpose
 ####Reducers
 a sample [Reducer](./reduks/src/main/java/com/beyondeye/reduks/Reducer.java) can be the following 
 ```kotlin
@@ -203,8 +191,89 @@ val reducer = Reducer<LoginActivityState> { state, action ->
 }
 ```
 Notice that `Reducer` is actually a JAVA SAM interface, and we are leveraging a Kotlin feature that allows to automatically convert a lambda to a SAM interface
+Reducers must be pure functions, without side-effects except for updating the state. In particular in a reducer you cannot dispatch actions
+####Better Actions with Kotlin sealed classes
+You may have noticed a potential source of bugs in our previous reducer code. There is a risk that we simply forget to enumerate all action types in the ```when``` expression.
 
-Reducers must be pure functions, without side-effects except for updating the state. In particular in a reducer you cannot dispatch actions. 
+We can catch this type of errors at compile time thanks to [ Kotlin sealed classes](https://kotlinlang.org/docs/reference/classes.html#sealed-classes).
+So we will rewrite our actions as
+```kotlin
+sealed class LoginAction {
+    class EmailUpdated(val email:String) :LoginAction()
+    class PasswordUpdated(val pw:String) :LoginAction()
+    class EmailConfirmed :LoginAction()
+}
+```
+and our reducer as
+```kotlin
+val reducer = Reducer<ActivityState> { state, action ->
+    when {
+        action is LoginAction -> when (action) {
+            is LoginAction.PasswordUpdated -> state.copy(password = action.pw)
+            is LoginAction.EmailUpdated -> state.copy(email = action.email, emailConfirmed = false)
+            is LoginAction.EmailConfirmed -> state.copy(emailConfirmed = true)
+        }
+        else -> state
+    }
+}
+```
+
+The compiler will give us an error if we forget to list one of ```LoginAction``` subtype in the ```when``` expression above. Also we don't the ```else``` case anymore (in the more internal ```when```)
+####Even Better Actions with Reduks StandardAction
+Reduks  [StandardAction](./reduks/src/main/kotlin/com/beyondeye/reduks/StandardAction.kt) is a base interface for actions that provide a standard way to define actions also for failed/async operations:
+ 
+```kotlin
+ interface StandardAction {
+     val payload: Any?
+     val error: Boolean
+ }
+```
+
+ We can use this to rewrite our actions as
+ 
+```kotlin
+ sealed class LoginAction2(override val payload: Any?=null,
+                           override val error:Boolean=false) : StandardAction {
+     class EmailUpdated(override val payload:String) : LoginAction2()
+     class PasswordUpdated(override val payload:String) : LoginAction2()
+     class EmailConfirmed(override val payload: Boolean) : LoginAction2()
+ }
+```
+
+Notice that we can redefine the type of the payload to the one required by each action type, without even using generics.
+
+Also we redefine the state as
+```kotlin
+data class ActivityState2(val email: String,
+                          val password: String,
+                          val emailConfirmed: Boolean,
+                          val serverContactError:Boolean)
+```
+And here is our new reducer that handle server errors
+ 
+```kotlin
+val reducer2 = Reducer<ActivityState2> { s, a ->
+    when {
+        a is LoginAction2 -> when (a) {
+            is LoginAction2.PasswordUpdated ->
+                s.copy(password = a.payload,serverContactError = false)
+            is LoginAction2.EmailUpdated -> 
+                s.copy(email = a.payload, emailConfirmed = false,serverContactError = false)
+            is LoginAction2.EmailConfirmed ->
+                if(a.error)
+                    s.copy(serverContactError = true)
+                else
+                    s.copy(emailConfirmed = a.payload)
+        }
+        else -> s
+    }
+}
+```
+
+####Combining Reducers
+
+TODO
+####If I feel like I want to dispatch from my Reducer what is the correct thing to do instead?
 This is one of the most typical things that confuse beginners.
 
 For example let's say that in order to verify the email address at user registration we must
@@ -228,9 +297,6 @@ If you find yourself in this situation then you should defer dispatching an acti
 At a later stage you can eventually also split the chain into multiple actions (so that you can update the UI at different stages of the user authentication process), 
 but always keep the chain logic in the original place. We will discuss later the [Thunk middleware](./reduks/src/main/kotlin/com/beyondeye/reduks/middlewares/ThunkMiddleware.kt)
 and [AsyncAction middleware](./reduks-kovenant/src/main/kotlin/com/beyondeye/reduks/middlewares/AsyncActionMiddleWare.kt) that will help you handle these chains of actions better
-####Combining Reducers
-
-TODO
 ###Reduks Modules
 TODO
 ####Combining Reduks modules

@@ -5,6 +5,6 @@ package com.beyondeye.reduks;
  *
  * Created by daely on 5/24/2016.
  */
-public interface Thunk<S> {
+public interface Thunk<S> extends Action {
     Object execute(NextDispatcher dispatcher, S state);
 }
