@@ -23,3 +23,21 @@ interface Store<S> {
     fun replaceReducer(reducer: Reducer<S>)
 
 }
+
+/**
+ * extension method for directly provide a lambda as argument for store subscribe
+ */
+fun <S>Store<S>.subscribe(lambda:(S)->Unit) {
+    this.subscribe(StoreSubscriber{newState-> lambda(newState)})
+}
+/**
+ * extension method for checking at compile time that we only dispatch objects derived from
+ * base [Action] interface
+ */
+fun <S>Store<S>.dispatch_a(action:Action)=dispatch(action)
+
+/**
+ * extension method for checking at compile time that we only dispatch objects derived from
+ * base [StandardAction] interface
+ */
+fun <S>Store<S>.dispatch_sa(action:StandardAction)=dispatch(action)

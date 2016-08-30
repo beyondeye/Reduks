@@ -1,5 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
+import com.beyondeye.reduks.Action
 import com.beyondeye.reduks.Middleware
 import com.beyondeye.reduks.NextDispatcher
 import com.beyondeye.reduks.Store
@@ -7,7 +8,7 @@ import nl.komponents.kovenant.task
 import nl.komponents.kovenant.Promise
 
 
-sealed class AsyncAction(val payloadTypename:String) {
+sealed class AsyncAction(val payloadTypename:String): Action {
     class AsyncActionMatcher<PayloadType>(val action:AsyncAction) {
         fun onStarted(body: () -> Unit): AsyncActionMatcher<PayloadType>? {
             if(action is AsyncAction.Started<*>)
