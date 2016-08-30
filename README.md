@@ -183,9 +183,9 @@ a sample [Reducer](./reduks/src/main/java/com/beyondeye/reduks/Reducer.java) can
 ```kotlin
 val reducer = Reducer<LoginActivityState> { state, action ->
     when(action) {
-        is Action.PasswordUpdated -> state.copy(password = action.pw)
-        is Action.EmailUpdated -> state.copy(email = action.email,emailConfirmed = false)
-        is Action.EmailConfirmed -> state.copy(emailConfirmed = true)
+        is LoginAction.PasswordUpdated -> state.copy(password = action.pw)
+        is LoginAction.EmailUpdated -> state.copy(email = action.email,emailConfirmed = false)
+        is LoginAction.EmailConfirmed -> state.copy(emailConfirmed = true)
         else -> state
     }
 }
@@ -244,7 +244,7 @@ Notice that we can redefine the type of the payload to the one required by each 
 
 Also we redefine the state as
 ```kotlin
-data class ActivityState2(val email: String,
+data class LoginActivityState2(val email: String,
                           val password: String,
                           val emailConfirmed: Boolean,
                           val serverContactError:Boolean)
@@ -252,7 +252,7 @@ data class ActivityState2(val email: String,
 And here is our new reducer that handle server errors
  
 ```kotlin
-val reducer2 = Reducer<ActivityState2> { s, a ->
+val reducer2 = Reducer<LoginActivityState2> { s, a ->
     when {
         a is LoginAction2 -> when (a) {
             is LoginAction2.PasswordUpdated ->
