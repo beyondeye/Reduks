@@ -14,20 +14,21 @@ infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Except
 /**
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
  */
-class KovenantStore<S>(initialState: S,private var reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
+class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
-        this.reducer=reducer
+        this.reducer = reducer
     }
-    class Creator<S>( val observeOnUiThread: Boolean = true) : StoreCreator<S> {
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = KovenantStore<S>(initialState,reducer,observeOnUiThread)
-        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>(),AsyncActionMiddleWare<S>())
+
+    class Creator<S>(val observeOnUiThread: Boolean = true) : StoreCreator<S> {
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = KovenantStore<S>(initialState, reducer, observeOnUiThread)
+        override val storeStandardMiddlewares: Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>(), AsyncActionMiddleWare<S>())
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>(observeOnUiThread)
         }
     }
+
     val observeContext =
-            if (!observeOnUiThread)
-            {
+            if (!observeOnUiThread) {
                 Kovenant.context
             } else {
                 Kovenant.createContext {
@@ -55,7 +56,7 @@ class KovenantStore<S>(initialState: S,private var reducer: Reducer<S>, val obse
                 curStatePromise = _statePromise
                 _statePromise = deferredNextState.promise
             }
-            if(observeOnUiThread) {
+            if (observeOnUiThread) {
                 curStatePromise?.then(defaultContext) { startState ->
                     val newState = reducer.reduce(startState, action) //return newState
                     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
@@ -65,26 +66,24 @@ class KovenantStore<S>(initialState: S,private var reducer: Reducer<S>, val obse
                     deferredNextState.resolve(newState)
                     newState
                 }?.then(observeContext) { newState ->
-                    notifySubscribers(newState)
+                    notifySubscribers()
                 }
-            } else
-            { //in case we don't observe on the ui thread, then the correct thing to do, for
-              //being sure that subscribers always sees the sequence of state changes as they
-              //actually happened is to wait to resolve the state change promise after the notification phase
+            } else {
                 curStatePromise?.then(defaultContext) { startState ->
                     reducer.reduce(startState, action) //return newState
                 }?.then(observeContext) { newState ->
-                    notifySubscribers(newState)
-                    deferredNextState.resolve(newState)
+                    deferredNextState.resolve(newState) //subscriber would not be able to access the newState if we not resolve the promise
+                    notifySubscribers()
                 }
 
             }
             return action
         }
     }
-    private fun notifySubscribers(newState:S) {
+
+    private fun notifySubscribers() {
         for (i in subscribers.indices) {
-            subscribers[i].onStateChange(newState)
+            subscribers[i].onStateChange()
         }
     }
 

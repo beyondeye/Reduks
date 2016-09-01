@@ -105,7 +105,7 @@ class SimpleStoreTest {
         var actual: TestState = TestState()
         val store = SimpleStore(TestState(), reducer)
 
-        store.subscribe(StoreSubscriber { actual = it })
+        store.subscribe(StoreSubscriber { actual = store.state })
         store.dispatch(TestAction(type = "to invoke"))
 
         assertThat(actual).isEqualTo(store.state)

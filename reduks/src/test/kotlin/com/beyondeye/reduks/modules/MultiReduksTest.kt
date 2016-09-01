@@ -49,9 +49,9 @@ class MultiReduksTest {
             subscriberBuilder = StoreSubscriberBuilder { store ->
                 val selector = SelectorBuilder<TestState1>()
                 val selForLastAction = selector.withSingleField { this.lastActionType }
-                StoreSubscriber { state ->
+                StoreSubscriber {
                     ++nStateChangeCalls1
-                    selForLastAction.onChangeIn(state) {
+                    selForLastAction.onChangeIn(store.state) {
                         ++nStateChanges1
                     }
                 }
@@ -68,9 +68,9 @@ class MultiReduksTest {
             subscriberBuilder = StoreSubscriberBuilder { store ->
                 val selector = SelectorBuilder<TestState2>()
                 val selForLastAction = selector.withSingleField { this.lastActionType }
-                StoreSubscriber { state ->
+                StoreSubscriber {
                     ++nStateChangeCalls2
-                    selForLastAction.onChangeIn(state) {
+                    selForLastAction.onChangeIn(store.state) {
                         ++nStateChanges2
                     }
                 }

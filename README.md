@@ -115,7 +115,8 @@ Through the store method
 we register callbacks to be called each time the state is modified (i.e. some action is dispatched to the store).
 ```kotlin
 val curLogInfo=LoginInfo("","")
-val subscriber=StoreSubscriber<LoginActivityState> { newState ->
+val subscriber=StoreSubscriber<LoginActivityState> {
+    val newState=store.state
     val loginfo=LoginInfo(newState.email,newState.password)
     if(loginfo.email!= curLogInfo.email||loginfo.password!= curLogInfo.password) {
         //log info changed...do something
@@ -123,6 +124,10 @@ val subscriber=StoreSubscriber<LoginActivityState> { newState ->
     }
 }
 ```
+
+You should have noticed that in the subscriber, in order to get the value of the newState we need to reference our store instance. You shoud always get a reference to the new state at
+ the beginning of the subscriber code and then avoid referencing ```store.state``` directly, otherwise you could end up using different values for ```newState```
+
 Notice that we **cannot** subscribe for changes of some **specific field** of the activity state, but only of the **whole** state.
  
  At first this seems strange. But now we will show how using some advanced features of Reduks, we can turn this into an advantage.
@@ -132,13 +137,13 @@ Notice that we **cannot** subscribe for changes of some **specific field** of th
  
 Reduks allows all this but also working with state changes in a way very similar to traditional callbacks. This is enabled by **Reduks selectors**: instead of writing
  the subscriber as above we can write the following code:
- 
 ```kotlin
 val subscriberBuilder = StoreSubscriberBuilder<ActivityState> { store ->
     val sel = SelectorBuilder<ActivityState>()
     val sel4LoginInfo=sel.withField { email } .withField { password }.compute { e, p -> LoginInfo(e,p)  }
     val sel4email=sel.withSingleField { email }
-    StoreSubscriber { newState ->
+    StoreSubscriber {
+        val newState=store.state
         sel4LoginInfo.onChangeIn(newState) { newLogInfo ->
             //log info changed...send to server for verification
             //...then we received notification that email was verified
@@ -154,20 +159,15 @@ val subscriberBuilder = StoreSubscriberBuilder<ActivityState> { store ->
 There are a few things to note in this new version of our sample subscriber:
  
  * We are creating a `StoreSubcriberBuilder` that a takes a `Store` argument and returns a `StoreSubscriber`. This is actual the recommended way to build a subscriber.
- The `StoreSubscriberBuilder` takes as argument the store instance, so that inside the subscriber we can dispatch actions to the store.
+ The `StoreSubscriberBuilder` takes as argument the store instance, so that inside the subscriber we can get the newState and dispatch new actions to the store.
  * We are creating *selector objects*: their purpose is to automatically detect change in one or more state fields and lazily compute a function of these fields, passing
   its value to a lambda when the method `onChangeIn(newState)` is called.
   
-As you can see the code now looks similar to code with Callbacks traditionally used for subscribing to asynchronous updates. But now all the callbacks are defined
-in the same block of code, which can be an advantage, since we don't have go and hunt all the callbacks in different places.
+As you can see the code now looks similar to code with Callbacks traditionally used for subscribing to asynchronous updates. 
 Selectors can detect quite efficiently changes in the state, thanks to a technique called *memoization* that works because we have embraced immutable data structures for representing the application state
  
 Look [here](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
- 
-A final note about subscribers: although Reduks allows for multiple subscribers to state changes, we can basically write all
-the code we need into a single subscriber, and this is the recommended way to do it, unless you have special requirements.
- 
- 
+  
 ###Actions and Reducers
 As we mentioned above, whenever we want to change the state of the application we need to send(dispatch) an *Action*  object, that will be processed by the *Reducers*,
 that are pure functions that take as input the action and the current state and outputs a new modified state.

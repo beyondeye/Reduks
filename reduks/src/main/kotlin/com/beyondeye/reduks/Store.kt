@@ -27,8 +27,8 @@ interface Store<S> {
 /**
  * extension method for directly provide a lambda as argument for store subscribe
  */
-fun <S>Store<S>.subscribe(lambda:(S)->Unit) {
-    this.subscribe(StoreSubscriber{newState-> lambda(newState)})
+fun <S>Store<S>.subscribe(lambda:()->Unit) {
+    this.subscribe(StoreSubscriber<S>{lambda()})
 }
 /**
  * extension method for checking at compile time that we only dispatch objects derived from

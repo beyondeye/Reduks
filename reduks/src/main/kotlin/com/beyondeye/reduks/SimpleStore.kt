@@ -22,7 +22,7 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
                 state = reducer.reduce(store.state, action)
             }
             for (i in subscribers.indices) {
-                subscribers[i].onStateChange(state)
+                subscribers[i].onStateChange()
             }
             return action
         }

@@ -16,7 +16,7 @@ abstract class RxStoreSubscriber<S>(val store:RxStore<S>): rx.Subscriber<S>(), S
      * on to onStateChange callback
      */
     override fun onNext(s: S) {
-        onStateChange(s)
+        onStateChange()
     }
     override fun onCompleted() {
         //do nothing

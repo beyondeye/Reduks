@@ -108,7 +108,7 @@ class KovenantStoreTest {
         var actual: TestState = TestState()
         val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
 
-        store.subscribe(StoreSubscriber { actual = it })
+        store.subscribe(StoreSubscriber { actual = store.state })
         store.dispatch(TestAction(type = "to invoke"))
 
         assertThat(store.state).isEqualTo(actual)

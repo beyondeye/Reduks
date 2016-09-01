@@ -38,8 +38,8 @@ class MultiStore2<S1:Any,S2:Any>(
     override var dispatch=dispatchWrappedAction
     //call back the multi subscriber each time any component state change
     override fun subscribe(storeSubscriber: StoreSubscriber<MultiState2<S1, S2>>): StoreSubscription {
-        val s1=store1.subscribe(StoreSubscriber { storeSubscriber.onStateChange(state) })
-        val s2=store2.subscribe(StoreSubscriber { storeSubscriber.onStateChange(state) })
+        val s1=store1.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
+        val s2=store2.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
         return MultiStoreSubscription(s1, s2)
     }
 }

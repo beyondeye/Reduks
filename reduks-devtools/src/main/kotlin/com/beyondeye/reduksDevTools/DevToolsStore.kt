@@ -55,6 +55,6 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
         }
     }
     override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
-        return devToolsStore.subscribe(StoreSubscriber<DevToolsState<S>> { devstate -> storeSubscriber.onStateChange(state) })
+        return devToolsStore.subscribe(StoreSubscriber<DevToolsState<S>> {  storeSubscriber.onStateChange() })
     }
 }

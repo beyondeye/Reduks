@@ -65,7 +65,8 @@ class ThunkMiddlewareTest {
             promise
         }
         //subscribe before dispatch!!
-        store.subscribe(StoreSubscriber { s ->
+        store.subscribe(StoreSubscriber {
+            val s=store.state
             if (s.sauceName != "") {
                 Assertions.assertThat(s.sauceName).isEqualTo("(Tomato)")
                 Assertions.assertThat(s.forPerson).isEqualTo("John")

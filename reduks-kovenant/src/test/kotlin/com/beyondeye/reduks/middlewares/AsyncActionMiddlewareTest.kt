@@ -10,7 +10,7 @@ import org.junit.Test
  * Created by Dario on 3/22/2016.
  */
 class AsyncActionMiddlewareTest {
-    class IncrementCounterAction;
+    class IncrementCounterAction
     class EndAction
     data class TestState(val counter:Int=0,val actionCounter:Int=0,val lastAsyncActionMessage: String = "none",val lastAsyncActionError: String? =null,
                          val lastAsyncActionResult:Int?=null,val lastAsyncActionResultString:String?=null,val endActionReceived:Boolean=false)
@@ -59,7 +59,8 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber { state->
+        store.subscribe (StoreSubscriber {
+            val state=store.state
             with (state) {
                 if (lastAsyncActionMessage != "none") {
                     Assertions.assertThat(lastAsyncActionMessage).isEqualTo(actionDifficultTag)
@@ -82,7 +83,8 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber { state->
+        store.subscribe (StoreSubscriber {
+                val state=store.state
                 with (state) {
                     if (lastAsyncActionMessage == actionDifficultTag) {
                         Assertions.assertThat(lastAsyncActionError).isNull()
@@ -113,7 +115,8 @@ class AsyncActionMiddlewareTest {
 
         //subscribe before dispatch!
         store.subscribe (
-                StoreSubscriber { state->
+                StoreSubscriber {
+                    val state=store.state
                     with(state) {
                         if (lastAsyncActionMessage != "none") {
                             Assertions.assertThat(lastAsyncActionMessage).isEqualTo(actionDifficultTag)
@@ -144,7 +147,7 @@ class AsyncActionMiddlewareTest {
                 StoreSubscriber {
                     with(store.state) {
                         //on state change
-                        Assertions.assertThat(counter).isEqualTo(1);
+                        Assertions.assertThat(counter).isEqualTo(1)
                         Assertions.assertThat(lastAsyncActionMessage).isEqualTo("none")
                         Assertions.assertThat(lastAsyncActionError).isNull()
                         Assertions.assertThat(lastAsyncActionResult).isNull()

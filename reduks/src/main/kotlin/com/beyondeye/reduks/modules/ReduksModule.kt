@@ -86,12 +86,13 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                         val s2sel = selector.withSingleField { s2 }
                         val sub1 = m1.subscriberBuilder.build(store.store1)
                         val sub2 = m2.subscriberBuilder.build(store.store2)
-                        StoreSubscriber { newS ->
+                        StoreSubscriber {
+                            val newS=store.state
                             s1sel.onChangeIn(newS) {
-                                sub1.onStateChange(newS.s1)
+                                sub1.onStateChange()
                             }
                             s2sel.onChangeIn(newS) {
-                                sub2.onStateChange(newS.s2)
+                                sub2.onStateChange()
                             }
                         }
                     })
@@ -120,10 +121,11 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                         val sub1 = m1.subscriberBuilder.build(store.store1)
                         val sub2 = m2.subscriberBuilder.build(store.store2)
                         val sub3 = m3.subscriberBuilder.build(store.store3)
-                        StoreSubscriber { newS ->
-                            s1sel.onChangeIn(newS) { sub1.onStateChange(newS.s1) }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange(newS.s2) }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange(newS.s3) }
+                        StoreSubscriber {
+                            val newS=store.state
+                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
+                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
+                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
                         }
                     })
         }
@@ -155,11 +157,12 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                         val sub2 = m2.subscriberBuilder.build(store.store2)
                         val sub3 = m3.subscriberBuilder.build(store.store3)
                         val sub4 = m4.subscriberBuilder.build(store.store4)
-                        StoreSubscriber { newS ->
-                            s1sel.onChangeIn(newS) { sub1.onStateChange(newS.s1) }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange(newS.s2) }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange(newS.s3) }
-                            s4sel.onChangeIn(newS) { sub4.onStateChange(newS.s4) }
+                        StoreSubscriber {
+                            val newS=store.state
+                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
+                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
+                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
+                            s4sel.onChangeIn(newS) { sub4.onStateChange() }
                         }
                     })
         }
@@ -196,12 +199,13 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                         val sub3 = m3.subscriberBuilder.build(store.store3)
                         val sub4 = m4.subscriberBuilder.build(store.store4)
                         val sub5 = m5.subscriberBuilder.build(store.store5)
-                        StoreSubscriber { newS ->
-                            s1sel.onChangeIn(newS) { sub1.onStateChange(newS.s1) }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange(newS.s2) }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange(newS.s3) }
-                            s4sel.onChangeIn(newS) { sub4.onStateChange(newS.s4) }
-                            s5sel.onChangeIn(newS) { sub5.onStateChange(newS.s5) }
+                        StoreSubscriber {
+                            val newS=store.state
+                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
+                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
+                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
+                            s4sel.onChangeIn(newS) { sub4.onStateChange() }
+                            s5sel.onChangeIn(newS) { sub5.onStateChange() }
                         }
                     })
         }
