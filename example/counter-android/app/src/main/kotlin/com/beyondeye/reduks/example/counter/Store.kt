@@ -7,4 +7,3 @@ import com.beyondeye.reduks.SimpleStore
  */
 
 val counterStore = SimpleStore(CounterState(), counterReducer())
-
