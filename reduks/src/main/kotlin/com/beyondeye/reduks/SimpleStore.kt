@@ -1,7 +1,6 @@
 package com.beyondeye.reduks
 
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
-import java.util.ArrayList
 
 class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
@@ -15,14 +14,15 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
         }
     }
     override var state: S = initialState
-    private val subscribers = ArrayList<StoreSubscriber<S>>()
+    private val subscribers = mutableListOf<StoreSubscriber<S>>()
     private val mainDispatcher = object : Middleware<S> {
         override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any):Any {
-            synchronized (this) {
-                state = reducer.reduce(store.state, action)
-            }
-            for (i in subscribers.indices) {
-                subscribers[i].onStateChange()
+            try {
+                synchronized(this) {
+                    state = reducer.reduce(store.state, action)
+                }
+            } finally {
+                subscribers.forEach { it.onStateChange() }
             }
             return action
         }

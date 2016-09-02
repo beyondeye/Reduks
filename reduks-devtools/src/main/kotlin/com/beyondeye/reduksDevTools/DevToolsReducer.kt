@@ -2,7 +2,6 @@ package com.beyondeye.reduksDevTools
 
 import com.beyondeye.reduks.Reducer
 
-import java.util.ArrayList
 
 class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsState<S>> {
 
@@ -59,8 +58,8 @@ class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsS
                               devToolsAction: DevToolsAction,
                               computedStates: List<S>,
                               stagedActions: List<Any?>): DevToolsState<S> {
-        val newStates = ArrayList(computedStates)
-        val newActions = ArrayList<Any?>(stagedActions)
+        val newStates = computedStates.toMutableList()
+        val newActions =stagedActions.toMutableList()
 
         newStates.add(appReducer.reduce(state.currentAppState, devToolsAction.appAction))
         newActions.add(devToolsAction.appAction)
@@ -72,7 +71,7 @@ class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsS
     }
 
     private fun recomputeStates(computedStates: List<S>, stagedActions: List<Any?>): List<S> {
-        val recomputedStates = ArrayList<S>(computedStates.size)
+        val recomputedStates = mutableListOf<S>()
         var currentState = computedStates[0]
 
         for (i in computedStates.indices) {

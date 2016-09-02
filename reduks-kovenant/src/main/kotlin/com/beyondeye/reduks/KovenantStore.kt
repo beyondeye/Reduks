@@ -5,7 +5,6 @@ import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import nl.komponents.kovenant.*
 import nl.komponents.kovenant.android.androidUiDispatcher
 import nl.komponents.kovenant.ui.promiseOnUi
-import java.util.ArrayList
 
 infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Exception> {
     return this.then { promiseOnUi { bind(it) }.get() }
@@ -47,7 +46,7 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
     val statePromise: Promise<S, Exception> get() = _statePromise
     override val state: S
         get() = _statePromise.get() //wait completion of all current queued promises
-    private val subscribers = ArrayList<StoreSubscriber<S>>()
+    private val subscribers= mutableListOf<StoreSubscriber<S> >()
     private val mainDispatcher = object : Middleware<S> {
         override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any {
             val deferredNextState = deferred<S, Exception>()
