@@ -27,9 +27,9 @@ allprojects {
         GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
         sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
         targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
-        compileSdkVersion_ = 23
+        compileSdkVersion_ = 24
         minSdkVersion_ = 15 //Integer
-        targetSdkVersion_ = 23 //Integer
+        targetSdkVersion_ = 24 //Integer
         extraConfVersion = '2.2.+'
     }
 }
@@ -122,5 +122,3 @@ task clean(type: Delete) {
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14.1'
 }
-
-
