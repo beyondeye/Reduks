@@ -321,9 +321,8 @@ TODO
 TODO
 ####Reduks DevTools
 TODO
-## License
 
-# Open source library included/modified or that inspired Reduks
+## Open source library included/modified or that inspired Reduks
 - http://redux.js.org/
 - https://github.com/brianegan/bansa. (Reduks was actually started as a fork of Bansa)
 - https://github.com/reactjs/reselect
@@ -333,6 +332,9 @@ TODO
 - https://github.com/acdlite/redux-promise
 - https://github.com/gaearon/redux-thunk
 - https://github.com/acdlite/flux-standard-action
+
+## License
+
 ~~~
 The MIT License (MIT)
 Copyright (c) 2016 Dario Elyasy
