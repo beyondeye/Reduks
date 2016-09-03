@@ -95,6 +95,9 @@ configure(subprojects - project(':reduks-core')) {
             main.java.srcDirs += 'src/main/kotlin'
             test.java.srcDirs += 'src/test/kotlin'
         }
+        lintOptions {
+            abortOnError false
+        }
     }
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
