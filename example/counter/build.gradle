@@ -1,0 +1,35 @@
+group 'com.beyondeye.reduks.example.counter'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext {
+        kotlin_version = '1.0.3'
+        reduks_version = '2.0.0b6'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+run {
+    standardInput = System.in
+}
+
+mainClassName = 'com.beyondeye.reduks.example.counter.MainKt'
+
+repositories {
+    maven { url "https://jitpack.io" }
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "com.github.beyondeye.reduks:reduks-core:$reduks_version"
+}

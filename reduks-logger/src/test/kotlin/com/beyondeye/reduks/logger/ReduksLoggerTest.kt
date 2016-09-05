@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config
  * use robolectric because LogFormatterPrinter depends from org.json in android sdk
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class)
+@Config(constants = BuildConfig::class,sdk = intArrayOf(Build.VERSION_CODES.M))
 class ReduksLoggerTest {
 
     @Before
