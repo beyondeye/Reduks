@@ -296,11 +296,20 @@ val reducercombined= combineReducers(reducerA, reducerB, reducerAB)
 ```
  
 Then for action sequence 
-```IncrA, IncrB``` 
+```
+IncrA, IncrB
+``` 
+
 starting from the initial state 
-```State(a=0,b=0)```
+
+```kotlin
+State(a=0,b=0)
+```
+
 the combined reducer will produce the finale state
-```State(a=2,b=2)```
+```
+State(a=2,b=2)
+```
 
 Note that this is different from how it works in   [reduxjs combineReducers](https://github.com/reactjs/redux/blob/master/docs/api/combineReducers.md). The original reduxjs concept has been
 implemented and extended in Reduks Modules (see below)
