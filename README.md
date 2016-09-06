@@ -265,8 +265,46 @@ val reducer2 = Reducer<LoginActivityState2> { s, a ->
 ```
 
 ####Combining Reducers
+When your application start getting complex, your reducer code will start getting difficult too manage.
+To solve this problem, Reduks provide the method ```combineReducers``` that allows  splitting the definition of the reducer and even put each part of the definition in a different file. 
 
-TODO
+ ```combineReducers```  takes a list of reducers and return a reducer that apply each reducer in the list according to the order in the list.
+For example:
+
+```kotlin
+class Action
+{
+    class IncrA
+    class IncrB
+}
+data class State(val a:Int=0,val b:Int=0)
+val reducerA=Reducer<State>{ state,action-> when(action) {
+    is Action.IncrA -> state.copy(a=state.a+1)
+    else -> state
+}}
+val reducerB=Reducer<State>{ state,action-> when(action) {
+    is Action.IncrB -> state.copy(b=state.b+1)
+    else -> state
+}}
+
+val reducerAB=Reducer<State>{ state,action-> when(action) {
+    is Action.IncrA -> state.copy(a=state.a*2)
+    is Action.IncrB -> state.copy(b=state.b*2)
+    else -> state
+}}
+val reducercombined= combineReducers(reducerA, reducerB, reducerAB)
+```
+ 
+Then for action sequence 
+```IncrA, IncrB``` 
+starting from the initial state 
+```State(a=0,b=0)```
+the combined reducer will produce the finale state
+```State(a=2,b=2)```
+
+Note that this is different from how it works in   [reduxjs combineReducers](https://github.com/reactjs/redux/blob/master/docs/api/combineReducers.md). The original reduxjs concept has been
+implemented and extended in Reduks Modules (see below)
+
 ####If I feel like I want to dispatch from my Reducer what is the correct thing to do instead?
 This is one of the most typical things that confuse beginners.
 
