@@ -307,7 +307,7 @@ State(a=0,b=0)
 ```
 
 the combined reducer will produce the finale state
-```
+```kotlin
 State(a=2,b=2)
 ```
 
