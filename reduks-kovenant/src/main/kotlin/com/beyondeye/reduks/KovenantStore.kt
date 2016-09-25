@@ -91,7 +91,9 @@ class KovenantStore<S>(initialState: S, private var reducer: IReducer<S>, val ob
      * An action can be of Any type
      */
     override var dispatch: (action: Any) -> Any = { action ->
-        mainDispatcher.dispatch(this, nullDispatcher, action)
+        mainDispatcher.dispatch(this,
+                 { it -> it}, //null dispatcher that ends the chain
+                action)
     }
 
     override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
@@ -102,7 +104,5 @@ class KovenantStore<S>(initialState: S, private var reducer: IReducer<S>, val ob
             }
         }
     }
-
-    val nullDispatcher : (Any)->Any= { it -> it}
 }
 

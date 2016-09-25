@@ -38,7 +38,9 @@ class SimpleStore<S>(initialState: S, private var reducer: IReducer<S>) : Store<
      * An action can be of Any type
      */
     override var dispatch: (action: Any) -> Any = { action ->
-        mainDispatcher.dispatch(this, nullDispatcher,action )
+        mainDispatcher.dispatch(this,
+                {it->it}, //null dispatcher that ends the chain
+                action )
     }
 
     override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
@@ -49,6 +51,5 @@ class SimpleStore<S>(initialState: S, private var reducer: IReducer<S>) : Store<
             }
         }
     }
-    val nullDispatcher : (Any)->Any= {it->it}
 }
 
