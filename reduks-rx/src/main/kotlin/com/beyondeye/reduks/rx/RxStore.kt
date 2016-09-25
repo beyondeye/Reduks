@@ -9,7 +9,7 @@ import rx.subscriptions.CompositeSubscription
 
 class RxStore<S>(
         override var state: S,
-        private var reducer: Reducer<S>,
+        private var reducer: IReducer<S>,
         /**
          * in android we need to keep track of all rx.Subscriptions and unsubscribe on Activity.onDestroy or Fragment.onDestroyView.
          * A common practice is put all subscription in a CompositeSubscription that can be unsubscribed with a single call.
@@ -17,7 +17,7 @@ class RxStore<S>(
          */
         val allRxSubscriptions: CompositeSubscription?=null
 ) : Store<S> {
-    override fun replaceReducer(reducer: Reducer<S>) {
+    override fun replaceReducer(reducer: IReducer<S>) {
         this.reducer=reducer
     }
     class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null) : StoreCreator<S> {
@@ -25,7 +25,7 @@ class RxStore<S>(
             return Creator<S_>(allRxSubscriptions)
         }
 
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
+        override fun create(reducer: IReducer<S>, initialState: S): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
         override val storeStandardMiddlewares =  arrayOf(ThunkMiddleware<S>())
     }
     val stateChanges: Observable<S>
@@ -54,7 +54,7 @@ class RxStore<S>(
     fun subscribeRx(subscriber: rx.Subscriber<S>, observeOnAndroidMainThread:Boolean=true): RxStoreSubscription<S> {
         return RxStoreSubscription(this,subscriber, observeOnAndroidMainThread)
     }
-    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+    override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
         if(storeSubscriber !is RxStoreSubscriber)
             throw IllegalArgumentException("wrong subscriber type")
         return subscribeRx(storeSubscriber)

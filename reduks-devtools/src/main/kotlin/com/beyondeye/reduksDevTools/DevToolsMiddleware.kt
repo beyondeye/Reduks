@@ -1,12 +1,11 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.NextDispatcher
+import com.beyondeye.reduks.IMiddleware
 import com.beyondeye.reduks.Store
 
-class DevToolsMiddleware<S>(private val store: Store<S>, private val appMiddleware: Middleware<S>) : Middleware<DevToolsState<S>> {
+class DevToolsMiddleware<S>(private val store: Store<S>, private val appMiddleware: IMiddleware<S>) : IMiddleware<DevToolsState<S>> {
 
-    override fun dispatch(devToolsStore: Store<DevToolsState<S>>, next: NextDispatcher, action: Any): Any {
+    override fun dispatch(devToolsStore: Store<DevToolsState<S>>, nextDispatcher:  (Any)->Any, action: Any): Any {
         // Actions are wrapped by the dispatcher as a com.beyondeye.reduksDevTools.DevToolsAction. However, the middleware passed
         // into the constructor act on original app actions. Therefore, we must lift the app action
         // out of the om.beyondeye.reduksDevTools.DevToolsAction container.
@@ -16,13 +15,13 @@ class DevToolsMiddleware<S>(private val store: Store<S>, private val appMiddlewa
             actionToDispatch = action.appAction
         }
 
-        val dispatcher = NextDispatcher { action ->
-            // Since next can be called within any Middleware, we need to wrap the actions
+        val dispatcher = { action:Any ->
+            // Since nextDispatcher can be called within any Middleware, we need to wrap the actions
             // as DevToolsActions, in the same way as we wrap the initial dispatch call.
             if (action is DevToolsAction) {
-                next.dispatch(action)
+                nextDispatcher(action)
             } else {
-                next.dispatch(DevToolsAction.createPerformAction(action))
+                nextDispatcher(DevToolsAction.createPerformAction(action))
             }
             action
         }

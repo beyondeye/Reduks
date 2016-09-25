@@ -1,4 +1,4 @@
-[![Kotlin 1.0](https://img.shields.io/badge/Kotlin-1.0.3-blue.svg)](http://kotlinlang.org)
+[![Kotlin 1.0](https://img.shields.io/badge/Kotlin-1.0.4-blue.svg)](http://kotlinlang.org)
 [![](https://jitpack.io/v/beyondeye/reduks.svg)](https://jitpack.io/#beyondeye/reduks)
 [![Build Status](https://travis-ci.org/beyondeye/Reduks.svg?branch=master)](https://travis-ci.org/beyondeye/Reduks)
 [![Slack channel](https://img.shields.io/badge/Chat-Slack-green.svg)](https://kotlinlang.slack.com/messages/reduks/)
@@ -35,19 +35,19 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b4'
+compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b7'
 
 //rx-java based state store+ additional required dep for android support
-compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b3'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b4'
+compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b7'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b7'
 
 //kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b4'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b4'
+compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b7'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b7'
 
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b4'
+compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b7'
 ```
 
 

@@ -1,8 +1,8 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.IReducer
 
-class DevToolsTestReducer : Reducer<DevToolsReducerTest.TestState> {
+class DevToolsTestReducer : IReducer<DevToolsReducerTest.TestState> {
     override fun reduce(state: DevToolsReducerTest.TestState, action: Any): DevToolsReducerTest.TestState {
         when (action) {
             is DevToolsReducerTest.TestAction -> {
@@ -16,5 +16,5 @@ class DevToolsTestReducer : Reducer<DevToolsReducerTest.TestState> {
         }
     }
 
-    var updated = false;
+    var updated = false
 }

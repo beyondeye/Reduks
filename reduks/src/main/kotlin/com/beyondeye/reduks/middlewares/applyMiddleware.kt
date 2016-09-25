@@ -14,13 +14,9 @@ private  fun <T> compose(functions: List<(T) -> T>): (T) -> T {
 /**
 * next is the next dispatcher to call after this middleware, to process the action dispatched to the store
 */
-private  fun <S> Middleware<S>.toLambda(): (store_: Store<S>, next:(Any)->Any, action:Any )  -> Any
+private  fun <S> IMiddleware<S>.toLambda(): (store_: Store<S>, nextDispatcher:(Any)->Any, action:Any )  -> Any
 {
-    return { store,next,action -> this.dispatch(store, object : NextDispatcher {
-        override fun dispatch(action: Any): Any {
-            return next(action)
-        }
-    }, action)}
+    return { store,next,action -> this.dispatch(store, {it ->next(it)}, action)}
 }
 
 
@@ -28,14 +24,14 @@ private  fun <S> Middleware<S>.toLambda(): (store_: Store<S>, next:(Any)->Any, a
 /**
  * a middleware function is a method with signature
  *
- * fun myMiddleware<S,A>(store:Store<S,A>, next:(Action)->Action, action:Action) : Action
+ * fun myMiddleware<S,A>(store:Store<S,A>, nextDispatcher:(Action)->Action, action:Action) : Action
  * An action can be of Any type
  *
  * by calling next, we can post new actions to be processed by all chained middleware that follows
  * the next function is basically the next middleware function with parameters 'store' and 'next' already bound
  */
 fun <S> Store<S>.applyMiddleware(
-        vararg middlewares: Middleware<S>
+        vararg middlewares: IMiddleware<S>
 ):  Store<S> {
     dispatch = compose(middlewares.map { it.toLambda().curried()(this) })(dispatch)
     return  this
@@ -46,24 +42,24 @@ fun <S> Store<S>.applyStandardMiddlewares() {
     this.applyMiddleware(ThunkMiddleware())
 }
 
-fun <S> Middleware<S>.toEnhancer():StoreEnhancer<S> {
+fun <S> IMiddleware<S>.toEnhancer():IStoreEnhancer<S> {
     return StoreEnhancer { srcStoreCreator->
         object:StoreCreator<S> {
-            override fun create(reducer: Reducer<S>, initialState: S)=
+            override fun create(reducer: IReducer<S>, initialState: S)=
                srcStoreCreator.create(reducer,initialState).applyMiddleware(this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out Middleware<S>>
+            override val storeStandardMiddlewares: Array<out IMiddleware<S>>
                 get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }
 }
 
-fun <S> Array<Middleware<S>>.toEnhancer():StoreEnhancer<S> {
+fun <S> Array<IMiddleware<S>>.toEnhancer():IStoreEnhancer<S> {
     return StoreEnhancer { srcStoreCreator->
         object:StoreCreator<S> {
-            override fun create(reducer: Reducer<S>, initialState: S): Store<S> =
+            override fun create(reducer: IReducer<S>, initialState: S): Store<S> =
                     srcStoreCreator.create(reducer,initialState).applyMiddleware(*this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out Middleware<S>>
+            override val storeStandardMiddlewares: Array<out IMiddleware<S>>
                 get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }

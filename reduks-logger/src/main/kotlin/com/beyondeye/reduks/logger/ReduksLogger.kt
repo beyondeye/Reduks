@@ -1,9 +1,6 @@
 package com.beyondeye.reduks.logger
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.NextDispatcher
-import com.beyondeye.reduks.StateType
-import com.beyondeye.reduks.Store
+import com.beyondeye.reduks.*
 import com.beyondeye.reduks.logger.logformatter.LogFormatter
 import com.beyondeye.zjsonpatch.JsonDiff
 import com.google.gson.GsonBuilder
@@ -14,7 +11,7 @@ import com.google.gson.JsonParser
  * Reduks Logger middleware
  * Created by daely on 7/21/2016.
  */
-class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
+class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : IMiddleware<S> {
     private val jsonDiffer = JsonDiff
     private val jsonParser = JsonParser()
     /**
@@ -25,10 +22,10 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
     private val logger = LogFormatter(config.reduksLoggerTag,config.formatterSettings)
     private val logBuffer: MutableList<LogEntry<S>> = mutableListOf() //we need a logBuffer because of possible unhandled exceptions before we print the logEntry
     fun getLogAsString():String = logger.getLogAsString()
-    override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any? {
+    override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any): Any {
         // Exit early if predicate function returns 'false'
         val prevState = store.state
-        if (!config.filter(prevState, action)) return next.dispatch(action)
+        if (!config.filter(prevState, action)) return nextDispatcher(action)
         val started = System.nanoTime()
         val logEntry = LogEntry<S>(started, config.stateTransformer(prevState), action)
         logBuffer.add(logEntry)
@@ -36,12 +33,12 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         var returnedValue: Any? = null
         if (config.logErrors) {
             try {
-                returnedValue = next.dispatch(action)
+                returnedValue = nextDispatcher(action)
             } catch (e: Exception) {
                 logEntry.error = config.errorTransformer(e)
             }
         } else {
-            returnedValue = next.dispatch(action)
+            returnedValue = nextDispatcher(action)
         }
         logEntry.took = nano2ms(logEntry.started,System.nanoTime())
         logEntry.nextState = config.stateTransformer(store.state)
@@ -51,7 +48,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         logBuffer.clear()
 
         if (logEntry.error != null) throw logEntry.error!!
-        return returnedValue
+        return returnedValue ?:object :Action{} //no action to return, return empty action
     }
     private fun printBuffer(buffer: List<LogEntry<S>>) {
         buffer.forEachIndexed { entryIdx, curEntry ->

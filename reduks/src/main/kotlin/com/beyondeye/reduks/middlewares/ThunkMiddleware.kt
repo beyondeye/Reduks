@@ -1,9 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.NextDispatcher
-import com.beyondeye.reduks.Store
-import com.beyondeye.reduks.Thunk
+import com.beyondeye.reduks.*
 
 /**
  * a middleware that knows how to handle actions of type thunk
@@ -29,14 +26,14 @@ import com.beyondeye.reduks.Thunk
  * a single place, with a single thunk (see examples from tests)
  */
 
-class ThunkMiddleware<S> : Middleware<S> {
-    override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any):Any {
-        if(action is Thunk<*>) {
+class ThunkMiddleware<S> : IMiddleware<S> {
+    override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
+        if(action is IThunk<*>) {
             @Suppress("UNCHECKED_CAST")
-            val a=(action as Thunk<S>).execute(store.dispatch ,store.state)
-            return next(a)
+            val a=(action as IThunk<S>).execute( {it-> store.dispatch(it)  } ,store.state)
+            return nextDispatcher(a)
         }
-        return  next(action)
+        return  nextDispatcher(action)
     }
 
 }

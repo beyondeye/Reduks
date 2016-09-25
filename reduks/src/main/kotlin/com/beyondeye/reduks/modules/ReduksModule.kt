@@ -32,18 +32,18 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * return the state reducer
              */
-            val stateReducer: Reducer<State>,
+            val stateReducer: IReducer<State>,
             /**
              * return the main store subscriber
              * we pass as argument the store itself, so that we can create an object that implement the
              * [StoreSubscriber] interface that keep a reference to the store itself, in case the we need call dispatch
              * in the subscriber
              */
-            val subscriberBuilder: StoreSubscriberBuilder<State>)
+            val subscriberBuilder: IStoreSubscriberBuilder<State>)
     override val ctx: ReduksContext
     override val store: Store<State>
-    override val storeSubscriber: StoreSubscriber<State>
-    override val storeSubscription: StoreSubscription
+    override val storeSubscriber: IStoreSubscriber<State>
+    override val storeSubscription: IStoreSubscription
     init {
         ctx=moduleDef.ctx
         val storeCreator= moduleDef.storeCreator
@@ -57,7 +57,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     }
 
 
-    fun  subscribe(storeSubscriber: StoreSubscriber<State>): StoreSubscription =store.subscribe(storeSubscriber)
+    fun  subscribe(storeSubscriber: IStoreSubscriber<State>): IStoreSubscription =store.subscribe(storeSubscriber)
     companion object {
         //calculate context for multiple modules
         fun multiContext(vararg ctxs: ReduksContext): ReduksContext {

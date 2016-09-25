@@ -1,9 +1,9 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.IReducer
 
 
-class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsState<S>> {
+class DevToolsReducer<S>(private val appReducer: IReducer<S>) : IReducer<DevToolsState<S>> {
 
     override fun reduce(state: DevToolsState<S>, action: Any): DevToolsState<S> {
         if (action !is DevToolsAction) {
@@ -61,7 +61,7 @@ class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsS
         val newStates = computedStates.toMutableList()
         val newActions =stagedActions.toMutableList()
 
-        newStates.add(appReducer.reduce(state.currentAppState, devToolsAction.appAction))
+        newStates.add(appReducer.reduce(state.currentAppState, devToolsAction.appAction!!))
         newActions.add(devToolsAction.appAction)
 
         return DevToolsState(
@@ -76,7 +76,7 @@ class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsS
 
         for (i in computedStates.indices) {
             val currentAction = stagedActions[i]
-            currentState = appReducer.reduce(currentState, currentAction)
+            currentState = appReducer.reduce(currentState, currentAction!!)
             recomputedStates.add(currentState)
         }
 

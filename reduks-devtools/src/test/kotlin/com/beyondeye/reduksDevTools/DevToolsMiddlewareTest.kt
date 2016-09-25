@@ -26,7 +26,7 @@ class DevToolsMiddlewareTest {
 
         val middleWare = Middleware<TestState> { store,  next,action ->
             counter += 1
-            next.dispatch(action)
+            next(action)
         }
 
         val store = DevToolsStore(TestState(), reducer, middleWare)
@@ -45,14 +45,14 @@ class DevToolsMiddlewareTest {
         val middleWare1 = Middleware<TestState> { store, next, action ->
             counter += 1
             order.add("first")
-            next.dispatch(action)
+            next(action)
             order.add("third")
         }
 
         val middleWare2 = Middleware<TestState> { store, next, action ->
             counter += 1
             order.add("second")
-            next.dispatch(action)
+            next(action)
         }
 
         val reducer = Reducer<TestState> { state, action ->
@@ -81,17 +81,17 @@ class DevToolsMiddlewareTest {
             counter += 1
             when (action) {
                 is CallApi -> {
-                    next.dispatch(Fetching)
+                    next(Fetching)
                     Observable
                             .just(5)
                             .delay(1L, TimeUnit.SECONDS, testScheduler)
                             .subscribe({
-                                next.dispatch(FetchComplete)
+                                next(FetchComplete)
                             })
 
-                    next.dispatch(action)
+                    next(action)
                 }
-                else -> next.dispatch(action)
+                else -> next(action)
             }
         }
 
@@ -103,7 +103,7 @@ class DevToolsMiddlewareTest {
                 is FetchComplete -> order.add("FETCH_COMPLETE")
             }
 
-            next.dispatch(action)
+            next(action)
         }
 
         val reducer = Reducer<TestState> { state, action ->
@@ -137,7 +137,7 @@ class DevToolsMiddlewareTest {
             counter += 1
             order.add("first")
 
-            next.dispatch(action)
+            next(action)
 
             // Redispatch an action that goes through the whole chain
             // (useful for async middleware)
@@ -149,7 +149,7 @@ class DevToolsMiddlewareTest {
         val middleWare2 = Middleware<TestState> { store, next, action ->
             counter += 1
             order.add("second")
-            next.dispatch(action)
+            next(action)
         }
 
         val reducer = Reducer<TestState> { state, action ->

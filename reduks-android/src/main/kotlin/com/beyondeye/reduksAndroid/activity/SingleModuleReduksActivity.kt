@@ -37,11 +37,11 @@ interface SingleModuleReduksActivity<S> {
     /**
      * return the activity state reducer
      */
-    fun getActivityStateReducer(): Reducer<S>
+    fun getActivityStateReducer(): IReducer<S>
 
     /**
      * return the activity main store subscriber
      */
-    fun getActivityStoreSubscriber(store: Store<S>): StoreSubscriber<S>
+    fun getActivityStoreSubscriber(store: Store<S>): IStoreSubscriber<S>
 
 }

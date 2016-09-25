@@ -59,7 +59,7 @@ class ThunkMiddlewareTest {
             val promise: Promise<Any, Exception> = task {
                 fetchSecretSauce("Tomato")
             }.then { sauce ->
-                dispatcher.dispatch(
+                dispatcher(
                         MakeSandwitch(forPerson = "John", sauceName = sauce))
             }
             promise

@@ -3,23 +3,22 @@ package com.beyondeye.reduks
 import com.beyondeye.reduks.*
 
 /**
+ * builder methods for making the code more clear when defining reduks objects
  * Created by daely on 8/31/2016.
  */
 
 /**
  * see also https://github.com/reactjs/redux/blob/master/docs/Glossary.md#middleware
  */
-class MiddlewareImpl<S>(val middlewareFn:(store: Store<S>, next: NextDispatcher, action:Any)->Any) {
-    fun dispatch(store: Store<S>, next: NextDispatcher, action: Any): Any =middlewareFn(store,next,action)
+class MiddlewareImpl<S>(val middlewareFn:(store: Store<S>, nextDispatcher:  (Any)->Any, action:Any)->Any):IMiddleware<S> {
+    override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any): Any =middlewareFn(store, nextDispatcher,action)
 }
-class NextDispatcherImpl(val nextDispatcherFn:(action:Any)->Any) {
-    fun dispatch(action: Any): Any = nextDispatcherFn(action)
-}
+
 /**
  * see also https://github.com/reactjs/redux/blob/master/docs/Glossary.md#reducer
  */
-class ReducerImpl<S>(val reducerFn:(state:S,action:Any)->S) {
-    fun reduce(state: S, action: Any): S= reducerFn(state,action)
+class ReducerImpl<S>(val reducerFn:(state:S,action:Any)->S) :IReducer<S>{
+    override fun reduce(state: S, action: Any): S= reducerFn(state,action)
 }
 
 /**
@@ -27,29 +26,29 @@ class ReducerImpl<S>(val reducerFn:(state:S,action:Any)->S) {
  * see https://github.com/reactjs/redux/blob/master/docs/Glossary.md#store-enhancer
  * Created by daely on 8/23/2016.
  */
-class StoreEnhancerImpl<S>(val storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>) {
-    fun enhance(next: StoreCreator<S>): StoreCreator<S> = storeEnhancerFn(next)
+class StoreEnhancerImpl<S>(val storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>):IStoreEnhancer<S> {
+    override fun enhance(next: StoreCreator<S>): StoreCreator<S> = storeEnhancerFn(next)
 }
 
-class StoreSubscriberImpl<S>(val subscriberFn: (newState:S)->Unit) {
-    fun onStateChange(state: S){subscriberFn(state)}
+class StoreSubscriberImpl<S>(val subscriberFn: ()->Unit) :IStoreSubscriber<S>{
+    override fun onStateChange(){subscriberFn()}
 }
 
-class StoreSubscriberBuilderImpl<S>(val storeSubscriberBuilderFn:(store: Store<S>)-> StoreSubscriber<S>) {
-    fun build(store: Store<S>): StoreSubscriber<S> = storeSubscriberBuilderFn(store)
+class StoreSubscriberBuilderImpl<S>(val storeSubscriberBuilderFn:(store: Store<S>)-> IStoreSubscriber<S>):IStoreSubscriberBuilder<S> {
+    override fun build(store: Store<S>): IStoreSubscriber<S> = storeSubscriberBuilderFn(store)
 }
 
-class ThunkImpl<S>(val thunkFn:(dispatcher: NextDispatcher, state: S)->Any) : Action {
-    fun execute(dispatcher: NextDispatcher, state: S): Any = thunkFn(dispatcher,state)
+class ThunkImpl<S>(val thunkFn:(dispatcher: (Any)->Any, state: S)->Any) : IThunk<S> {
+    override fun execute(dispatcher:  (Any)->Any, state: S): Any = thunkFn(dispatcher,state)
 }
 
-fun <S> _Middleware(middlewareFn:(store: Store<S>, next: NextDispatcher, action:Any)->Any) = MiddlewareImpl(middlewareFn)
-fun <S> _NextDispatcher(nextDispatcherFn:(action:Any)->Any) = NextDispatcherImpl(nextDispatcherFn)
-fun <S> _Reducer( reducerFn:(state:S,action:Any)->S) = ReducerImpl(reducerFn)
-fun <S> _StoreEnhancer(storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>)= StoreEnhancerImpl(storeEnhancerFn)
-fun <S> _StoreSubcriber(subscriberFn: (newState:S)->Unit)= StoreSubscriberImpl(subscriberFn)
-fun <S> _StoreSubscriberBuilder(storeSubscriberBuilderFn:(store: Store<S>)-> StoreSubscriber<S>) = StoreSubscriberBuilderImpl(storeSubscriberBuilderFn)
-fun <S> _Thunk( thunkFn:(dispatcher: NextDispatcher, state: S)->Any) = ThunkImpl(thunkFn)
+
+fun <S> Middleware(middlewareFn:(store: Store<S>, nextDispatcher:  (Any)->Any, action:Any)->Any) = MiddlewareImpl(middlewareFn)
+fun <S> Reducer( reducerFn:(state:S,action:Any)->S) = ReducerImpl(reducerFn)
+fun <S> StoreEnhancer(storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>)= StoreEnhancerImpl(storeEnhancerFn)
+fun <S> StoreSubscriber(subscriberFn: ()->Unit)= StoreSubscriberImpl<S>(subscriberFn)
+fun <S> StoreSubscriberBuilder(storeSubscriberBuilderFn:(store: Store<S>)-> IStoreSubscriber<S>) = StoreSubscriberBuilderImpl(storeSubscriberBuilderFn)
+fun <S> Thunk( thunkFn:(dispatcher:  (Any)->Any, state: S)->Any) = ThunkImpl(thunkFn)
 
 data class TestState(val a:Int, val b:Int)
-val s1= _StoreSubcriber<TestState>{ it-> }
+val s1= StoreSubscriber<TestState>{ -> }

@@ -49,7 +49,7 @@ abstract class RxReduksActivity<S>: AppCompatActivity() {
         allActivitySubscriptions.unsubscribe()
         super.onDestroy()
     }
-    fun getActivityStoreSubscriber(store: Store<S>): StoreSubscriber<S> {
+    fun getActivityStoreSubscriber(store: Store<S>): IStoreSubscriber<S> {
         isGetActivityRxStoreSubscriberCalled =true
         return getActivityRxStoreSubscriber(store)
     }

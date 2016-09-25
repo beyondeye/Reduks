@@ -1,9 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.Action
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.NextDispatcher
-import com.beyondeye.reduks.Store
+import com.beyondeye.reduks.*
 import nl.komponents.kovenant.task
 import nl.komponents.kovenant.Promise
 
@@ -32,8 +29,7 @@ sealed class AsyncAction(val payloadTypename:String): Action {
      * it seems redundant to store both type name and define this class as template class
      * unfortunately this is required because of type erasure in java/kotlin generics
      */
-    class Started<PayloadType :Any>(payloadTypename:String, promise: Promise<PayloadType, Throwable>): AsyncAction(payloadTypename) {
-        val promise: Promise<PayloadType, Throwable> = promise
+    class Started<PayloadType :Any>(payloadTypename:String, val promise: Promise<PayloadType, Throwable>): AsyncAction(payloadTypename) {
         constructor(type:String,body: () -> PayloadType):this(type, task { body() })
         fun asCompleted() = Completed(payloadTypename, promise.get())
         fun asFailed() = Failed(payloadTypename, promise.getError())
@@ -41,11 +37,10 @@ sealed class AsyncAction(val payloadTypename:String): Action {
          * block until we get back the result from the promise
          */
         fun resolve(): AsyncAction {
-            val res: AsyncAction
-            try {
-                res= Completed(payloadTypename, promise.get())
+            val res = try {
+                Completed(payloadTypename, promise.get())
             } catch (e:Exception) {
-                res= Failed(payloadTypename, e)
+                Failed(payloadTypename, e)
             }
             return res
         }
@@ -80,8 +75,8 @@ sealed class AsyncAction(val payloadTypename:String): Action {
  *
  * Created by daely on 5/17/2016.
  */
-class AsyncActionMiddleWare<S> : Middleware<S> {
-    override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any):Any {
+class AsyncActionMiddleWare<S> : IMiddleware<S> {
+    override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
         if(action is AsyncAction.Started<*>) {
             //queue some async actions when the promise resolves
             action.promise
@@ -90,7 +85,7 @@ class AsyncActionMiddleWare<S> : Middleware<S> {
             //do not pass back the unwrapped promise as result of the middleware like is done for example in https://github.com/acdlite/redux-promise
             //because not very useful for chaining .since we need anyway to cast back to the right type, just return the AsyncAction.Started<A> itself
         }
-        return next(action)
+        return nextDispatcher(action)
     }
 
 }

@@ -2,21 +2,21 @@ package com.beyondeye.reduks
 
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 
-class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S> {
-    override fun replaceReducer(reducer: Reducer<S>) {
+class SimpleStore<S>(initialState: S, private var reducer: IReducer<S>) : Store<S> {
+    override fun replaceReducer(reducer: IReducer<S>) {
         this.reducer=reducer
     }
     class Creator<S>: StoreCreator<S> {
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
-        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
+        override fun create(reducer: IReducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
+        override val storeStandardMiddlewares:Array<IMiddleware<S>> = arrayOf(ThunkMiddleware<S>())
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>()
         }
     }
     override var state: S = initialState
-    private val subscribers = mutableListOf<StoreSubscriber<S>>()
-    private val mainDispatcher = object : Middleware<S> {
-        override fun dispatch(store: Store<S>, next: NextDispatcher, action: Any):Any {
+    private val subscribers = mutableListOf<IStoreSubscriber<S>>()
+    private val mainDispatcher = object : IMiddleware<S> {
+        override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
             try {
                 synchronized(this) {
                     state = reducer.reduce(store.state, action)
@@ -38,19 +38,17 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
      * An action can be of Any type
      */
     override var dispatch: (action: Any) -> Any = { action ->
-        mainDispatcher.dispatch(this, NullDispatcher(),action )
+        mainDispatcher.dispatch(this, nullDispatcher,action )
     }
 
-    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+    override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
         this.subscribers.add(storeSubscriber)
-        return object : StoreSubscription {
+        return object : IStoreSubscription {
             override fun unsubscribe() {
                 subscribers.remove(storeSubscriber)
             }
         }
     }
-    class NullDispatcher : NextDispatcher {
-        override fun dispatch(action: Any): Any = action
-    }
+    val nullDispatcher : (Any)->Any= {it->it}
 }
 
