@@ -49,6 +49,3 @@ fun <S> StoreEnhancer(storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>)
 fun <S> StoreSubscriber(subscriberFn: ()->Unit)= StoreSubscriberImpl<S>(subscriberFn)
 fun <S> StoreSubscriberBuilder(storeSubscriberBuilderFn:(store: Store<S>)-> IStoreSubscriber<S>) = StoreSubscriberBuilderImpl(storeSubscriberBuilderFn)
 fun <S> Thunk( thunkFn:(dispatcher:  (Any)->Any, state: S)->Any) = ThunkImpl(thunkFn)
-
-data class TestState(val a:Int, val b:Int)
-val s1= StoreSubscriber<TestState>{ -> }
