@@ -379,6 +379,7 @@ TODO
 - https://github.com/acdlite/redux-promise
 - https://github.com/gaearon/redux-thunk
 - https://github.com/acdlite/flux-standard-action
+- https://github.com/hrldcpr/pcollections
 
 ## License
 
