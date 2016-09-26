@@ -43,7 +43,7 @@ allprojects {
 //configure(subprojects.findAll {it.name == 'reduks-core' || it.name == 'zjsonpatch'}) {
 //
 //}
-configure(project(':reduks-core')) {
+configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcollections'}) {
     repositories {
         mavenCentral()
     }
@@ -67,7 +67,7 @@ configure(project(':reduks-core')) {
     }
 
 }
-configure(subprojects - project(':reduks-core')) {
+configure(subprojects.findAll{it.name !='reduks-core' && it.name !='reduks-pcollections'}) {
     repositories {
         mavenCentral()
     }

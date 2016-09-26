@@ -1,0 +1,5 @@
+dependencies {
+}
+
+apply from: '../maven-push-javalib.gradle'
+
