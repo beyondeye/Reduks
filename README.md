@@ -211,8 +211,10 @@ val reducer = Reducer<ActivityState> { state, action ->
     }
 }
 ```
-
 The compiler will give us an error if we forget to list one of ```LoginAction``` subtypes in the ```when``` expression above. Also we don't need the ```else``` case anymore (in the more internal ```when```)
+Note that the exhaustive check is activated only for [when expressions](https://kotlinlang.org/docs/reference/control-flow.html#when-expression), i.e. when we actually use the result of
+the  ```when``` block, like in the code above.
+
 ####Even Better Actions with Reduks StandardAction
 Reduks  [StandardAction](./reduks/src/main/kotlin/com/beyondeye/reduks/StandardAction.kt) is a base interface for actions that provide a standard way to define actions also for failed/async operations:
  
