@@ -15,11 +15,11 @@ class MiddlewareTest {
     fun actions_should_be_run_through_a_stores_middleware() {
         var counter = 0
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             state
         }
 
-        val middleWare = Middleware<TestState> { store, next, action ->
+        val middleWare = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             next(action)
         }
@@ -38,20 +38,20 @@ class MiddlewareTest {
         var counter = 0
         val order = mutableListOf<String>()
 
-        val middleWare1 = Middleware<TestState> { store, next, action ->
+        val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("first")
             val nextAction = next(action)
             order.add("third")
         }
 
-        val middleWare2 = Middleware<TestState> { store, next, action ->
+        val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "hey hey!" -> TestState(message = "howdy!")
@@ -77,7 +77,7 @@ class MiddlewareTest {
         val order = mutableListOf<String>()
         val testScheduler = TestScheduler()
 
-        val fetchMiddleware = Middleware<TestState> { store, next, action ->
+        val fetchMiddleware = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             when (action) {
                 is TestAction -> when (action.type) {
@@ -98,13 +98,13 @@ class MiddlewareTest {
             }
         }
 
-        val loggerMiddleware = Middleware<TestState> { store, next, action ->
+        val loggerMiddleware = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add((action as TestAction).type)
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "FETCHING" -> TestState(message = "FETCHING")
@@ -135,7 +135,7 @@ class MiddlewareTest {
         var counter = 0
         val order = mutableListOf<String>()
 
-        val middleWare1 = Middleware<TestState> { store, next, action ->
+        val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("first")
 
@@ -148,13 +148,13 @@ class MiddlewareTest {
             }
         }
 
-        val middleWare2 = Middleware<TestState> { store, next, action ->
+        val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             state
         }
 
@@ -171,11 +171,11 @@ class MiddlewareTest {
     fun actions_should_be_run_through_a_stores_middleware_wrapped_as_store_enhancer() {
         var counter = 0
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             state
         }
 
-        val middleWare = Middleware<TestState> { store, next, action ->
+        val middleWare = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             next(action)
         }
@@ -193,21 +193,21 @@ class MiddlewareTest {
         var counter = 0
         val order = mutableListOf<String>()
 
-        val middleWare1 = Middleware<TestState> { store, next, action ->
+        val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("first")
             val nextAction = next(action)
             order.add("third")
         }
 
-        val middleWare2 = Middleware<TestState> { store, next, action ->
+        val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "hey hey!" -> TestState(message = "howdy!")

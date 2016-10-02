@@ -1,8 +1,8 @@
 package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.KovenantStore
-import com.beyondeye.reduks.Reducer
-import com.beyondeye.reduks.StoreSubscriber
+import com.beyondeye.reduks.ReducerFn
+import com.beyondeye.reduks.StoreSubscriberFn
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
@@ -17,7 +17,7 @@ class AsyncActionMiddlewareTest {
     val actionDifficultTag = "A very difficult mathematical problem"
     val actionDifficultTextTag = "A very difficult textual problem"
     val actionDifficultError ="Sometimes difficult problems cannot be solved"
-    val reducer = Reducer<TestState> { state, action ->
+    val reducer = ReducerFn<TestState> { state, action ->
         var res: TestState? = null
         AsyncAction.withPayload<Integer>( action)
                 ?.onCompleted { payload ->
@@ -59,7 +59,7 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber {
+        store.subscribe (StoreSubscriberFn {
             val state=store.state
             with (state) {
                 if (lastAsyncActionMessage != "none") {
@@ -83,7 +83,7 @@ class AsyncActionMiddlewareTest {
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
-        store.subscribe (StoreSubscriber {
+        store.subscribe (StoreSubscriberFn {
                 val state=store.state
                 with (state) {
                     if (lastAsyncActionMessage == actionDifficultTag) {
@@ -115,7 +115,7 @@ class AsyncActionMiddlewareTest {
 
         //subscribe before dispatch!
         store.subscribe (
-                StoreSubscriber {
+                StoreSubscriberFn {
                     val state=store.state
                     with(state) {
                         if (lastAsyncActionMessage != "none") {
@@ -144,7 +144,7 @@ class AsyncActionMiddlewareTest {
 
         //subscribe before dispatch!!
         store.subscribe (
-                StoreSubscriber {
+                StoreSubscriberFn {
                     with(store.state) {
                         //on state change
                         Assertions.assertThat(counter).isEqualTo(1)

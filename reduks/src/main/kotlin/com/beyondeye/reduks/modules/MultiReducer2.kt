@@ -1,6 +1,5 @@
 package com.beyondeye.reduks.modules
 
-import com.beyondeye.reduks.IReducer
 import com.beyondeye.reduks.Reducer
 
 /**
@@ -8,9 +7,9 @@ import com.beyondeye.reduks.Reducer
  * Created by daely on 8/3/2016.
  */
 class MultiReducer2<S1:Any,S2:Any>(m1: ReduksModule.Def<S1>,
-                                   m2: ReduksModule.Def<S2>) : IReducer<MultiState2<S1, S2>> {
-    @JvmField val r1: IReducer<S1> = m1.stateReducer //use @JvmField annotation for avoiding generation useless getter methods
-    @JvmField val r2: IReducer<S2> = m2.stateReducer
+                                   m2: ReduksModule.Def<S2>) : Reducer<MultiState2<S1, S2>> {
+    @JvmField val r1: Reducer<S1> = m1.stateReducer //use @JvmField annotation for avoiding generation useless getter methods
+    @JvmField val r2: Reducer<S2> = m2.stateReducer
     @JvmField val ctx1 = m1.ctx
     @JvmField val ctx2 = m2.ctx
     override fun reduce(s: MultiState2<S1, S2>, a: Any): MultiState2<S1, S2> {

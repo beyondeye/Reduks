@@ -3,13 +3,13 @@ package com.beyondeye.reduksAndroid.activity
 import android.os.Bundle
 import android.os.Parcelable
 import com.beyondeye.reduks.Action
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.Reduks
 
 class ActionRestoreState<S>(val restoredState:S): Action {
     companion object {
         @Suppress("UNCHECKED_CAST")
-        internal fun<S> getRestoreStateReducer() = Reducer<S> { state, action ->
+        internal fun<S> getRestoreStateReducer() = ReducerFn<S> { state, action ->
             when (action) {
                 is ActionRestoreState<*> -> action.restoredState as S
                 else -> state

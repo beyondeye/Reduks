@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.rx
 
 import android.util.Log
-import com.beyondeye.reduks.IStoreSubscriber
+import com.beyondeye.reduks.StoreSubscriber
 
 
 
@@ -10,7 +10,7 @@ import com.beyondeye.reduks.IStoreSubscriber
  *  we avoid the need to override all onNext,onCompleted,onError methods
  * we just need to override [RxStoreSubscriber.onStateChange] that is binded to onNext
  */
-abstract class RxStoreSubscriber<S>(val store:RxStore<S>): rx.Subscriber<S>(), IStoreSubscriber<S> {
+abstract class RxStoreSubscriber<S>(val store:RxStore<S>): rx.Subscriber<S>(), StoreSubscriber<S> {
     /**
      * RxJava onNext is called whenever a new state update is posted in [RxStore.stateChanges], so we pass it
      * on to onStateChange callback

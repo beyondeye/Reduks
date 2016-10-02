@@ -14,7 +14,7 @@ private  fun <T> compose(functions: List<(T) -> T>): (T) -> T {
 /**
 * next is the next dispatcher to call after this middleware, to process the action dispatched to the store
 */
-private  fun <S> IMiddleware<S>.toLambda(): (store_: Store<S>, nextDispatcher:(Any)->Any, action:Any )  -> Any
+private  fun <S> Middleware<S>.toLambda(): (store_: Store<S>, nextDispatcher:(Any)->Any, action:Any )  -> Any
 {
     return { store,next,action -> this.dispatch(store, {it ->next(it)}, action)}
 }
@@ -31,7 +31,7 @@ private  fun <S> IMiddleware<S>.toLambda(): (store_: Store<S>, nextDispatcher:(A
  * the next function is basically the next middleware function with parameters 'store' and 'next' already bound
  */
 fun <S> Store<S>.applyMiddleware(
-        vararg middlewares: IMiddleware<S>
+        vararg middlewares: Middleware<S>
 ):  Store<S> {
     dispatch = compose(middlewares.map { it.toLambda().curried()(this) })(dispatch)
     return  this
@@ -42,24 +42,24 @@ fun <S> Store<S>.applyStandardMiddlewares() {
     this.applyMiddleware(ThunkMiddleware())
 }
 
-fun <S> IMiddleware<S>.toEnhancer():IStoreEnhancer<S> {
-    return StoreEnhancer { srcStoreCreator->
+fun <S> Middleware<S>.toEnhancer(): StoreEnhancer<S> {
+    return StoreEnhancerFn { srcStoreCreator->
         object:StoreCreator<S> {
-            override fun create(reducer: IReducer<S>, initialState: S)=
+            override fun create(reducer: Reducer<S>, initialState: S)=
                srcStoreCreator.create(reducer,initialState).applyMiddleware(this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out IMiddleware<S>>
+            override val storeStandardMiddlewares: Array<out Middleware<S>>
                 get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }
 }
 
-fun <S> Array<IMiddleware<S>>.toEnhancer():IStoreEnhancer<S> {
-    return StoreEnhancer { srcStoreCreator->
+fun <S> Array<Middleware<S>>.toEnhancer(): StoreEnhancer<S> {
+    return StoreEnhancerFn { srcStoreCreator->
         object:StoreCreator<S> {
-            override fun create(reducer: IReducer<S>, initialState: S): Store<S> =
+            override fun create(reducer: Reducer<S>, initialState: S): Store<S> =
                     srcStoreCreator.create(reducer,initialState).applyMiddleware(*this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out IMiddleware<S>>
+            override val storeStandardMiddlewares: Array<out Middleware<S>>
                 get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }

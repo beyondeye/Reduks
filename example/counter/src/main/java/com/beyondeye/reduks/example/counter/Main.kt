@@ -20,7 +20,7 @@ sealed class CounterAction {
 }
 
 //REDUCER
-fun counterReducer(): Reducer<CounterState> = Reducer { state, action ->
+fun counterReducer(): Reducer<CounterState> = ReducerFn { state, action ->
     when (action) {
         is CounterAction.Init -> CounterState()
         is CounterAction.Increment -> {

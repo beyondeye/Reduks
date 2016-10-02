@@ -7,6 +7,6 @@ package com.beyondeye.reduks
  * single method interface, mainly used because kotlin does not support yet type alias for function types
  * Created by daely on 8/23/2016.
  */
-interface IStoreEnhancer<S> {
+interface StoreEnhancer<S> {
     fun enhance(next: StoreCreator<S>): StoreCreator<S>
 }

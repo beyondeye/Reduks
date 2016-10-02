@@ -9,7 +9,7 @@ class KovenantStoreTest {
     data class TestAction(val type: String = "unknown")
     @Test
     fun when_an_action_is_fired_the_corresponding_reducer_should_be_called_and_update_the_state_of_the_application() {
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "to invoke" -> TestState("reduced")
@@ -30,7 +30,7 @@ class KovenantStoreTest {
         val helloReducer1 = "helloReducer1"
         val helloReducer2 = "helloReducer2"
 
-        val reducer1 = Reducer<TestState> { state, action ->
+        val reducer1 = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     helloReducer1 -> TestState("oh hai")
@@ -40,7 +40,7 @@ class KovenantStoreTest {
             }
         }
 
-        val reducer2 = Reducer<TestState> { state, action ->
+        val reducer2 = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     helloReducer2 -> TestState("mark")
@@ -60,12 +60,12 @@ class KovenantStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = KovenantStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
 
-        store.subscribe(StoreSubscriber { subscriber1Called = true })
-        store.subscribe (StoreSubscriber { subscriber2Called = true })
+        store.subscribe(StoreSubscriberFn { subscriber1Called = true })
+        store.subscribe (StoreSubscriberFn { subscriber2Called = true })
 
         store.dispatch(TestAction())
 
@@ -77,12 +77,12 @@ class KovenantStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = KovenantStore(TestState(), Reducer<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = KovenantStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },observeOnUiThread = false) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
 
-        store.subscribe (StoreSubscriber { subscriber1Called = true })
-        val subscription = store.subscribe(StoreSubscriber { subscriber2Called = true })
+        store.subscribe (StoreSubscriberFn { subscriber1Called = true })
+        val subscription = store.subscribe(StoreSubscriberFn { subscriber2Called = true })
         subscription.unsubscribe()
 
         store.dispatch(TestAction())
@@ -93,9 +93,10 @@ class KovenantStoreTest {
         }
     }
 
+    //TODO this tests sometimes will fail? why
     @Test
     fun store_should_pass_the_current_state_to_subscribers() {
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "to invoke" -> TestState("oh hai")
@@ -108,7 +109,7 @@ class KovenantStoreTest {
         var actual: TestState = TestState()
         val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
 
-        store.subscribe(StoreSubscriber { actual = store.state })
+        store.subscribe(StoreSubscriberFn { actual = store.state })
         store.dispatch(TestAction(type = "to invoke"))
 
         assertThat(store.state).isEqualTo(actual)

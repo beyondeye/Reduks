@@ -24,13 +24,13 @@ class MultiReduksTest {
     data class TestAction1(val type: String)
     data class TestAction2(val type: String)
 
-    val reducer1 = Reducer<TestState1> { state, action ->
+    val reducer1 = ReducerFn<TestState1> { state, action ->
         when (action) {
             is TestAction1 -> state.copy(lastActionType = action.type)
             else -> state
         }
     }
-    val reducer2 = Reducer<TestState2> { state, action ->
+    val reducer2 = ReducerFn<TestState2> { state, action ->
         when (action) {
             is TestAction2 -> state.copy(lastActionType = action.type)
             else -> state
@@ -46,10 +46,10 @@ class MultiReduksTest {
             initialState = TestState1(),
             startAction = TestAction1("start1"),
             stateReducer = reducer1,
-            subscriberBuilder = StoreSubscriberBuilder { store ->
+            subscriberBuilder = StoreSubscriberBuilderFn { store ->
                 val selector = SelectorBuilder<TestState1>()
                 val selForLastAction = selector.withSingleField { this.lastActionType }
-                StoreSubscriber {
+                StoreSubscriberFn {
                     ++nStateChangeCalls1
                     selForLastAction.onChangeIn(store.state) {
                         ++nStateChanges1
@@ -65,10 +65,10 @@ class MultiReduksTest {
             initialState = TestState2(),
             startAction = TestAction2("start2"),
             stateReducer = reducer2,
-            subscriberBuilder = StoreSubscriberBuilder { store ->
+            subscriberBuilder = StoreSubscriberBuilderFn { store ->
                 val selector = SelectorBuilder<TestState2>()
                 val selForLastAction = selector.withSingleField { this.lastActionType }
-                StoreSubscriber {
+                StoreSubscriberFn {
                     ++nStateChangeCalls2
                     selForLastAction.onChangeIn(store.state) {
                         ++nStateChanges2

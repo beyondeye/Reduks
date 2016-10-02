@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.SimpleStore
 import com.beyondeye.reduks.modules.ActionWithContext
 import com.beyondeye.reduks.modules.ReduksContext
@@ -15,7 +15,7 @@ import org.junit.Test
 class WrappedActionMiddlewareTests {
     data class TestState(val lastWrappedActionType: String = "",val lastActionType:String="")
     data class TestAction(val type: String)
-    val reducer = Reducer<TestState> { state, action ->
+    val reducer = ReducerFn<TestState> { state, action ->
         when (action) {
             is ActionWithContext -> {
                 val unwrappedAction=action.action as TestAction

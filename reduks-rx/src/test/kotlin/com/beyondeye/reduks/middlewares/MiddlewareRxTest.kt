@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.MiddlewareFn
+import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.rx.RxStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -17,13 +17,13 @@ class MiddlewareRxTest {
     @Test
     fun actions_should_be_run_through_a_stores_middleware() {
         var counter = 0
-        val middleWare = Middleware<MyState> { store, next, action ->
+        val middleWare = MiddlewareFn<MyState> { store, next, action ->
                     counter += 1
                     next(action)
                     action
                 }
 
-        val reducer = Reducer<MyState> { state, action ->
+        val reducer = ReducerFn<MyState> { state, action ->
             state
         }
 
@@ -41,7 +41,7 @@ class MiddlewareRxTest {
         var counter = 0
         val order = ArrayList<String>()
 
-        val middleWare1 = Middleware<MyState> { store, next,action ->
+        val middleWare1 = MiddlewareFn<MyState> { store, next, action ->
             counter += 1
             order.add("first")
             val nextAction = next(action)
@@ -49,14 +49,14 @@ class MiddlewareRxTest {
             nextAction
         }
 
-        val middleWare2 = Middleware<MyState>{ store, next,action ->
+        val middleWare2 = MiddlewareFn<MyState>{ store, next, action ->
             counter += 1
             order.add("second")
             val nextAction = next(action)
             nextAction
         }
 
-        val reducer = Reducer<MyState>{ state, action ->
+        val reducer = ReducerFn<MyState>{ state, action ->
             if (action !is MyAction) state
             else
                 when (action.type) {
@@ -82,7 +82,7 @@ class MiddlewareRxTest {
         val order = ArrayList<String>()
         val testScheduler = TestScheduler()
 
-        val fetchMiddleware = Middleware<MyState> { store, next, action ->
+        val fetchMiddleware = MiddlewareFn<MyState> { store, next, action ->
             counter += 1
             if (action !is MyAction) next(action)
             else
@@ -102,7 +102,7 @@ class MiddlewareRxTest {
                 }
         }
 
-        val loggerMiddleware = Middleware<MyState> { store, next, action->
+        val loggerMiddleware = MiddlewareFn<MyState> { store, next, action->
             counter += 1
             if (action !is MyAction) next(action)
             else {
@@ -111,7 +111,7 @@ class MiddlewareRxTest {
             }
         }
 
-        val reducer = Reducer<MyState> { state, action ->
+        val reducer = ReducerFn<MyState> { state, action ->
             if (action !is MyAction) state
             else
                 when (action.type) {
@@ -141,7 +141,7 @@ class MiddlewareRxTest {
         var counter = 0
         val order = ArrayList<String>()
 
-        val middleWare1 = Middleware<MyState>{ store, next, action ->
+        val middleWare1 = MiddlewareFn<MyState>{ store, next, action ->
             counter += 1
             if(action !is MyAction)
                 next(action)
@@ -153,20 +153,20 @@ class MiddlewareRxTest {
                 // Redispatch an action that goes through the whole chain
                 // (useful for async middleware)
                 if (action.type == "around!") {
-                    store.dispatch(MyAction());
+                    store.dispatch(MyAction())
                 }
 
                 nextAction
             }
         }
 
-        val middleWare2 = Middleware<MyState> { store, next,action ->
+        val middleWare2 = MiddlewareFn<MyState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
-        val reducer = Reducer<MyState>{ state, action ->
+        val reducer = ReducerFn<MyState>{ state, action ->
             state
         }
 

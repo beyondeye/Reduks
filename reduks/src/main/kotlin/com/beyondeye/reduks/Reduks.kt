@@ -9,8 +9,8 @@ import com.beyondeye.reduks.modules.ReduksContext
 interface Reduks<State> {
     val ctx: ReduksContext
     val store: Store<State>
-    val storeSubscriber: IStoreSubscriber<State>
-    val storeSubscription: IStoreSubscription
+    val storeSubscriber: StoreSubscriber<State>
+    val storeSubscription: StoreSubscription
     /**
      * call dispatch on the store object
      */

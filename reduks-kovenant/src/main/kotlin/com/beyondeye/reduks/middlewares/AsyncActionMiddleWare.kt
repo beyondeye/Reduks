@@ -75,7 +75,7 @@ sealed class AsyncAction(val payloadTypename:String): Action {
  *
  * Created by daely on 5/17/2016.
  */
-class AsyncActionMiddleWare<S> : IMiddleware<S> {
+class AsyncActionMiddleWare<S> : Middleware<S> {
     override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
         if(action is AsyncAction.Started<*>) {
             //queue some async actions when the promise resolves

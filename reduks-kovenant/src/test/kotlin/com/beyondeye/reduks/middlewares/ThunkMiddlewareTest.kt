@@ -15,7 +15,7 @@ class ThunkMiddlewareTest {
     class IncrementCounter
     data class TestState1(val counter:Int=0, val lastMathResult:Int)
 
-    val reducer1 = Reducer<TestState1> { state, action ->
+    val reducer1 = ReducerFn<TestState1> { state, action ->
         when (action) {
             is SetLastMathResult -> state.copy(lastMathResult = action.result)
             is IncrementCounter -> state.copy(counter = state.counter + 1)
@@ -27,7 +27,7 @@ class ThunkMiddlewareTest {
         val store = KovenantStore(TestState1(0, 0), reducer1,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(ThunkMiddleware<TestState1>())
 
-        store.dispatch(Thunk<TestState1> {
+        store.dispatch(ThunkFn<TestState1> {
             dispatcher, state ->
             SetLastMathResult(2 + 2) //return this action
         })
@@ -44,7 +44,7 @@ class ThunkMiddlewareTest {
     }
     class MakeSandwitch(val forPerson:String,val sauceName:String)
     data class TestState2(val counter:Int=0, val forPerson:String="",val sauceName:String="")
-    val reducer2 = Reducer<TestState2> { state, action ->
+    val reducer2 = ReducerFn<TestState2> { state, action ->
         when (action) {
             is MakeSandwitch -> state.copy(forPerson = action.forPerson, sauceName = action.sauceName)
             is IncrementCounter -> state.copy(counter = state.counter + 1)
@@ -55,7 +55,7 @@ class ThunkMiddlewareTest {
     fun testAsyncActionsThunk() {
         val store = KovenantStore(TestState2(), reducer2,observeOnUiThread = false) //false: otherwise exception if not running on android
         store.applyMiddleware(ThunkMiddleware<TestState2>())
-        val thunk= Thunk<TestState2> { dispatcher, state ->
+        val thunk= ThunkFn<TestState2> { dispatcher, state ->
             val promise: Promise<Any, Exception> = task {
                 fetchSecretSauce("Tomato")
             }.then { sauce ->
@@ -65,7 +65,7 @@ class ThunkMiddlewareTest {
             promise
         }
         //subscribe before dispatch!!
-        store.subscribe(StoreSubscriber {
+        store.subscribe(StoreSubscriberFn {
             val s=store.state
             if (s.sauceName != "") {
                 Assertions.assertThat(s.sauceName).isEqualTo("(Tomato)")

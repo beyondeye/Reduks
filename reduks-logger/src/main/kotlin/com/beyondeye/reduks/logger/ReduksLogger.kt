@@ -11,7 +11,7 @@ import com.google.gson.JsonParser
  * Reduks Logger middleware
  * Created by daely on 7/21/2016.
  */
-class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : IMiddleware<S> {
+class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
     private val jsonDiffer = JsonDiff
     private val jsonParser = JsonParser()
     /**

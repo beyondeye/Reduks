@@ -2,20 +2,20 @@ package com.beyondeye.reduks
 
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 
-class SimpleStore<S>(initialState: S, private var reducer: IReducer<S>) : Store<S> {
-    override fun replaceReducer(reducer: IReducer<S>) {
+class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S> {
+    override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }
     class Creator<S>: StoreCreator<S> {
-        override fun create(reducer: IReducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
-        override val storeStandardMiddlewares:Array<IMiddleware<S>> = arrayOf(ThunkMiddleware<S>())
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
+        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>()
         }
     }
     override var state: S = initialState
-    private val subscribers = mutableListOf<IStoreSubscriber<S>>()
-    private val mainDispatcher = object : IMiddleware<S> {
+    private val subscribers = mutableListOf<StoreSubscriber<S>>()
+    private val mainDispatcher = object : Middleware<S> {
         override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
             try {
                 synchronized(this) {
@@ -43,9 +43,9 @@ class SimpleStore<S>(initialState: S, private var reducer: IReducer<S>) : Store<
                 action )
     }
 
-    override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
         this.subscribers.add(storeSubscriber)
-        return object : IStoreSubscription {
+        return object : StoreSubscription {
             override fun unsubscribe() {
                 subscribers.remove(storeSubscriber)
             }

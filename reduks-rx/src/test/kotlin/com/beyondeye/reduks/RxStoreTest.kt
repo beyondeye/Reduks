@@ -11,7 +11,7 @@ class RxStoreTest {
 
     @Test
     fun when_an_action_is_fired_the_corresponding_reducer_should_be_called_and_update_the_state_of_the_application() {
-        val reducer = Reducer<MyState> { state, action->
+        val reducer = ReducerFn<MyState> { state, action->
             if (action !is MyAction) state
             else
                 when (action.type) {
@@ -31,7 +31,7 @@ class RxStoreTest {
         val helloReducer1 = "helloReducer1"
         val helloReducer2 = "helloReducer2"
 
-        val reducer1 = Reducer<MyState>{ state, action ->
+        val reducer1 = ReducerFn<MyState>{ state, action ->
             if (action is MyAction)
                 when (action.type) {
                     helloReducer1 -> MyState("oh hai")
@@ -40,7 +40,7 @@ class RxStoreTest {
             else state
         }
 
-        val reducer2 = Reducer<MyState>{ state, action ->
+        val reducer2 = ReducerFn<MyState>{ state, action ->
             if (action is MyAction)
                 when (action.type) {
                     helloReducer2 -> MyState("mark")
@@ -59,7 +59,7 @@ class RxStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = RxStore(MyState(), Reducer<MyState>{ state, action -> MyState() })
+        val store = RxStore(MyState(), ReducerFn<MyState>{ state, action -> MyState() })
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 
@@ -74,7 +74,7 @@ class RxStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = RxStore(MyState(), Reducer<MyState>{ state, action -> MyState() })
+        val store = RxStore(MyState(), ReducerFn<MyState>{ state, action -> MyState() })
         val subscriber1 = TestSubscriber.create<MyState>()
         val subscriber2 = TestSubscriber.create<MyState>()
 

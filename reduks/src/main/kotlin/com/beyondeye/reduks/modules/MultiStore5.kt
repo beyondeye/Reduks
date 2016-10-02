@@ -12,7 +12,7 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         ctx3: ReduksContext, @JvmField val store3: Store<S3>,
         ctx4: ReduksContext, @JvmField val store4: Store<S4>,
         ctx5: ReduksContext, @JvmField val store5: Store<S5>) : Store<MultiState5<S1, S2, S3, S4, S5>>, MultiStore( ReduksModule.multiContext(ctx1, ctx2, ctx3, ctx4, ctx5)) {
-    override fun replaceReducer(reducer: IReducer<MultiState5<S1, S2, S3, S4, S5>>) {
+    override fun replaceReducer(reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>) {
         throw UnsupportedOperationException("MultiStore does not support replacing reducer")
     }
 
@@ -22,7 +22,7 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
                                                                     @JvmField val ctx3: ReduksContext,
                                                                     @JvmField val ctx4: ReduksContext,
                                                                     @JvmField val ctx5: ReduksContext) : StoreCreator<MultiState5<S1, S2, S3, S4, S5>> {
-        override fun create(reducer: IReducer<MultiState5<S1, S2, S3, S4, S5>>,
+        override fun create(reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>,
                             initialState: MultiState5<S1, S2, S3, S4, S5>): Store<MultiState5<S1, S2, S3, S4, S5>> {
             if (reducer !is MultiReducer5<S1, S2, S3, S4, S5>) throw IllegalArgumentException()
             return MultiStore5<S1, S2, S3, S4, S5>(
@@ -34,7 +34,7 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         }
 
         override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
-        override val storeStandardMiddlewares: Array<out IMiddleware<MultiState5<S1, S2, S3, S4, S5>>> =
+        override val storeStandardMiddlewares: Array<out Middleware<MultiState5<S1, S2, S3, S4, S5>>> =
                 storeCreator.ofType<MultiState5<S1, S2, S3, S4, S5>>().storeStandardMiddlewares
 
     }
@@ -48,12 +48,12 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
     override val state: MultiState5<S1, S2, S3, S4, S5> get() = MultiState5(ctx, store1.state, store2.state, store3.state, store4.state, store5.state)
     override var dispatch = dispatchWrappedAction
     //call back the multi subscriber each time any component state change
-    override fun subscribe(storeSubscriber: IStoreSubscriber<MultiState5<S1, S2, S3, S4, S5>>): IStoreSubscription {
-        val s1 = store1.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
-        val s2 = store2.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
-        val s3 = store3.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
-        val s4 = store4.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
-        val s5 = store5.subscribe(StoreSubscriber { storeSubscriber.onStateChange() })
+    override fun subscribe(storeSubscriber: StoreSubscriber<MultiState5<S1, S2, S3, S4, S5>>): StoreSubscription {
+        val s1 = store1.subscribe(StoreSubscriberFn { storeSubscriber.onStateChange() })
+        val s2 = store2.subscribe(StoreSubscriberFn { storeSubscriber.onStateChange() })
+        val s3 = store3.subscribe(StoreSubscriberFn { storeSubscriber.onStateChange() })
+        val s4 = store4.subscribe(StoreSubscriberFn { storeSubscriber.onStateChange() })
+        val s5 = store5.subscribe(StoreSubscriberFn { storeSubscriber.onStateChange() })
         return MultiStoreSubscription(s1, s2, s3, s4, s5)
     }
 }

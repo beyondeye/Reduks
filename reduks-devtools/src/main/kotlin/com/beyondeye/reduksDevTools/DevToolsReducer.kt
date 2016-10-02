@@ -1,9 +1,9 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.IReducer
+import com.beyondeye.reduks.Reducer
 
 
-class DevToolsReducer<S>(private val appReducer: IReducer<S>) : IReducer<DevToolsState<S>> {
+class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsState<S>> {
 
     override fun reduce(state: DevToolsState<S>, action: Any): DevToolsState<S> {
         if (action !is DevToolsAction) {

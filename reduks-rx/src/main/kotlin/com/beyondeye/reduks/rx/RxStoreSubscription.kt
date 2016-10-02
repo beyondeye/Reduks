@@ -1,12 +1,12 @@
 package com.beyondeye.reduks.rx
-import com.beyondeye.reduks.IStoreSubscription
+import com.beyondeye.reduks.StoreSubscription
 import rx.android.schedulers.AndroidSchedulers
 /**
  * Created by daely on 5/23/2016.
  * note: the constructor take as input an rx.Subscriber which is a base class for RxStoreSubscriber
  */
 
-class RxStoreSubscription<S>(val rxStore:RxStore<S>, val subscriber:rx.Subscriber<S>, observeOnAndroidMainThread:Boolean) : IStoreSubscription {
+class RxStoreSubscription<S>(val rxStore:RxStore<S>, val subscriber:rx.Subscriber<S>, observeOnAndroidMainThread:Boolean) : StoreSubscription {
     var storeSubscription = rx.subscriptions.Subscriptions.unsubscribed()
     fun storeChangesSubscribed() =!storeSubscription.isUnsubscribed()
     init {

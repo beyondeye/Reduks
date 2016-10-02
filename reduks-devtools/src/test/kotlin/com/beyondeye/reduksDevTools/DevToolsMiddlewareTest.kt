@@ -1,7 +1,7 @@
 package com.beyondeye.reduksDevTools
 
-import com.beyondeye.reduks.Middleware
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.MiddlewareFn
+import com.beyondeye.reduks.ReducerFn
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import rx.Observable
@@ -20,11 +20,11 @@ class DevToolsMiddlewareTest {
     @Test fun unwrapped_actions_should_be_run_through_a_stores_middleware() {
         var counter = 0
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             state.copy("Reduced?")
         }
 
-        val middleWare = Middleware<TestState> { store,  next,action ->
+        val middleWare = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             next(action)
         }
@@ -42,20 +42,20 @@ class DevToolsMiddlewareTest {
         var counter = 0
         val order = mutableListOf<String>()
 
-        val middleWare1 = Middleware<TestState> { store, next, action ->
+        val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("first")
             next(action)
             order.add("third")
         }
 
-        val middleWare2 = Middleware<TestState> { store, next, action ->
+        val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is HeyHey -> TestState(message = "howdy!")
                 else -> state
@@ -77,7 +77,7 @@ class DevToolsMiddlewareTest {
         val order = mutableListOf<String>()
         val testScheduler = TestScheduler()
 
-        val fetchMiddleware = Middleware<TestState> { store, next, action ->
+        val fetchMiddleware = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             when (action) {
                 is CallApi -> {
@@ -95,7 +95,7 @@ class DevToolsMiddlewareTest {
             }
         }
 
-        val loggerMiddleware = Middleware<TestState> { store, next, action ->
+        val loggerMiddleware = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             when (action) {
                 is CallApi -> order.add("CALL_API")
@@ -106,7 +106,7 @@ class DevToolsMiddlewareTest {
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 Fetching -> TestState(message = "FETCHING")
                 FetchComplete -> TestState(message = "FETCH_COMPLETE")
@@ -133,7 +133,7 @@ class DevToolsMiddlewareTest {
         var counter = 0
         val order = mutableListOf<String>()
 
-        val middleWare1 = Middleware<TestState> { store, next, action ->
+        val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("first")
 
@@ -146,13 +146,13 @@ class DevToolsMiddlewareTest {
             }
         }
 
-        val middleWare2 = Middleware<TestState> { store, next, action ->
+        val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
             counter += 1
             order.add("second")
             next(action)
         }
 
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             state
         }
 

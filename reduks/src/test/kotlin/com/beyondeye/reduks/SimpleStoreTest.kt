@@ -9,7 +9,7 @@ class SimpleStoreTest {
 
     @Test
     fun when_an_action_is_fired_the_corresponding_reducer_should_be_called_and_update_the_state_of_the_application() {
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "to invoke" -> TestState("reduced")
@@ -31,7 +31,7 @@ class SimpleStoreTest {
         val helloReducer1 = "helloReducer1"
         val helloReducer2 = "helloReducer2"
 
-        val reducer1 = Reducer<TestState> { state, action ->
+        val reducer1 = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     helloReducer1 -> TestState("oh hai")
@@ -41,7 +41,7 @@ class SimpleStoreTest {
             }
         }
 
-        val reducer2 = Reducer<TestState> { state, action ->
+        val reducer2 = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     helloReducer2 -> TestState("mark")
@@ -61,12 +61,12 @@ class SimpleStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = SimpleStore(TestState(), Reducer<TestState> { state, action -> TestState() })
+        val store = SimpleStore(TestState(), ReducerFn<TestState> { state, action -> TestState() })
         var subscriber1Called = false
         var subscriber2Called = false
 
-        store.subscribe(StoreSubscriber { subscriber1Called = true })
-        store.subscribe (StoreSubscriber { subscriber2Called = true })
+        store.subscribe(StoreSubscriberFn { subscriber1Called = true })
+        store.subscribe (StoreSubscriberFn { subscriber2Called = true })
 
         store.dispatch(TestAction())
 
@@ -76,12 +76,12 @@ class SimpleStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = SimpleStore(TestState(), Reducer<TestState> { state, action -> TestState() })
+        val store = SimpleStore(TestState(), ReducerFn<TestState> { state, action -> TestState() })
         var subscriber1Called = false
         var subscriber2Called = false
 
-        store.subscribe (StoreSubscriber { subscriber1Called = true })
-        val subscription = store.subscribe(StoreSubscriber { subscriber2Called = true })
+        store.subscribe (StoreSubscriberFn { subscriber1Called = true })
+        val subscription = store.subscribe(StoreSubscriberFn { subscriber2Called = true })
         subscription.unsubscribe()
 
         store.dispatch(TestAction())
@@ -92,7 +92,7 @@ class SimpleStoreTest {
 
     @Test
     fun store_should_pass_the_current_state_to_subscribers() {
-        val reducer = Reducer<TestState> { state, action ->
+        val reducer = ReducerFn<TestState> { state, action ->
             when (action) {
                 is TestAction -> when (action.type) {
                     "to invoke" -> TestState("oh hai")
@@ -105,7 +105,7 @@ class SimpleStoreTest {
         var actual: TestState = TestState()
         val store = SimpleStore(TestState(), reducer)
 
-        store.subscribe(StoreSubscriber { actual = store.state })
+        store.subscribe(StoreSubscriberFn { actual = store.state })
         store.dispatch(TestAction(type = "to invoke"))
 
         assertThat(actual).isEqualTo(store.state)

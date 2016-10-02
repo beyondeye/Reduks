@@ -5,13 +5,13 @@ import com.beyondeye.reduks.middlewares.applyMiddleware
 
 class DevToolsStore<S>
 @SafeVarargs
-constructor(initialState: S, reducer: IReducer<S>, vararg middlewares: IMiddleware<S>) : Store<S> {
-    override fun replaceReducer(reducer: IReducer<S>) {
+constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware<S>) : Store<S> {
+    override fun replaceReducer(reducer: Reducer<S>) {
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    class Creator<S>(vararg middlewares_: IMiddleware<S>) : StoreCreator<S> {
-        override fun create(reducer: IReducer<S>, initialState: S): Store<S> = DevToolsStore<S>(initialState,reducer)
+    class Creator<S>(vararg middlewares_: Middleware<S>) : StoreCreator<S> {
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = DevToolsStore<S>(initialState,reducer)
         override val storeStandardMiddlewares=middlewares_
         override fun <S_> ofType(): StoreCreator<S_> {
             throw NotImplementedError("TODO how to create standardmiddlewares for the new state type?")
@@ -34,8 +34,8 @@ constructor(initialState: S, reducer: IReducer<S>, vararg middlewares: IMiddlewa
         devToolsStore.dispatch(DevToolsAction.createInitAction())
     }
 
-    private fun toDevToolsMiddlewares(middlewares: Array<out IMiddleware<S>>): Array<IMiddleware<DevToolsState<S>>> {
-        val devToolsMiddlewares = Array<IMiddleware<DevToolsState<S>>>(middlewares.size) {
+    private fun toDevToolsMiddlewares(middlewares: Array<out Middleware<S>>): Array<Middleware<DevToolsState<S>>> {
+        val devToolsMiddlewares = Array<Middleware<DevToolsState<S>>>(middlewares.size) {
             DevToolsMiddleware(this, middlewares[it])
         }
         return devToolsMiddlewares
@@ -54,7 +54,7 @@ constructor(initialState: S, reducer: IReducer<S>, vararg middlewares: IMiddlewa
             devToolsStore.dispatch(DevToolsAction.createPerformAction(action))
         }
     }
-    override fun subscribe(storeSubscriber: IStoreSubscriber<S>): IStoreSubscription {
-        return devToolsStore.subscribe(StoreSubscriber<DevToolsState<S>> {  storeSubscriber.onStateChange() })
+    override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
+        return devToolsStore.subscribe(StoreSubscriberFn<DevToolsState<S>> {  storeSubscriber.onStateChange() })
     }
 }

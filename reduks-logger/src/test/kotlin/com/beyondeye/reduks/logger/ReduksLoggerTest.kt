@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.logger
 
 import android.os.Build
-import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.SimpleStore
 import com.beyondeye.reduks.logger.logformatter.LogFormatterSettings
 import com.beyondeye.reduks.middlewares.applyMiddleware
@@ -30,7 +30,7 @@ class ReduksLoggerTest {
     }
     data class TestState(val component1: String = "initial state",val component2: String = "initial state")
     data class TestAction(val type: String = "unknown")
-    val testReducer = Reducer<TestState> { state, action ->
+    val testReducer = ReducerFn<TestState> { state, action ->
         when (action) {
             is TestAction -> when (action.type) {
                 "reduce component1" -> state.copy(component1 = "reduced")

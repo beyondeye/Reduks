@@ -6,7 +6,7 @@ import com.beyondeye.reduks.Reducer
  * Created by kittinunf on 9/1/16.
  */
 
-fun counterReducer(): Reducer<CounterState> = Reducer { state, action ->
+fun counterReducer(): Reducer<CounterState> = ReducerFn { state, action ->
     when (action) {
         is CounterAction.Init -> CounterState()
         is CounterAction.Increment -> {
