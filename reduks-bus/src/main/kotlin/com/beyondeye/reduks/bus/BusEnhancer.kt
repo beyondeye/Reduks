@@ -3,6 +3,7 @@ package com.beyondeye.reduks.bus
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.pcollections.HashTreePMap
 import com.beyondeye.reduks.pcollections.PMap
+import java.lang.ref.WeakReference
 
 fun emptyBusData():PMap<String,Any> =  HashTreePMap.empty()
 
@@ -48,17 +49,17 @@ internal fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
 class Opt<T>(val it:T?)
 internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
     val selector = SelectorBuilder<S>()
-    var lastVal:BusDataType?=null
+    var lastBusData=WeakReference<BusDataType>(null) //NO need to keep a strong reference here
     val busDataSel = selector.withField { busData }.compute { bd ->
         @Suppress("UNCHECKED_CAST") Opt(bd[key] as BusDataType?) }
     StoreSubscriberFn {
         val newState = store.state
-        busDataSel.onChangeIn(newState) { optNewVal->
-            if(optNewVal.it!=null) {
-                val newVal=optNewVal.it
-                if(newVal!==lastVal) { //unfortunately, selectors alone cannot catch change of busData but no change to a specific key TODO try to think of a better solution
-                    fn(newVal)
-                    lastVal=newVal
+        busDataSel.onChangeIn(newState) { optNewBusData->
+            if(optNewBusData.it!=null) {
+                val newBusData=optNewBusData.it
+                if(newBusData!==lastBusData.get()) { //unfortunately, selectors alone cannot catch change of busData but no change to a specific key TODO try to think of a better solution
+                    fn(newBusData)
+                    lastBusData=WeakReference(newBusData)
                 }
             }
         }
