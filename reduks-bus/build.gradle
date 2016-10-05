@@ -1,0 +1,8 @@
+dependencies {
+    compile project(':reduks-core')
+    compile project(':reduks-pcollections')
+
+}
+
+apply from: '../maven-push-javalib.gradle'
+
