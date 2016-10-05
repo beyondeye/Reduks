@@ -29,7 +29,8 @@ val initialState=TestState(0,0)
  */
 class BusStoreEnhancerTest {
     @Test
-    fun testEnhance() {
+    fun testBusStore() {
+        //---given
         val creator= SimpleStore.Creator<TestState>()
         val store = creator.create(testReducer, initialState,BusStoreEnhancer())
         var iDataReceivedCount:Int=0
@@ -49,45 +50,74 @@ class BusStoreEnhancerTest {
             }
         }
 
+        //---when
         val iBusDataBeforePost:Int? =store.busData()
+        //---then
         assertNull(iBusDataBeforePost)
 
+        //---when
         val fBusDataBeforePost:Float? =store.busData()
+        //---then
         assertNull(fBusDataBeforePost)
 
+        //---when
         store.postBusData(2.0F)
+        //---then
         assert(fDataReceivedCount==1)
         assert(iDataReceivedCount==0)
 
+        //---when
         store.postBusData(1)
+        //---then
         assert(iDataReceivedCount==1)
         assert(fDataReceivedCount==1)
 
+        //---when
         val ibusData:Int?=store.busData()
+        //---then
         assertNotNull(ibusData)
         assertEquals(ibusData ,1)
 
+        //---when
         val fbusData:Float?=store.busData()
+        //---then
         assertNotNull(fbusData)
         assertEquals(fbusData ,2.0f)
 
-        store.clearBusData<TestState,Int>()
-        assert(iDataReceivedCount==1)
-        assert(fDataReceivedCount==1)
-        assertNull(store.busData<TestState,Int>())
-        store.clearBusData<TestState,Float>()
-        assert(iDataReceivedCount==1)
-        assert(fDataReceivedCount==1)
-        assertNull(store.busData<TestState,Float>())
-
-        //now test unsubscribe
+        //---given
         fDataReceivedCount=0
         iDataReceivedCount=0
+        //---when
+        //check that normal actions goes through as expected
+        store.dispatch(Action.SetA(1))
+        //---then
+        assertTrue(store.state.a==1)
+        assert(iDataReceivedCount==0)
+        assert(fDataReceivedCount==0)
+
+
+        //---when
+        store.clearBusData<TestState,Int>()
+        //---then
+        assert(iDataReceivedCount==0)
+        assert(fDataReceivedCount==0)
+        assertNull(store.busData<TestState,Int>())
+        //---when
+        store.clearBusData<TestState,Float>()
+        //---then
+        assert(iDataReceivedCount==0)
+        assert(fDataReceivedCount==0)
+        assertNull(store.busData<TestState,Float>())
+
+        //---when
         store.unsubscribeAllBusDataHandlers()
         store.postBusData(11)
+        //---then
         assert(fDataReceivedCount==0)
         assert(iDataReceivedCount==0)
+        //---when
         store.postBusData(22.0f)
+        //---then
         assert(fDataReceivedCount==0)
         assert(iDataReceivedCount==0)
     }

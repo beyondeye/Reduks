@@ -45,8 +45,6 @@ internal fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
         }
     }
 }
-//TODO add Opt class in selectors file and add documentation for it
-class Opt<T>(val it:T?)
 internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
     val selector = SelectorBuilder<S>()
     var lastBusData=WeakReference<BusDataType>(null) //NO need to keep a strong reference here
@@ -55,8 +53,7 @@ internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBus
     StoreSubscriberFn {
         val newState = store.state
         busDataSel.onChangeIn(newState) { optNewBusData->
-            if(optNewBusData.it!=null) {
-                val newBusData=optNewBusData.it
+            optNewBusData.it?.let { newBusData ->
                 if(newBusData!==lastBusData.get()) { //unfortunately, selectors alone cannot catch change of busData but no change to a specific key TODO try to think of a better solution
                     fn(newBusData)
                     lastBusData=WeakReference(newBusData)
