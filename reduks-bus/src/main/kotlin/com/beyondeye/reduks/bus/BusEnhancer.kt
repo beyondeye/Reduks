@@ -79,7 +79,7 @@ class BusStore<S: StateWithBusData>(val wrappedStore:Store<S>,  reducer: Reducer
         busDataHandlerSubscriptions.forEach { it.unsubscribe() }
         busDataHandlerSubscriptions.clear()
     }
-    val busDataHandlerSubscriptions:MutableList<StoreSubscription> = mutableListOf()
+    private val busDataHandlerSubscriptions:MutableList<StoreSubscription> = mutableListOf()
     fun <BusDataType> addBusDataHandler(key:String, fn: (bd: BusDataType) -> Unit): StoreSubscription {
         val sub=wrappedStore.subscribe(getStoreSubscriberBuilderForBusDataHandler<S,BusDataType>(key,fn))
         busDataHandlerSubscriptions.add(sub)
@@ -120,7 +120,7 @@ class BusStoreEnhancer<S: StateWithBusData> : StoreEnhancer<S>{
             get() = next.storeStandardMiddlewares
 
         override fun <S_> ofType(): StoreCreator<S_> {
-            throw NotImplementedError()
+            throw NotImplementedError("Don't use a BusStoreEnhancer on a single module: use it on the resulting multimodule!") //don't know how to implement this, this is mainly used in reduks modules, but I can wrap the multimodule with the store enhancer so not much of a problem here
         }
     }
     override fun enhance(next: StoreCreator<S>): StoreCreator<S> = BusEnhancerStoreCreator<S>(next)
