@@ -6,3 +6,12 @@ package com.beyondeye.reduks
 interface StoreSubscription {
     fun unsubscribe()
 }
+
+fun StoreSubscription.addToList(subscriptions:MutableList<StoreSubscription>) {
+    subscriptions.add(this)
+}
+
+fun MutableList<StoreSubscription>.unsubscribe() {
+    this.forEach { it.unsubscribe() }
+    this.clear()
+}

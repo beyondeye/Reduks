@@ -8,6 +8,7 @@ import java.lang.ref.WeakReference
 fun emptyBusData():PMap<String,Any> =  HashTreePMap.empty()
 
 /**
+ * base interface for reduks State class that can handle bus data
  * Created by daely on 9/30/2016.
  */
 interface StateWithBusData {
@@ -95,6 +96,10 @@ class BusStore<S: StateWithBusData>(val wrappedStore:Store<S>,  reducer: Reducer
         busDataHandlerSubscriptions.add(sub)
         return sub
     }
+    fun removeBusDataHandler(subscription:StoreSubscription) {
+        subscription.unsubscribe()
+        busDataHandlerSubscriptions.remove(subscription)
+    }
     override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
         return wrappedStore.subscribe(storeSubscriber)
     }
@@ -120,6 +125,17 @@ fun Store<out StateWithBusData>.unsubscribeAllBusDataHandlers() {
     if(this is BusStore<*>) this.unsubscribeAllBusDataHandlers()
 }
 fun Reduks<out StateWithBusData>.unsubscribeAllBusDataHandlers() { store.unsubscribeAllBusDataHandlers()}
+//--------
+fun Store<out StateWithBusData>.removeBusDataHandler(subscription: StoreSubscription) {
+    if(this is BusStore<*>) this.removeBusDataHandler(subscription)
+}
+fun Reduks<out StateWithBusData>.removeBusDataHandler(subscription: StoreSubscription) { store.removeBusDataHandler(subscription) }
+
+fun Reduks<out StateWithBusData>.removeBusDataHandlers(subscriptions: MutableList<StoreSubscription>?) {
+    subscriptions?.forEach { store.removeBusDataHandler(it) }
+    subscriptions?.clear()
+}
+
 //--------
 inline fun <reified BusDataType:Any> Store<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) :StoreSubscription?{
     if(this is BusStore<*>) return this.addBusDataHandler<BusDataType>(key?: BusDataType::class.java.name,fn)
