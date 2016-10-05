@@ -24,9 +24,7 @@ data class TestState(val a:Int, val b:Int, override val busData:PMap<String,Any>
     override fun copyWithNewBusData(newBusData: PMap<String, Any>) = copy(busData=newBusData)
 }
 val initialState=TestState(0,0)
-/**
- * Created by daely on 10/2/2016.
- */
+
 class BusStoreEnhancerTest {
     @Test
     fun testBusStore() {
@@ -97,17 +95,17 @@ class BusStoreEnhancerTest {
 
 
         //---when
-        store.clearBusData<TestState,Int>()
+        store.clearBusData<Int>()
         //---then
         assert(iDataReceivedCount==0)
         assert(fDataReceivedCount==0)
-        assertNull(store.busData<TestState,Int>())
+        assertNull(store.busData<Int>())
         //---when
-        store.clearBusData<TestState,Float>()
+        store.clearBusData<Float>()
         //---then
         assert(iDataReceivedCount==0)
         assert(fDataReceivedCount==0)
-        assertNull(store.busData<TestState,Float>())
+        assertNull(store.busData<Float>())
 
         //---when
         store.unsubscribeAllBusDataHandlers()

@@ -11,7 +11,17 @@ fun emptyBusData():PMap<String,Any> =  HashTreePMap.empty()
  * Created by daely on 9/30/2016.
  */
 interface StateWithBusData {
+    /**
+     * a persistent (immutable) map that contains a key for each bus data: Simply override it with
+     * override val busData:PMap<String,Any> = emptyBusData()
+     */
     val busData:PMap<String,Any>
+
+    /**
+     * a method that returns a copy of the state, wuth the busData map substituted with the one
+     * in [newBusData].If your State class is defined as a data class, simply implement this as
+     *     override fun copyWithNewBusData(newBusData: PMap<String, Any>) = copy(busData=newBusData)
+     */
     fun copyWithNewBusData(newBusData:PMap<String,Any>): StateWithBusData
 }
 
@@ -93,21 +103,22 @@ class BusStore<S: StateWithBusData>(val wrappedStore:Store<S>,  reducer: Reducer
     }
 
 }
-inline fun <S,reified BusDataType:Any> Store<S>.busData(key:String?=null):BusDataType? {
+inline fun <reified BusDataType:Any> Store<out StateWithBusData>.busData(key:String?=null):BusDataType? {
     if(this !is BusStore<*>) return null
     return this.state.busData[key?: BusDataType::class.java.name] as BusDataType?
 }
-inline fun <S,reified BusDataType:Any> Store<S>.clearBusData(key:String?=null) {dispatch(ActionClearBusData(key?: BusDataType::class.java.name)) }
-fun <S, BusDataType :Any> Store<S>.postBusData(data: BusDataType, key:String?=null) { dispatch(ActionSendBusData(key ?: data.javaClass.name,data)) }
-fun <S> Store<S>.unsubscribeAllBusDataHandlers() {
+inline fun <reified BusDataType:Any> Store<out StateWithBusData>.clearBusData(key:String?=null) {dispatch(ActionClearBusData(key?: BusDataType::class.java.name)) }
+fun <BusDataType :Any> Store<out StateWithBusData>.postBusData(data: BusDataType, key:String?=null) { dispatch(ActionSendBusData(key ?: data.javaClass.name,data)) }
+fun Store<out StateWithBusData>.unsubscribeAllBusDataHandlers() {
     if(this is BusStore<*>) this.unsubscribeAllBusDataHandlers()
 }
-inline fun <S,reified BusDataType:Any> Store<S>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) :StoreSubscription?{
+inline fun <reified BusDataType:Any> Store<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) :StoreSubscription?{
     if(this is BusStore<*>) return this.addBusDataHandler<BusDataType>(key?: BusDataType::class.java.name,fn)
     else return null
 }
 
 /**
+ * A store enhancer that enable something similar to an event bus backed by actual reduks action/reducers/subscribers
  * Created by daely on 9/30/2016.
  */
 class BusStoreEnhancer<S: StateWithBusData> : StoreEnhancer<S>{
