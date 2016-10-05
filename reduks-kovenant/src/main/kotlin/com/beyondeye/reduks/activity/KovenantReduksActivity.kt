@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.beyondeye.reduks.*
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
+import com.beyondeye.reduksAndroid.activity.ReduksActivity
 import nl.komponents.kovenant.android.startKovenant
 import nl.komponents.kovenant.android.stopKovenant
 
@@ -13,8 +14,8 @@ import nl.komponents.kovenant.android.stopKovenant
  * automatically handle save and restore of store state on activity recreation using a special custom action [ActionRestoreState]
  * Created by daely on 6/13/2016.
  */
-abstract class KovenantReduksActivity<S>: AppCompatActivity() {
-    lateinit var reduks: Reduks<S>
+abstract class KovenantReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
+    lateinit override var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)

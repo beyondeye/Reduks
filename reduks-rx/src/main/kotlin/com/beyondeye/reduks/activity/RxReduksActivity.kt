@@ -6,6 +6,7 @@ import com.beyondeye.reduks.*
 import com.beyondeye.reduks.rx.RxStore
 import com.beyondeye.reduks.rx.RxStoreSubscriber
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
+import com.beyondeye.reduksAndroid.activity.ReduksActivity
 import rx.subscriptions.CompositeSubscription
 
 /**
@@ -14,8 +15,8 @@ import rx.subscriptions.CompositeSubscription
  * automatically handle save and restore of store state on activity recreation using a special custom action [ActionRestoreState]
  * Created by daely on 6/13/2016.
  */
-abstract class RxReduksActivity<S>: AppCompatActivity() {
-    lateinit var reduks: Reduks<S>
+abstract class RxReduksActivity<S>:  ReduksActivity<S>, AppCompatActivity() {
+    lateinit override var reduks: Reduks<S>
     lateinit var allActivitySubscriptions: CompositeSubscription //all rx subscriptions
     var isGetActivityRxStoreSubscriberCalled =false
 
