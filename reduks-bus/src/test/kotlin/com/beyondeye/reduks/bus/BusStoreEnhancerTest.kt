@@ -48,30 +48,48 @@ class BusStoreEnhancerTest {
                 assertEquals(receivedOnBus,2.0F)
             }
         }
+
         val iBusDataBeforePost:Int? =store.busData()
         assertNull(iBusDataBeforePost)
+
         val fBusDataBeforePost:Float? =store.busData()
         assertNull(fBusDataBeforePost)
 
         store.postBusData(2.0F)
         assert(fDataReceivedCount==1)
         assert(iDataReceivedCount==0)
+
         store.postBusData(1)
         assert(iDataReceivedCount==1)
         assert(fDataReceivedCount==1)
+
         val ibusData:Int?=store.busData()
         assertNotNull(ibusData)
         assertEquals(ibusData ,1)
 
-        val fbusDataInState:Float?=store.busData()
-        assertNotNull(fbusDataInState)
-        assertEquals(fbusDataInState ,2.0f)
+        val fbusData:Float?=store.busData()
+        assertNotNull(fbusData)
+        assertEquals(fbusData ,2.0f)
 
-        assertTrue(iDataReceivedCount==1)
         store.clearBusData<TestState,Int>()
+        assert(iDataReceivedCount==1)
+        assert(fDataReceivedCount==1)
         assertNull(store.busData<TestState,Int>())
         store.clearBusData<TestState,Float>()
+        assert(iDataReceivedCount==1)
+        assert(fDataReceivedCount==1)
         assertNull(store.busData<TestState,Float>())
+
+        //now test unsubscribe
+        fDataReceivedCount=0
+        iDataReceivedCount=0
+        store.unsubscribeAllBusDataHandlers()
+        store.postBusData(11)
+        assert(fDataReceivedCount==0)
+        assert(iDataReceivedCount==0)
+        store.postBusData(22.0f)
+        assert(fDataReceivedCount==0)
+        assert(iDataReceivedCount==0)
     }
 
 

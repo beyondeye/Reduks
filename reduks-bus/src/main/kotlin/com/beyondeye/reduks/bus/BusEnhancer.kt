@@ -3,7 +3,6 @@ package com.beyondeye.reduks.bus
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.pcollections.HashTreePMap
 import com.beyondeye.reduks.pcollections.PMap
-import jdk.nashorn.internal.ir.annotations.Ignore
 
 fun emptyBusData():PMap<String,Any> =  HashTreePMap.empty()
 
@@ -15,11 +14,11 @@ interface StateWithBusData {
     fun copyWithNewBusData(newBusData:PMap<String,Any>): StateWithBusData
 }
 
-fun StateWithBusData.newStateWithUpdatedBusData(key: String, newData: Any): StateWithBusData {
+internal fun StateWithBusData.newStateWithUpdatedBusData(key: String, newData: Any): StateWithBusData {
     return copyWithNewBusData(busData.plus(key,newData))
 }
 
-fun StateWithBusData.newStateWithRemovedBusData(key: String): StateWithBusData {
+internal fun StateWithBusData.newStateWithRemovedBusData(key: String): StateWithBusData {
     return copyWithNewBusData(busData.minus(key))
 }
 
@@ -30,7 +29,7 @@ class ActionSendBusData(val key: String, val newData: Any)
 
 class ActionClearBusData(val key: String)
 
-fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
+internal fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
     return ReducerFn { s, a ->
         when (a) {
             is ActionSendBusData -> {
@@ -47,14 +46,21 @@ fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
 }
 //TODO add Opt class in selectors file and add documentation for it
 class Opt<T>(val it:T?)
-fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
+internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
     val selector = SelectorBuilder<S>()
+    var lastVal:BusDataType?=null
     val busDataSel = selector.withField { busData }.compute { bd ->
         @Suppress("UNCHECKED_CAST") Opt(bd[key] as BusDataType?) }
     StoreSubscriberFn {
         val newState = store.state
-        busDataSel.onChangeIn(newState) {
-            if(it.it!=null) fn(it.it)
+        busDataSel.onChangeIn(newState) { optNewVal->
+            if(optNewVal.it!=null) {
+                val newVal=optNewVal.it
+                if(newVal!==lastVal) { //unfortunately, selectors alone cannot catch change of busData but no change to a specific key TODO try to think of a better solution
+                    fn(newVal)
+                    lastVal=newVal
+                }
+            }
         }
     }
 }
@@ -107,7 +113,7 @@ inline fun <S,reified BusDataType:Any> Store<S>.addBusDataHandler(key:String?=nu
  * Created by daely on 9/30/2016.
  */
 class BusStoreEnhancer<S: StateWithBusData> : StoreEnhancer<S>{
-    class BusEnhancerStoreCreator<S: StateWithBusData>(val next: StoreCreator<S>) :StoreCreator<S> {
+    internal class BusEnhancerStoreCreator<S: StateWithBusData>(val next: StoreCreator<S>) :StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
             return BusStore(next.create(reducer,initialState),reducer)
         }
