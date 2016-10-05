@@ -103,20 +103,30 @@ class BusStore<S: StateWithBusData>(val wrappedStore:Store<S>,  reducer: Reducer
     }
 
 }
+//-------
 inline fun <reified BusDataType:Any> Store<out StateWithBusData>.busData(key:String?=null):BusDataType? {
     if(this !is BusStore<*>) return null
     return this.state.busData[key?: BusDataType::class.java.name] as BusDataType?
 }
+inline fun <reified BusDataType:Any> Reduks<out StateWithBusData>.busData(key:String?=null):BusDataType?=store.busData(key)
+//-------
 inline fun <reified BusDataType:Any> Store<out StateWithBusData>.clearBusData(key:String?=null) {dispatch(ActionClearBusData(key?: BusDataType::class.java.name)) }
+inline fun <reified BusDataType:Any> Reduks<out StateWithBusData>.clearBusData(key:String?=null) { store.clearBusData<BusDataType>(key) }
+//-------
 fun <BusDataType :Any> Store<out StateWithBusData>.postBusData(data: BusDataType, key:String?=null) { dispatch(ActionSendBusData(key ?: data.javaClass.name,data)) }
+fun <BusDataType :Any> Reduks<out StateWithBusData>.postBusData(data: BusDataType, key:String?=null) { store.postBusData(data,key) }
+//-------
 fun Store<out StateWithBusData>.unsubscribeAllBusDataHandlers() {
     if(this is BusStore<*>) this.unsubscribeAllBusDataHandlers()
 }
+fun Reduks<out StateWithBusData>.unsubscribeAllBusDataHandlers() { store.unsubscribeAllBusDataHandlers()}
+//--------
 inline fun <reified BusDataType:Any> Store<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) :StoreSubscription?{
     if(this is BusStore<*>) return this.addBusDataHandler<BusDataType>(key?: BusDataType::class.java.name,fn)
     else return null
 }
-
+inline fun <reified BusDataType:Any> Reduks<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) :StoreSubscription?=
+        store.addBusDataHandler(key,fn)
 /**
  * A store enhancer that enable something similar to an event bus backed by actual reduks action/reducers/subscribers
  * Created by daely on 9/30/2016.
