@@ -7,6 +7,13 @@ package com.beyondeye.reduks
  */
 private val defaultEqualityCheck = { a: Any, b: Any -> a === b }
 
+/**
+ * a class for keeping a non null object reference even when actual reference is null
+ * Needed because selectors do not work for nullable fields: if you have a field in the state that is
+ * nullable T? the define instead as Opt<T> if you want selectors to work
+ */
+class Opt<T>(@JvmField val it:T?)
+
 interface Memoizer<T> {
     fun memoize(vararg inputArgs: Any): T
 }
