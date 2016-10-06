@@ -442,16 +442,16 @@ The next change we need is the when we create our store. Now we need pass an ins
  val store = creator.create(reducer, initialState, BusStoreEnhancer())
 ```
 That's it! Now you can add a bus subscriber for some specific data type that is sent on the bus. For example for a subscriber that should receive updates for
-```
+```kotlin
 class LoginFragmentResult(val username:String, val password:String)
 ```
 you add a subscriber like this
 ```kotlin
-    store.addBusDataHandler { lfr:LoginFragmentResult? ->
-        if(lfr!=null) {
-            print("login with username=${lfr.username} and password=${lfr.password} and ")
-        }
+store.addBusDataHandler { lfr:LoginFragmentResult? ->
+    if(lfr!=null) {
+        print("login with username=${lfr.username} and password=${lfr.password} and ")
     }
+}
 ```
 Simple! Note that the data received in the BusDataHandler must be always define as nullable. The explanation why in a moment (and how Reduks bus works under the hood).
 But first let's see how we post some data on the bus:
