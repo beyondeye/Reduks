@@ -396,6 +396,7 @@ For a discussion of performance of various implementations see [here](https://gi
 Currently the `reduks-pcollections` module include a stripped down version of the pcollections library (only [Pmap](./reduks-pcollections/src/main/kotlin/com/beyondeye/reduks/pcollections/PMap.java) and [PStack](./reduks-pcollections/src/main/kotlin/com/beyondeye/reduks/pcollections/PStack.java)).
 Although it is not the most efficient implementation, it is not too far behind for maps, it has low method count and play well with standard Java collections. It is used as the building block
 for reduks bus store enhancer (see below)
+
 <a name="reduksbus"></a>
 ####Reduks bus: a communication channel between fragments
 The official method in Android for communicating results from a fragment to the parent activity or between fragments are [callback interfaces](http://developer.android.com/training/basics/fragments/communicating.html).
