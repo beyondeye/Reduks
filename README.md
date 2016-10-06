@@ -429,7 +429,9 @@ So why not implementing a kind of event bus on top of Reduks? This is what the [
  
  In order to enable support for reduks bus,  your Reduks state class need to implement the [StateWithBusData interface](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/StateWithBusData.kt):
 ```kotlin
-data class State(val a:Int, val b:Int, override val busData: PMap<String, Any> = emptyBusData()) :StateWithBusData {
+data class State(val a:Int, val b:Int, 
+    override val busData: PMap<String, Any> = emptyBusData()) :StateWithBusData 
+{
     override fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData = copy(busData=newBusData)
 }
 ```
@@ -456,7 +458,7 @@ store.addBusDataHandler { lfr:LoginFragmentResult? ->
 Simple! Note that the data received in the BusDataHandler must be always define as nullable. The explanation why in a moment (and how Reduks bus works under the hood).
 But first let's see how we post some data on the bus:
 ```kotlin
-    store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
+ store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
 ```
 That's it. See more code examples [here](./reduks-bus/src/test/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancerTest.kt). For the full Api see [here](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/api.kt)
 #####Reduks bus under the hood
