@@ -3,8 +3,8 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     ext {
-        kotlin_version = '1.0.3'
-        reduks_version = '2.0.0b7'
+        kotlin_version = '1.0.4'
+        reduks_version = '2.0.0b9'
     }
 
     repositories {
