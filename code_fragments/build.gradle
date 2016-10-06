@@ -3,6 +3,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':reduks-core')
     compile project(':reduks-rx')
+    compile project(':reduks-bus')
+    compile project(':reduks-pcollections')
     compile "com.android.support:appcompat-v7:$support_version"
     compile "com.android.support:design:$support_version"
 }
