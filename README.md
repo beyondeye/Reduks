@@ -405,11 +405,135 @@ Reduks architecture has actually severally things in common with  an event bus
 So why not implementing a kind of event bus on top of Reduks? This is what the [BusStoreEnhancer](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancer.kt)  is for.
  It is not a real event bus, but it is perfectly fit for the purpose of communicating data between fragments (and more). Let's see how it is done. 
  Let's say for example that our state class is defined as
+ 
  ```kotlin
  data class State(val a:Int, val b:Int)
  ```
- In order to enable support for reduks bus, you need your state class to implement the []()
-TODO
+ with actions and reducers defined as follows
+ ```kotlin
+ class Action
+ {
+     class SetA(val newA:Int)
+     class SetB(val newB:Int)
+ }
+ val reducer = ReducerFn<State> { state, action ->
+     when (action) {
+         is Action.SetA -> state.copy(a= action.newA)
+         is Action.SetB -> state.copy(b= action.newB)
+         else -> state
+     }
+ }
+ ```
+ 
+ In order to enable support for reduks bus,  your Reduks state class need to implement the [StateWithBusData interface](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/StateWithBusData.kt):
+```kotlin
+data class State(val a:Int, val b:Int, override val busData: PMap<String, Any> = emptyBusData()) :StateWithBusData {
+    override fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData = copy(busData=newBusData)
+}
+```
+Basically we add a ```busData``` field (that is a persistent map) and we define a method that Reduks will use to create a new state with an updated version
+ of this ```busData``` (something similar of the standard copy() method for data classes, which is actually used for implementation in the example above).
+The next change we need is the when we create our store. Now we need pass an instance of ```BusStoreEnhancer```:
+```kotlin
+ val initialState=State(0,0)
+ val creator= SimpleStore.Creator<AState>()
+ val store = creator.create(reducer, initialState, BusStoreEnhancer())
+```
+That's it! Now you can add a bus subscriber for some specific data type that is sent on the bus. For example for a subscriber that should receive updates for
+```
+class LoginFragmentResult(val username:String, val password:String)
+```
+you add a subscriber like this
+```kotlin
+    store.addBusDataHandler { lfr:LoginFragmentResult? ->
+        if(lfr!=null) {
+            print("login with username=${lfr.username} and password=${lfr.password} and ")
+        }
+    }
+```
+Simple! Note that the data received in the BusDataHandler must be always define as nullable. The explanation why in a moment (and how Reduks bus works under the hood).
+But first let's see how we post some data on the bus:
+```kotlin
+    store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
+```
+That's it. See more code examples [here](./reduks-bus/src/test/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancerTest.kt). For the full Api see [here](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/api.kt)
+#####Reduks bus under the hood
+What's happening when we post some data on the bus? What we are doing is actualling dispatching the Action
+```kotlin
+class ActionSendBusData(val key: String, val newData: Any)
+```
+with the object class name as `key` (this is actually customizable) and object data as `newData`. This action is automatically intercepted 
+by a reducer added by the `BusStoreEnhancer` and translated in a call to `copyWithNewBusData` for updating the map `busData` in the state with
+the new value. The bus data handler that we added in the code above is actually a store subscriber that watch for changes (and only for changes) of
+data in the `busData` map for the specific key equal to the object class name.
+As you can see what we have implemented is not really an Event Bus, because we do not support a stream of data, we only support the two states: 
+
+- some data present for the selected key
+- no data present
+
+the `no data present` state is triggered when we call
+```kotlin
+store.clearBusData<LoginFragmentResult>()
+```
+that will clear the bus data for the specified object type and trigger the bus data handler with a null value as input.
+####Reduks bus in Android Fragments
+Finally we can show the code for handling communication  between a Fragment and a parent activity, or another Fragment.
+We assume that the parent activity implement the [ReduksActivity interface](./reduks-android/src/main/kotlin/com/beyondeye/reduksAndroid/activity/ReduksActivity.kt)
+```kotlin
+interface  ReduksActivity<S> {
+       val reduks: Reduks<S>
+   }
+```
+For posting data on the bus the fragment need to obtain a reference to the [`Reduks`](./reduks/src/main/kotlin/com/beyondeye/reduks/Reduks.kt) object of the parent activity. It can be easily done overriding the `onAttach()` method:
+```kotlin
+fun Context.bindReduksFromParentActivity(): Reduks<out StateWithBusData>? =
+        if (this is ReduksActivity<*>) {
+            this.reduks as? Reduks<out StateWithBusData>
+        } else {
+            throw RuntimeException(this.toString() + " must implement ReduksActivity<out StateWithBusData>")
+        }
+
+class LoginFragment : Fragment() {
+    private var reduks: Reduks<out StateWithBusData>?=null
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        reduks=context?.bindReduksFromParentActivity()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        reduks=null
+    }
+    fun onSubmitLogin() {
+        reduks?.postBusData(LoginFragmentResult("Kotlin","IsAwsome"))
+    }
+}
+```
+And in another fragment (or in the parent activity) we can listen for data posted on the bus in this way 
+```kotlin
+class LoginDataDisplayFragment : Fragment() {
+    private var reduks: Reduks<out StateWithBusData>?=null
+    val busHandlers:MutableList<StoreSubscription> = mutableListOf()
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        reduks=context?.bindReduksFromParentActivity()
+        reduks?.addBusDataHandler { lfr:LoginFragmentResult? ->
+            if(lfr!=null) {
+                print("login with username=${lfr.username} and password=${lfr.password} and ")
+            }
+        }?.addToList(busHandlers)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        reduks?.removeBusDataHandlers(busHandlers)
+        reduks=null
+    }
+}
+```
+
+for the full source code of the example discussed see [here](./code_fragments/src/main/java/beyondeye/com/examples/busExample.kt) 
 ####Persisting Reduks state and activity lifecycle
 TODO
 ###Middlewares
