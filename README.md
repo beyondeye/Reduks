@@ -401,7 +401,9 @@ for reduks bus store enhancer (see below)
 The official method in Android for communicating results from a fragment to the parent activity or between fragments are [callback interfaces](http://developer.android.com/training/basics/fragments/communicating.html).
 This design pattern is very problematic, as it is proven by the success of libraries like [Square Otto](https://github.com/square/otto) and [GreenRobot EventBus](https://github.com/greenrobot/EventBus).
 Reduks architecture has actually severally things in common with  an event bus 
+
 <img src="https://github.com/greenrobot/EventBus/blob/master/EventBus-Publish-Subscribe.png" width="500" height="187"/>
+
 So why not implementing a kind of event bus on top of Reduks? This is what the [BusStoreEnhancer](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancer.kt)  is for.
  It is not a real event bus, but it is perfectly fit for the purpose of communicating data between fragments (and more). Let's see how it is done. 
  Let's say for example that our state class is defined as
