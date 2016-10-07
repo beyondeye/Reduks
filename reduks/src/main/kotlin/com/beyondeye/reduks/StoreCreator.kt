@@ -20,6 +20,9 @@ interface StoreCreator<S> {
      */
     fun <S_> ofType(): StoreCreator<S_>
 }
+fun<S> StoreCreator<S>.enhancedWith(vararg enhancers: StoreEnhancer<S>):StoreCreator<S> {
+    return combineEnhancers(*enhancers).enhance(this)
+}
 
 /**
  * create an enhanced store
