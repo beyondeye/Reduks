@@ -26,9 +26,6 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
             else
                 res.applyMiddleware(ThunkMiddleware(), AsyncActionMiddleWare())
         }
-        override fun <S_> ofType(): StoreCreator<S_> {
-            return Creator<S_>(observeOnUiThread)
-        }
     }
 
     val observeContext =

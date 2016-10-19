@@ -43,7 +43,6 @@ fun <S> Middleware<S>.toEnhancer(): StoreEnhancer<S> {
         object:StoreCreator<S> {
             override fun create(reducer: Reducer<S>, initialState: S)=
                srcStoreCreator.create(reducer,initialState).applyMiddleware(this@toEnhancer)
-            override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }
 }
@@ -53,7 +52,6 @@ fun <S> Array<Middleware<S>>.toEnhancer(): StoreEnhancer<S> {
         object:StoreCreator<S> {
             override fun create(reducer: Reducer<S>, initialState: S): Store<S> =
                     srcStoreCreator.create(reducer,initialState).applyMiddleware(*this@toEnhancer)
-            override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }
 }

@@ -12,11 +12,6 @@ class BusStoreEnhancer<S: StateWithBusData> : StoreEnhancer<S>{
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
             return BusStore(next.create(reducer,initialState),reducer)
         }
-
-
-        override fun <S_> ofType(): StoreCreator<S_> {
-            throw NotImplementedError("Don't use a BusStoreEnhancer on a single module: use it on the resulting multimodule!") //don't know how to implement this, this is mainly used in reduks modules, but I can wrap the multimodule with the store enhancer so not much of a problem here
-        }
     }
     override fun enhance(next: StoreCreator<S>): StoreCreator<S> = BusEnhancerStoreCreator<S>(next)
 }

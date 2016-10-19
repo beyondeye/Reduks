@@ -15,23 +15,24 @@ class MultiStore4<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(
         throw UnsupportedOperationException("MultiStore does not support replacing reducer")
     }
 
-    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(@JvmField val storeCreator: StoreCreator<Any>,
-                                                          @JvmField val ctx1: ReduksContext,
+    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(@JvmField val ctx1: ReduksContext,
+                                                          @JvmField val creator1:StoreCreator<S1>,
                                                           @JvmField val ctx2: ReduksContext,
+                                                          @JvmField val creator2:StoreCreator<S2>,
                                                           @JvmField val ctx3: ReduksContext,
-                                                          @JvmField val ctx4: ReduksContext) : StoreCreator<MultiState4<S1, S2, S3, S4>> {
+                                                          @JvmField val creator3:StoreCreator<S3>,
+                                                          @JvmField val ctx4: ReduksContext,
+                                                          @JvmField val creator4:StoreCreator<S4>
+                                                          ) : StoreCreator<MultiState4<S1, S2, S3, S4>> {
         override fun create(reducer: Reducer<MultiState4<S1, S2, S3, S4>>,
                             initialState: MultiState4<S1, S2, S3, S4>): Store<MultiState4<S1, S2, S3, S4>> {
             if (reducer !is MultiReducer4<S1, S2, S3, S4>) throw IllegalArgumentException()
             return MultiStore4<S1, S2, S3, S4>(
-                    ctx1, storeCreator.ofType<S1>().create(reducer.r1, initialState.s1),
-                    ctx2, storeCreator.ofType<S2>().create(reducer.r2, initialState.s2),
-                    ctx3, storeCreator.ofType<S3>().create(reducer.r3, initialState.s3),
-                    ctx4, storeCreator.ofType<S4>().create(reducer.r4, initialState.s4))
+                    ctx1, creator1.create(reducer.r1, initialState.s1),
+                    ctx2, creator2.create(reducer.r2, initialState.s2),
+                    ctx3, creator3.create(reducer.r3, initialState.s3),
+                    ctx4, creator4.create(reducer.r4, initialState.s4))
         }
-
-        override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
-
     }
 
     override val storeMap = mapOf(

@@ -12,11 +12,6 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
 
     class Creator<S> : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> = DevToolsStore<S>(initialState,reducer)
-        override fun <S_> ofType(): StoreCreator<S_> {
-            throw NotImplementedError("TODO how to create standardmiddlewares for the new state type?")
-            return Creator<S_>()
-        }
-
     }
     private val devToolsStore: SimpleStore<DevToolsState<S>>
 

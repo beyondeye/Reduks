@@ -22,10 +22,6 @@ class RxStore<S>(
         this.reducer=reducer
     }
     class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null, val withStandardMiddlewares:Boolean=true) : StoreCreator<S> {
-        override fun <S_> ofType(): StoreCreator<S_> {
-            return Creator<S_>(allRxSubscriptions)
-        }
-
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
             val res = RxStore<S>(initialState, reducer, allRxSubscriptions)
             return if (!withStandardMiddlewares)

@@ -11,12 +11,6 @@ interface StoreCreator<S> {
      * create a new store associated to this specific factory type
      */
     fun create(reducer: Reducer<S>, initialState: S):Store<S>
-
-
-    /**
-     * return new factory with same parameter but for new state type S2
-     */
-    fun <S_> ofType(): StoreCreator<S_>
 }
 fun<S> StoreCreator<S>.enhancedWith(vararg enhancers: StoreEnhancer<S>):StoreCreator<S> {
     return combineEnhancers(*enhancers).enhance(this)
@@ -29,11 +23,6 @@ class StoreCreatorWithMiddlewares<S>(val creator:StoreCreator<S>,vararg middlewa
     override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
         val res=creator.create(reducer,initialState)
         return res.applyMiddleware(*middlewares)
-    }
-
-
-    override fun <S_> ofType(): StoreCreator<S_> {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
 

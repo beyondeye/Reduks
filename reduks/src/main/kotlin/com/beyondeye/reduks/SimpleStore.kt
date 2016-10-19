@@ -15,9 +15,6 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
             else
                 res.applyMiddleware(ThunkMiddleware())
         }
-        override fun <S_> ofType(): StoreCreator<S_> {
-            return Creator<S_>()
-        }
     }
     override var state: S = initialState
     private val subscribers = mutableListOf<StoreSubscriber<S>>()

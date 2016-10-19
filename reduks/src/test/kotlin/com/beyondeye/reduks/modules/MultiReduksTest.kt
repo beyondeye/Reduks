@@ -79,7 +79,7 @@ class MultiReduksTest {
 
     @Test
     fun test_multireduks2_from_multidef_dispatch() {
-        val multidef=ReduksModule.MultiDef(SimpleStore.Creator(),mdef1,mdef2)
+        val multidef=ReduksModule.MultiDef(mdef1,mdef2)
         val mr = ReduksModule(multidef)
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("start1") //check that start action dispatched
         assertThat(mr.store.state.s2.lastActionType).isEqualTo("start2") //check that start action dispatched

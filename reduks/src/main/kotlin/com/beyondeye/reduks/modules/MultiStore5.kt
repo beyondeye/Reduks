@@ -16,25 +16,27 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         throw UnsupportedOperationException("MultiStore does not support replacing reducer")
     }
 
-    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(@JvmField val storeCreator: StoreCreator<Any>,
-                                                                    @JvmField val ctx1: ReduksContext,
+    class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(@JvmField val ctx1: ReduksContext,
+                                                                    @JvmField val creator1:StoreCreator<S1>,
                                                                     @JvmField val ctx2: ReduksContext,
+                                                                    @JvmField val creator2:StoreCreator<S2>,
                                                                     @JvmField val ctx3: ReduksContext,
+                                                                    @JvmField val creator3:StoreCreator<S3>,
                                                                     @JvmField val ctx4: ReduksContext,
-                                                                    @JvmField val ctx5: ReduksContext) : StoreCreator<MultiState5<S1, S2, S3, S4, S5>> {
+                                                                    @JvmField val creator4:StoreCreator<S4>,
+                                                                    @JvmField val ctx5: ReduksContext,
+                                                                    @JvmField val creator5:StoreCreator<S5>
+                                                                    ) : StoreCreator<MultiState5<S1, S2, S3, S4, S5>> {
         override fun create(reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>,
                             initialState: MultiState5<S1, S2, S3, S4, S5>): Store<MultiState5<S1, S2, S3, S4, S5>> {
             if (reducer !is MultiReducer5<S1, S2, S3, S4, S5>) throw IllegalArgumentException()
             return MultiStore5<S1, S2, S3, S4, S5>(
-                    ctx1, storeCreator.ofType<S1>().create(reducer.r1, initialState.s1),
-                    ctx2, storeCreator.ofType<S2>().create(reducer.r2, initialState.s2),
-                    ctx3, storeCreator.ofType<S3>().create(reducer.r3, initialState.s3),
-                    ctx4, storeCreator.ofType<S4>().create(reducer.r4, initialState.s4),
-                    ctx5, storeCreator.ofType<S5>().create(reducer.r5, initialState.s5))
+                    ctx1, creator1.create(reducer.r1, initialState.s1),
+                    ctx2, creator2.create(reducer.r2, initialState.s2),
+                    ctx3, creator3.create(reducer.r3, initialState.s3),
+                    ctx4, creator4.create(reducer.r4, initialState.s4),
+                    ctx5, creator5.create(reducer.r5, initialState.s5))
         }
-
-        override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
-
     }
 
     override val storeMap = mapOf(
