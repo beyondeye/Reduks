@@ -2,6 +2,7 @@ package com.beyondeye.reduks.rx
 
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
+import com.beyondeye.reduks.middlewares.applyMiddleware
 import rx.Observable
 import rx.subjects.PublishSubject
 import rx.subjects.SerializedSubject
@@ -20,13 +21,18 @@ class RxStore<S>(
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }
-    class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null) : StoreCreator<S> {
+    class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null, val withStandardMiddlewares:Boolean=true) : StoreCreator<S> {
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>(allRxSubscriptions)
         }
 
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = RxStore<S>(initialState,reducer,allRxSubscriptions)
-        override val storeStandardMiddlewares =  arrayOf(ThunkMiddleware<S>())
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
+            val res = RxStore<S>(initialState, reducer, allRxSubscriptions)
+            return if (!withStandardMiddlewares)
+                res
+            else
+                res.applyMiddleware(ThunkMiddleware())
+        }
     }
     val stateChanges: Observable<S>
     private val dispatcher = SerializedSubject<Any, Any>(PublishSubject.create<Any>()) //Any: is the typo of an Action

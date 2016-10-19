@@ -13,8 +13,6 @@ class BusStoreEnhancer<S: StateWithBusData> : StoreEnhancer<S>{
             return BusStore(next.create(reducer,initialState),reducer)
         }
 
-        override val storeStandardMiddlewares: Array<out Middleware<S>>
-            get() = next.storeStandardMiddlewares
 
         override fun <S_> ofType(): StoreCreator<S_> {
             throw NotImplementedError("Don't use a BusStoreEnhancer on a single module: use it on the resulting multimodule!") //don't know how to implement this, this is mainly used in reduks modules, but I can wrap the multimodule with the store enhancer so not much of a problem here

@@ -10,9 +10,8 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
         throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    class Creator<S>(vararg middlewares_: Middleware<S>) : StoreCreator<S> {
+    class Creator<S> : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> = DevToolsStore<S>(initialState,reducer)
-        override val storeStandardMiddlewares=middlewares_
         override fun <S_> ofType(): StoreCreator<S_> {
             throw NotImplementedError("TODO how to create standardmiddlewares for the new state type?")
             return Creator<S_>()

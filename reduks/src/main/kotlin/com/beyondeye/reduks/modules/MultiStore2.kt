@@ -27,8 +27,6 @@ class MultiStore2<S1:Any,S2:Any>(
                     ctx2,storeCreator.ofType<S2>().create(reducer.r2, initialState.s2))
         }
         override fun <S_> ofType(): StoreCreator<S_> =storeCreator.ofType<S_>()
-        override val storeStandardMiddlewares: Array<out Middleware<MultiState2<S1, S2>>> =
-                storeCreator.ofType<MultiState2<S1,S2>>().storeStandardMiddlewares
 
     }
     override val storeMap = mapOf(

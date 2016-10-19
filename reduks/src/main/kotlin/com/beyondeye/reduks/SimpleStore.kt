@@ -1,14 +1,20 @@
 package com.beyondeye.reduks
 
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
+import com.beyondeye.reduks.middlewares.applyMiddleware
 
 class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
     }
-    class Creator<S>: StoreCreator<S> {
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = SimpleStore<S>(initialState,reducer)
-        override val storeStandardMiddlewares:Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>())
+    class Creator<S>(val withStandardMiddlewares:Boolean=true): StoreCreator<S> {
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
+          val res=SimpleStore<S>(initialState,reducer)
+            return if(!withStandardMiddlewares)
+                res
+            else
+                res.applyMiddleware(ThunkMiddleware())
+        }
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>()
         }

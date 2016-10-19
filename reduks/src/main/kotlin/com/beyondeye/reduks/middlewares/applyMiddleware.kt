@@ -37,18 +37,12 @@ fun <S> Store<S>.applyMiddleware(
     return  this
 }
 
-fun <S> Store<S>.applyStandardMiddlewares() {
-//    this.applyMiddleware(AsyncActionMiddleWare(),ThunkMiddleware())
-    this.applyMiddleware(ThunkMiddleware())
-}
 
 fun <S> Middleware<S>.toEnhancer(): StoreEnhancer<S> {
     return StoreEnhancerFn { srcStoreCreator->
         object:StoreCreator<S> {
             override fun create(reducer: Reducer<S>, initialState: S)=
                srcStoreCreator.create(reducer,initialState).applyMiddleware(this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out Middleware<S>>
-                get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }
@@ -59,8 +53,6 @@ fun <S> Array<Middleware<S>>.toEnhancer(): StoreEnhancer<S> {
         object:StoreCreator<S> {
             override fun create(reducer: Reducer<S>, initialState: S): Store<S> =
                     srcStoreCreator.create(reducer,initialState).applyMiddleware(*this@toEnhancer)
-            override val storeStandardMiddlewares: Array<out Middleware<S>>
-                get() = srcStoreCreator.storeStandardMiddlewares
             override fun <S_> ofType(): StoreCreator<S_> =srcStoreCreator.ofType()
         }
     }

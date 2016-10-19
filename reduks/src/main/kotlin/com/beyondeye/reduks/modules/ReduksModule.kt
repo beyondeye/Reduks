@@ -48,7 +48,6 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
         ctx=moduleDef.ctx
         val storeCreator= moduleDef.storeCreator
         store=storeCreator.create(moduleDef.stateReducer, moduleDef.initialState)
-        store.applyMiddleware(*storeCreator.storeStandardMiddlewares)
         storeSubscriber= moduleDef.subscriberBuilder.build(store)
         storeSubscription = store.subscribe(storeSubscriber)
         //split multiaction to list if required
@@ -95,7 +94,8 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                                 sub2.onStateChange()
                             }
                         }
-                    })
+                    }
+                    )
         }
         //--------------------------------
         fun <S1 : Any, S2 : Any, S3 : Any> MultiDef(storeCreator_: StoreCreator<MultiState3<S1, S2, S3>>,
@@ -127,7 +127,8 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             s2sel.onChangeIn(newS) { sub2.onStateChange() }
                             s3sel.onChangeIn(newS) { sub3.onStateChange() }
                         }
-                    })
+                    }
+                    )
         }
         //--------------------------------
         fun <S1 : Any, S2 : Any, S3 : Any, S4 : Any> MultiDef(storeCreator_: StoreCreator<MultiState4<S1, S2, S3, S4>>,

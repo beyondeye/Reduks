@@ -34,8 +34,6 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         }
 
         override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
-        override val storeStandardMiddlewares: Array<out Middleware<MultiState5<S1, S2, S3, S4, S5>>> =
-                storeCreator.ofType<MultiState5<S1, S2, S3, S4, S5>>().storeStandardMiddlewares
 
     }
 

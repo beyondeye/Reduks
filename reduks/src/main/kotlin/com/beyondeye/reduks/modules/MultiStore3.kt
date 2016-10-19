@@ -28,8 +28,6 @@ class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
         }
 
         override fun <S_> ofType(): StoreCreator<S_> = storeCreator.ofType<S_>()
-        override val storeStandardMiddlewares: Array<out Middleware<MultiState3<S1, S2, S3>>> =
-                storeCreator.ofType<MultiState3<S1, S2, S3>>().storeStandardMiddlewares
 
     }
 

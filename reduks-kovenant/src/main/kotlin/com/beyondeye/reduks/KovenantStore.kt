@@ -2,6 +2,7 @@ package com.beyondeye.reduks
 
 import com.beyondeye.reduks.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
+import com.beyondeye.reduks.middlewares.applyMiddleware
 import nl.komponents.kovenant.*
 import nl.komponents.kovenant.android.androidUiDispatcher
 import nl.komponents.kovenant.ui.promiseOnUi
@@ -17,10 +18,14 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer = reducer
     }
-
-    class Creator<S>(val observeOnUiThread: Boolean = true) : StoreCreator<S> {
-        override fun create(reducer: Reducer<S>, initialState: S): Store<S> = KovenantStore<S>(initialState, reducer, observeOnUiThread)
-        override val storeStandardMiddlewares: Array<Middleware<S>> = arrayOf(ThunkMiddleware<S>(), AsyncActionMiddleWare<S>())
+    class Creator<S>(val observeOnUiThread: Boolean = true, val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
+        override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
+            val res = KovenantStore<S>(initialState, reducer, observeOnUiThread)
+            return if (!withStandardMiddleware)
+                res
+            else
+                res.applyMiddleware(ThunkMiddleware(), AsyncActionMiddleWare())
+        }
         override fun <S_> ofType(): StoreCreator<S_> {
             return Creator<S_>(observeOnUiThread)
         }
