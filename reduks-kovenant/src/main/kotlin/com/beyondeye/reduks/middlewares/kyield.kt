@@ -1,5 +1,8 @@
 package com.beyondeye.reduks.middlewares
 
+import nl.komponents.kovenant.CancelablePromise
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.task
 import java.util.*
 import java.util.concurrent.SynchronousQueue
 
@@ -12,6 +15,7 @@ import java.util.concurrent.SynchronousQueue
  * To return from method just do return
  * WARNING: do not throw InterruptedException in method body
  * and do not wrap yield expression with try-catch muting InterruptedException
+ *
  * ORIGINAL code is from https://bitbucket.org/Nerzhul500/kyield/src
  * see discussion of implementation here developers-club.com/posts/168571/
  **/
@@ -19,6 +23,7 @@ fun <T: Any>yieldfun(body: YieldContext<T>.() -> Unit): Iterable<T> = YieldItera
 
 interface YieldContext<T> {
     infix fun kyield(value: T): Unit //kyield, because of name clash
+    infix fun kyield(promise: Promise<T,Exception>): Unit //kyield, because of name clash
     val ret: YieldContext<T>
 }
 
@@ -44,13 +49,15 @@ private class ExceptionThrownMessage( val exception: Throwable): Message() {
 }
 
 private class YieldIterator<T:Any> (val body: YieldContext<T>.() -> Unit): Iterator<T>, YieldContext<T> {
-    private var thread: Thread? = null
+
+
+    private var bodyPromise: CancelablePromise<Unit,Exception>? = null
     private val resultQueue = SynchronousQueue<Message>()
     private val continuationSync = SynchronousQueue<Any>()
     private var currentMessage: Message? = null
 
     init {
-        val r = Runnable {
+        val p = task {
                 try {
                     continuationSync.take() //wait until next access to iterator (call to iterator.evaluateNext())
                     body() //execute calculation and put it in result queue
@@ -58,18 +65,26 @@ private class YieldIterator<T:Any> (val body: YieldContext<T>.() -> Unit): Itera
                 }
                 catch (e: InterruptedException) {
                     // if not all items were iterated so yield will wait for signal and finalizer should
-                    // interrupt the thread to exit
+                    // interrupt the bodyPromise to exit
                 }
                 catch (e: Throwable) {
                     resultQueue.put(ExceptionThrownMessage(e))
                 }
         }
-        thread = Thread(r)
-        thread!!.start()
+        bodyPromise = p as CancelablePromise //by default, promise returned by task is a CancelableProimse: see http://kovenant.komponents.nl/api/core_usage/#cancel
     }
 
     override fun kyield(value: T) {
         resultQueue.put(ValueMessage(value)) //put result and wait for next request
+        continuationSync.take()
+    }
+
+    override fun kyield(promise: Promise<T, Exception>) {
+        try {
+            resultQueue.put(ValueMessage(promise.get()))
+        } catch (e: Exception) {
+            resultQueue.put(ExceptionThrownMessage(e))
+        }
         continuationSync.take()
     }
 
@@ -102,6 +117,6 @@ private class YieldIterator<T:Any> (val body: YieldContext<T>.() -> Unit): Itera
     }
 
     protected fun finalize() {
-        thread?.interrupt()
+        bodyPromise?.cancel(Exception("Canceled"))
     }
 }

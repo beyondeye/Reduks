@@ -9,6 +9,7 @@ package com.beyondeye.reduks.middlewares
  */
 
 import junit.framework.TestCase
+import nl.komponents.kovenant.task
 import org.junit.Test
 import java.util.NoSuchElementException
 
@@ -26,7 +27,11 @@ class KYieldTest :TestCase(){
             ret kyield i
         }
     }
-
+    fun yieldPromises123() = yieldfun<Int> {
+        for (i in 1 .. 3) {
+            ret kyield task { i }
+        }
+    }
     fun yieldEvens() = yieldfun<Int> {
         for (i in 0 .. 8) {
             if (i % 2 == 0)
@@ -47,6 +52,12 @@ class KYieldTest :TestCase(){
         ret kyield 2
         throw Exception("some exception")
     }
+    fun yieldThrowsPromises() = yieldfun<Int> {
+        ret kyield task {1}
+        ret kyield task {2}
+        ret kyield task { throw Exception("some exception") }
+    }
+
 
     @Test fun testYieldEmpty() {
         val empty = yieldEmpty().toList()
@@ -60,6 +71,11 @@ class KYieldTest :TestCase(){
 
     @Test fun testYieldRet123() {
         val list = yieldRet123().toList()
+        assertEquals(listOf(1, 2, 3), list)
+    }
+
+    @Test fun testYeldRet123Promises() {
+        val list = yieldPromises123().toList()
         assertEquals(listOf(1, 2, 3), list)
     }
 
@@ -112,4 +128,12 @@ class KYieldTest :TestCase(){
             iterable.toList()
         } is Exception
     }
+    @Test fun testYieldThrowsPromises() {
+        val iterable = yieldThrowsPromises()
+        fails {
+            iterable.toList()
+        } is Exception
+    }
+
+
 }
