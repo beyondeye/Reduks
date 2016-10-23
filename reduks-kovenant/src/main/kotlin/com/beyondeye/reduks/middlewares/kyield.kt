@@ -18,7 +18,7 @@ import java.util.concurrent.SynchronousQueue
 fun <T: Any>yieldfun(body: YieldContext<T>.() -> Unit): Iterable<T> = YieldIterable<T>(body)
 
 interface YieldContext<T> {
-    infix fun kyield(value: T): Unit //kyield, because of name clas
+    infix fun kyield(value: T): Unit //kyield, because of name clash
     val ret: YieldContext<T>
 }
 
@@ -52,8 +52,8 @@ private class YieldIterator<T:Any> (val body: YieldContext<T>.() -> Unit): Itera
     init {
         val r = Runnable {
                 try {
-                    continuationSync.take()
-                    body()
+                    continuationSync.take() //wait until next access to iterator (call to iterator.evaluateNext())
+                    body() //execute calculation and put it in result queue
                     resultQueue.put(CompletedMessage())
                 }
                 catch (e: InterruptedException) {
@@ -69,7 +69,7 @@ private class YieldIterator<T:Any> (val body: YieldContext<T>.() -> Unit): Itera
     }
 
     override fun kyield(value: T) {
-        resultQueue.put(ValueMessage(value))
+        resultQueue.put(ValueMessage(value)) //put result and wait for next request
         continuationSync.take()
     }
 
