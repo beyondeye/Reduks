@@ -6,12 +6,17 @@ package com.beyondeye.reduks.modules
  */
 class ReduksContext(val moduleId:String) {
     /**
+     * check if the context is valid
+     */
+    fun isEmpty()=moduleId.length>0
+    /**
      * compose two contexts
      */
     infix operator fun plus(other: ReduksContext) = ReduksContext("$moduleId+${other.moduleId}")
     /**
      * generate action with context with '..' operator
      * E.g. ctx..Action()
+     * If the context is not valid then return the input action
      */
-    operator fun rangeTo(action:Any) = ActionWithContext(action,this)
+    operator fun rangeTo(action:Any):Any = if(isEmpty()) ActionWithContext(action,this) else action
 }
