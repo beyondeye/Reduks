@@ -28,7 +28,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * return the initial action to dispatch to the Store
              */
-            val startAction: Any,
+            val startAction: Any=INIT(),
             /**
              * return the state reducer
              */
