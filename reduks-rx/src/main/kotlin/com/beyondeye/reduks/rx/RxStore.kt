@@ -20,6 +20,7 @@ class RxStore<S>(
 ) : Store<S> {
     override fun replaceReducer(reducer: Reducer<S>) {
         this.reducer=reducer
+        dispatch(INIT())
     }
     class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null, val withStandardMiddlewares:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {

@@ -5,3 +5,9 @@ package com.beyondeye.reduks
  * Created by daely on 8/28/2016.
  */
 interface Action
+
+
+/**
+ * default start action sent when when reduks starts up
+ */
+class INIT:Action
