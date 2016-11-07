@@ -19,4 +19,20 @@ class ReduksContext(val moduleId:String) {
      * If the context is not valid then return the input action
      */
     operator fun rangeTo(action:Any):Any = if(isEmpty()) ActionWithContext(action,this) else action
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as ReduksContext
+
+        if (moduleId != other.moduleId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return moduleId.hashCode()
+    }
+
 }
