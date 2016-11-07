@@ -3,6 +3,9 @@ package com.beyondeye.reduks
  * see also https://github.com/reactjs/redux/blob/master/docs/Glossary.md#store
  */
 interface Store<S> {
+    /**
+     * the current state
+     */
     val state: S
     /**
      * dispatch the action to the store and return it

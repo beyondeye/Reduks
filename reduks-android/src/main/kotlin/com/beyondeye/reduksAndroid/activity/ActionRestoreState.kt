@@ -25,7 +25,7 @@ class ActionRestoreState<S>(val restoredState:S): Action {
             if(reduks.store.state is Parcelable) {
                 val restoredState:S?=savedInstanceState?.getParcelable<Parcelable>(REDUKS_STATE) as S?
                 if(restoredState!=null) {
-                    reduks.dispatch(ActionRestoreState(restoredState))
+                    reduks.store.dispatch(ActionRestoreState(restoredState))
                 }
             }
         }

@@ -11,8 +11,15 @@ interface Reduks<State> {
     val store: Store<State>
     val storeSubscriber: StoreSubscriber<State>
     val storeSubscription: StoreSubscription
-    /**
-     * call dispatch on the store object
-     */
-    fun dispatch(action:Any) = store.dispatch(action)
 }
+
+
+/**
+ * a shortcut for getting the current state from the store object
+ */
+val <S>Reduks<S>.state:S get()=store.state
+
+/**
+ * a shortcur for calling dispatch on the store object
+ */
+fun <S>Reduks<S>.dispatch(action:Any) = store.dispatch(action)
