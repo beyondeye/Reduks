@@ -39,10 +39,10 @@ class ActionWithContextTest {
         val ctx2=ReduksContext("2")
         val ctx3=ReduksContext("3")
         fun getMatch(a:Any)= when(a) {
-            isA<ActionA>(ctx1) -> "1a"
-            isA<ActionB>(ctx1) -> "1b"
-            isA<ActionA>(ctx2) -> "2a"
-            isA<ActionB>(ctx2) -> "2b"
+            ctx1.isA<ActionA>() -> "1a"
+            ctx1.isA<ActionB>() -> "1b"
+            ctx2.isA<ActionA>() -> "2a"
+            ctx2.isA<ActionB>() -> "2b"
             else -> ""
         }
         assertEquals("1a",getMatch(ctx1..ActionA()))

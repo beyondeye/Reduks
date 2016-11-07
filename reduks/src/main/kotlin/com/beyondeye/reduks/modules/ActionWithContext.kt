@@ -59,11 +59,10 @@ fun ReduksContext.matchA(matchfn: (Any) -> Boolean) = ActionWithContextLambdaPat
 
 /**
  * use this to match an [ActionWithContext] with embedded action of type T and context equal to
- * specified one
- * @param ctx [ReduksContext] to match
+ * this
  * sample usage: when(a) {
- *   isA<SomeActionType>(ctx) -> //...do something
+ *   ctx.isA<SomeActionType>() -> //...do something
  * }
  *
  */
-inline fun <reified T>isA(ctx:ReduksContext) = ActionWithContextLambdaPattern(ctx){it -> it is T}
+inline fun <reified T>ReduksContext.isA() = ActionWithContextLambdaPattern(this){it -> it is T}
