@@ -19,7 +19,7 @@ abstract class KovenantReduksActivity<S>: ReduksActivity<S>, AppCompatActivity()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)
-        startKovenant() //(before  initReduks()!!)
+        //startKovenant() //(before  initReduks()!!)
         reduks=initReduks(KovenantStore.Creator<S>())
     }
 
@@ -46,7 +46,7 @@ abstract class KovenantReduksActivity<S>: ReduksActivity<S>, AppCompatActivity()
         // force=true, which ignores all current
         // scheduled tasks
         // see  (See http://kovenant.komponents.nl/android/config/)
-        stopKovenant()
+        //stopKovenant()
         super.onDestroy()
     }
     override fun onSaveInstanceState(outState: Bundle?) {
