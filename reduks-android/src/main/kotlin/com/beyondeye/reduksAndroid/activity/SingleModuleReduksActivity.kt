@@ -18,7 +18,7 @@ interface SingleModuleReduksActivity<S> {
                     activityStartState(),
                     activityStartAction(),
                     combineReducers(getActivityStateReducer(), ActionRestoreState.getRestoreStateReducer()),
-                    StoreSubscriberBuilderFn<S> {getActivityStoreSubscriber(it)})
+                    StoreSubscriberBuilderFn<S> {store -> getActivityStoreSubscriber(store)})
     )
     /**
      * module id used for reduks

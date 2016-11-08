@@ -37,6 +37,10 @@ class StoreSubscriberImpl<S>(val subscriberFn: ()->Unit) : StoreSubscriber<S>{
 class StoreSubscriberBuilderImpl<S>(val storeSubscriberBuilderFn:(store: Store<S>)-> StoreSubscriber<S>): StoreSubscriberBuilder<S> {
     override fun build(store: Store<S>): StoreSubscriber<S> = storeSubscriberBuilderFn(store)
 }
+class StoreSubscriberBuilderImpl2<S>(val storeSubscriberBuilderFn2:(store: Store<S>,selector:SelectorBuilder<S>)-> StoreSubscriber<S>): StoreSubscriberBuilder<S> {
+    val selector=SelectorBuilder<S>()
+    override fun build(store: Store<S>): StoreSubscriber<S> = storeSubscriberBuilderFn2(store,selector)
+}
 
 class ThunkImpl<S>(val thunkFn:(dispatcher: (Any)->Any, state: S)->Any) : Thunk<S> {
     override fun execute(dispatcher:  (Any)->Any, state: S): Any = thunkFn(dispatcher,state)
@@ -48,4 +52,6 @@ fun <S> ReducerFn(reducerFn:(state:S, action:Any)->S) = ReducerImpl(reducerFn)
 fun <S> StoreEnhancerFn(storeEnhancerFn:(next: StoreCreator<S>)-> StoreCreator<S>)= StoreEnhancerImpl(storeEnhancerFn)
 fun <S> StoreSubscriberFn(subscriberFn: ()->Unit)= StoreSubscriberImpl<S>(subscriberFn)
 fun <S> StoreSubscriberBuilderFn(storeSubscriberBuilderFn:(store: Store<S>)-> StoreSubscriber<S>) = StoreSubscriberBuilderImpl(storeSubscriberBuilderFn)
+fun <S> StoreSubscriberBuilderFn(storeSubscriberBuilderFn2:(store: Store<S>,selector:SelectorBuilder<S>)-> StoreSubscriber<S>) = StoreSubscriberBuilderImpl2(storeSubscriberBuilderFn2)
+
 fun <S> ThunkFn(thunkFn:(dispatcher:  (Any)->Any, state: S)->Any) = ThunkImpl(thunkFn)
