@@ -2,6 +2,7 @@ package com.beyondeye.reduks
 
 import com.beyondeye.reduks.modules.MultiStore
 import com.beyondeye.reduks.modules.ReduksContext
+import com.beyondeye.reduks.modules.subStore_
 
 /**
  * Redux module containing all Reduks components: store and its (main) subscriber
@@ -33,42 +34,51 @@ fun <S>Reduks<S>.dispatch(action:Any) = store.dispatch(action)
 
 
 /**
- * try to retrieve a substore defined by its identifying context subctx and its type
+ * see [Store.subStore]
+ */
+inline fun<reified SB:Any> Reduks<*>.subStore(subctx:ReduksContext?=null):Store<SB>?  =store.subStore(subctx)
+/**
+ * see [Store.subState]
+ */
+inline fun<reified SB:Any> Reduks<*>.subState(subctx:ReduksContext?=null):SB?  =store.subState(subctx)
+/**
+ * see [Store.subDispatcher]
+ */
+inline fun<reified SB:Any> Reduks<*>.subDispatcher(subctx:ReduksContext?=null):((Any)->Any)?  =store.subDispatcher<SB>(subctx)
+
+
+
+/**
+ * try to retrieve a substore data: if input param subctx is null then
+ * then use as context the  default substore ReduksContext for the specified state type SB
+ * see [MultiStore.subStore_]
+ * WARNING: when using the default context these methods use reflection
  * @return null if either the a substore with the specified context was not found or it was found but it has a
  * different substate type than required
  */
-fun<SB> Reduks<*>.subStore(subctx:ReduksContext):Store<SB>?  {
-    val store_ =store //get a reference to the store (it can a be delegated property)
-    @Suppress("UNCHECKED_CAST")
-    if(store_ is MultiStore) return  store_.storeMap[subctx.toString()] as? Store<SB>
-    return null
-}
+inline fun<reified SB:Any> Store<*>.subStore(subctx:ReduksContext?=null):Store<SB>?  =
+    if(this is MultiStore)  subStore_<SB>(subctx) else null
 
 /**
- * try to retrieve a substore with default substore ReduksContext
- * WARNING: uses reflection
+ * try to retrieve a substore state: if input param subctx is null then
+ * then use as context the  default substore ReduksContext for the specified state type SB
+ * see [MultiStore.subStore_]
+ * WARNING: when using the default context these methods use reflection
+ * @return null if either the a substore with the specified context was not found or it was found but it has a
+ * different substate type than required
  */
-inline fun<reified SB:Any> Reduks<*>.subStore():Store<SB>?  {
-    val store_ =store //get a reference to the store (it can a be delegated property)
-    @Suppress("UNCHECKED_CAST")
-    if(store_ is MultiStore) return  store_.storeMap[ReduksContext.defaultModuleId<SB>()] as? Store<SB>
-    return null
-}
+inline fun<reified SB:Any> Store<*>.subState(subctx:ReduksContext?=null):SB?  =
+    if(this is MultiStore)  subStore_<SB>(subctx)?.state else null
 
-fun<SB> Reduks<*>.subState(subctx:ReduksContext):SB?  {
-    val store_=store //get a reference to the store (it can a be delegated property)
-    @Suppress("UNCHECKED_CAST")
-    if(store_ is MultiStore) return  (store_.storeMap[subctx.toString()] as? Store<SB>)?.state
-    return null
-}
 
 /**
- * try to retrieve a substore state with default substore ReduksContext
- * WARNING: uses reflection
+ * try to retrieve a substore dispatcher: if input param subctx is null then
+ * then use as context the  default substore ReduksContext for the specified state type SB
+ * see [MultiStore.subStore_]
+ * WARNING: when using the default context these methods use reflection
+ * @return null if either the a substore with the specified context was not found or it was found but it has a
+ * different substate type than required
  */
-inline fun<reified SB:Any> Reduks<*>.subState():SB?  {
-    val store_=store //get a reference to the store (it can a be delegated property)
-    @Suppress("UNCHECKED_CAST")
-    if(store_ is MultiStore) return  (store_.storeMap[ReduksContext.defaultModuleId<SB>()] as? Store<SB>)?.state
-    return null
-}
+inline fun<reified SB:Any> Store<*>.subDispatcher(subctx:ReduksContext?=null):((Any)->Any)?  =
+    if(this is MultiStore)  subStore_<SB>(subctx)?.dispatch else null
+

@@ -24,3 +24,7 @@ abstract class MultiStore(@JvmField val ctx:ReduksContext) {
         }
     }
 }
+
+inline fun <reified SB : Any> MultiStore.subStore_(subctx: ReduksContext?):Store<SB>? =
+        @Suppress("UNCHECKED_CAST")
+        (storeMap[subctx?.toString() ?: ReduksContext.defaultModuleId<SB>()] as? Store<SB>)
