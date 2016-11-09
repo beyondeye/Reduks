@@ -12,7 +12,7 @@ inline fun <reified S:Any> ModuleDef(
         initialState: S,
         startAction: Any=INIT(),
         stateReducer: Reducer<S>,
-        subscriberBuilder: StoreSubscriberBuilder<S>)=
+        subscriberBuilder: StoreSubscriberBuilder<S>?=null)=
         ReduksModule.Def<S>(ctx, storeCreator, initialState, startAction, stateReducer, subscriberBuilder)
 
 /**
@@ -49,18 +49,19 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
              * we pass as argument the store itself, so that we can create an object that implement the
              * [StoreSubscriberFn] interface that keep a reference to the store itself, in case the we need call dispatch
              * in the subscriber
+             * Define as null if no main store subscriber is defined
              */
-            val subscriberBuilder: StoreSubscriberBuilder<State>)
+            val subscriberBuilder: StoreSubscriberBuilder<State>?)
     override val ctx: ReduksContext
     override val store: Store<State>
-    override val storeSubscriber: StoreSubscriber<State>
-    override val storeSubscription: StoreSubscription
+    override val storeSubscriber: StoreSubscriber<State>?
+    override val storeSubscription: StoreSubscription?
     init {
         ctx=moduleDef.ctx
         val storeCreator= moduleDef.storeCreator
         store=storeCreator.create(moduleDef.stateReducer, moduleDef.initialState)
-        storeSubscriber= moduleDef.subscriberBuilder.build(store)
-        storeSubscription = store.subscribe(storeSubscriber)
+        storeSubscriber= moduleDef.subscriberBuilder?.build(store)
+        storeSubscription = if(storeSubscriber==null) null else store.subscribe(storeSubscriber)
         //split multiaction to list if required
         val actionList: List<Any> = MultiActionWithContext.toActionList(moduleDef.startAction)
         actionList.forEach { store.dispatch(it) }
@@ -82,29 +83,15 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val mctx = multiContext(m1.ctx, m2.ctx)
             return ReduksModule.Def<MultiState2<S1, S2>>(
                     ctx = mctx,
-                    storeCreator = MultiStore2.Factory<S1, S2>(m1.ctx, m1.storeCreator, m2.ctx, m2.storeCreator),
+                    storeCreator = MultiStore2.Factory<S1, S2>(
+                            m1.ctx, m1.storeCreator, m1.subscriberBuilder,
+                            m2.ctx, m2.storeCreator,m2.subscriberBuilder),
                     initialState = MultiState2(m1.initialState, m2.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx)),
                     stateReducer = MultiReducer2<S1, S2>(m1, m2),
-                    subscriberBuilder = StoreSubscriberBuilderFn { store ->
-                        if (store !is MultiStore2<S1, S2>) throw IllegalArgumentException("error")
-                        val selector = SelectorBuilder<MultiState2<S1, S2>>()
-                        val s1sel = selector.withSingleField { s1 }
-                        val s2sel = selector.withSingleField { s2 }
-                        val sub1 = m1.subscriberBuilder.build(store.store1)
-                        val sub2 = m2.subscriberBuilder.build(store.store2)
-                        StoreSubscriberFn {
-                            val newS=store.state
-                            s1sel.onChangeIn(newS) {
-                                sub1.onStateChange()
-                            }
-                            s2sel.onChangeIn(newS) {
-                                sub2.onStateChange()
-                            }
-                        }
-                    }
+                    subscriberBuilder =  null
                     )
         }
         //--------------------------------
@@ -114,29 +101,17 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val mctx = multiContext(m1.ctx, m2.ctx, m3.ctx)
             return ReduksModule.Def<MultiState3<S1, S2, S3>>(
                     ctx = mctx,
-                    storeCreator = MultiStore3.Factory<S1, S2, S3>(m1.ctx,m1.storeCreator, m2.ctx,m2.storeCreator, m3.ctx,m3.storeCreator),
+                    storeCreator = MultiStore3.Factory<S1, S2, S3>(
+                            m1.ctx,m1.storeCreator,m1.subscriberBuilder,
+                            m2.ctx,m2.storeCreator,m2.subscriberBuilder,
+                            m3.ctx,m3.storeCreator,m3.subscriberBuilder),
                     initialState = MultiState3(m1.initialState, m2.initialState, m3.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx),
                             ActionWithContext(m3.startAction, m3.ctx)),
                     stateReducer = MultiReducer3<S1, S2, S3>(m1, m2, m3),
-                    subscriberBuilder = StoreSubscriberBuilderFn { store ->
-                        if (store !is MultiStore3<S1, S2, S3>) throw IllegalArgumentException("error")
-                        val selector = SelectorBuilder<MultiState3<S1, S2, S3>>()
-                        val s1sel = selector.withSingleField { s1 }
-                        val s2sel = selector.withSingleField { s2 }
-                        val s3sel = selector.withSingleField { s3 }
-                        val sub1 = m1.subscriberBuilder.build(store.store1)
-                        val sub2 = m2.subscriberBuilder.build(store.store2)
-                        val sub3 = m3.subscriberBuilder.build(store.store3)
-                        StoreSubscriberFn {
-                            val newS=store.state
-                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
-                        }
-                    }
+                    subscriberBuilder = null
                     )
         }
         //--------------------------------
@@ -148,10 +123,10 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             return ReduksModule.Def<MultiState4<S1, S2, S3, S4>>(
                     ctx = mctx,
                     storeCreator = MultiStore4.Factory<S1, S2, S3, S4>(
-                            m1.ctx,m1.storeCreator,
-                            m2.ctx,m2.storeCreator,
-                            m3.ctx,m3.storeCreator,
-                            m4.ctx,m4.storeCreator),
+                            m1.ctx,m1.storeCreator,m1.subscriberBuilder,
+                            m2.ctx,m2.storeCreator,m2.subscriberBuilder,
+                            m3.ctx,m3.storeCreator,m3.subscriberBuilder,
+                            m4.ctx,m4.storeCreator,m4.subscriberBuilder),
                     initialState = MultiState4(m1.initialState, m2.initialState, m3.initialState, m4.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
@@ -159,25 +134,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             ActionWithContext(m3.startAction, m3.ctx),
                             ActionWithContext(m4.startAction, m4.ctx)),
                     stateReducer = MultiReducer4<S1, S2, S3, S4>(m1, m2, m3, m4),
-                    subscriberBuilder = StoreSubscriberBuilderFn { store ->
-                        if (store !is MultiStore4<S1, S2, S3, S4>) throw IllegalArgumentException("error")
-                        val selector = SelectorBuilder<MultiState4<S1, S2, S3, S4>>()
-                        val s1sel = selector.withSingleField { s1 }
-                        val s2sel = selector.withSingleField { s2 }
-                        val s3sel = selector.withSingleField { s3 }
-                        val s4sel = selector.withSingleField { s4 }
-                        val sub1 = m1.subscriberBuilder.build(store.store1)
-                        val sub2 = m2.subscriberBuilder.build(store.store2)
-                        val sub3 = m3.subscriberBuilder.build(store.store3)
-                        val sub4 = m4.subscriberBuilder.build(store.store4)
-                        StoreSubscriberFn {
-                            val newS=store.state
-                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
-                            s4sel.onChangeIn(newS) { sub4.onStateChange() }
-                        }
-                    })
+                    subscriberBuilder = null )
         }
 
         //--------------------------------
@@ -190,11 +147,11 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             return ReduksModule.Def<MultiState5<S1, S2, S3, S4, S5>>(
                     ctx = mctx,
                     storeCreator = MultiStore5.Factory<S1, S2, S3, S4, S5>(
-                            m1.ctx, m1.storeCreator,
-                            m2.ctx, m2.storeCreator,
-                            m3.ctx, m3.storeCreator,
-                            m4.ctx, m4.storeCreator,
-                            m5.ctx, m5.storeCreator),
+                            m1.ctx, m1.storeCreator,m1.subscriberBuilder,
+                            m2.ctx, m2.storeCreator,m2.subscriberBuilder,
+                            m3.ctx, m3.storeCreator,m3.subscriberBuilder,
+                            m4.ctx, m4.storeCreator,m4.subscriberBuilder,
+                            m5.ctx, m5.storeCreator,m5.subscriberBuilder),
                     initialState = MultiState5(m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
@@ -203,28 +160,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             ActionWithContext(m4.startAction, m4.ctx),
                             ActionWithContext(m5.startAction, m5.ctx)),
                     stateReducer = MultiReducer5<S1, S2, S3, S4, S5>(m1, m2, m3, m4, m5),
-                    subscriberBuilder = StoreSubscriberBuilderFn { store ->
-                        if (store !is MultiStore5<S1, S2, S3, S4, S5>) throw IllegalArgumentException("error")
-                        val selector = SelectorBuilder<MultiState5<S1, S2, S3, S4, S5>>()
-                        val s1sel = selector.withSingleField { s1 }
-                        val s2sel = selector.withSingleField { s2 }
-                        val s3sel = selector.withSingleField { s3 }
-                        val s4sel = selector.withSingleField { s4 }
-                        val s5sel = selector.withSingleField { s5 }
-                        val sub1 = m1.subscriberBuilder.build(store.store1)
-                        val sub2 = m2.subscriberBuilder.build(store.store2)
-                        val sub3 = m3.subscriberBuilder.build(store.store3)
-                        val sub4 = m4.subscriberBuilder.build(store.store4)
-                        val sub5 = m5.subscriberBuilder.build(store.store5)
-                        StoreSubscriberFn {
-                            val newS=store.state
-                            s1sel.onChangeIn(newS) { sub1.onStateChange() }
-                            s2sel.onChangeIn(newS) { sub2.onStateChange() }
-                            s3sel.onChangeIn(newS) { sub3.onStateChange() }
-                            s4sel.onChangeIn(newS) { sub4.onStateChange() }
-                            s5sel.onChangeIn(newS) { sub5.onStateChange() }
-                        }
-                    })
+                    subscriberBuilder = null )
         }
     }
 

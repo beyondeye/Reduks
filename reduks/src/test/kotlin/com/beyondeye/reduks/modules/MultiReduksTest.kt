@@ -132,10 +132,10 @@ class MultiReduksTest {
         //-----THEN
         assertThat(mr.store.state.s1.lastActionType).isEqualTo("1")
         assertThat(mr.store.state.s2.lastActionType).isEqualTo("2")
-        assertThat(nStateChanges1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls2).isEqualTo(1) //start action and one additional dispatch+unknown actions
+        assertThat(nStateChanges1).isEqualTo(1)
+        assertThat(nStateChangeCalls1).isEqualTo(1)
+        assertThat(nStateChanges2).isEqualTo(1)
+        assertThat(nStateChangeCalls2).isEqualTo(2)
     }
 
     @Test
@@ -177,10 +177,10 @@ class MultiReduksTest {
         //-----THEN
         assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("1")
         assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
-        assertThat(nStateChanges1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls2).isEqualTo(1) //start action and one additional dispatch+unknown actions
+        assertThat(nStateChanges1).isEqualTo(1)
+        assertThat(nStateChangeCalls1).isEqualTo(1)
+        assertThat(nStateChanges2).isEqualTo(1)
+        assertThat(nStateChangeCalls2).isEqualTo(2)
     }
 
 
@@ -223,10 +223,10 @@ class MultiReduksTest {
         //-----THEN
         assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("1")
         assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
-        assertThat(nStateChanges1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls1).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChanges2).isEqualTo(1) //start action and one additional dispatch
-        assertThat(nStateChangeCalls2).isEqualTo(1) //start action and one additional dispatch+unknown actions
+        assertThat(nStateChanges1).isEqualTo(1)
+        assertThat(nStateChangeCalls1).isEqualTo(1)
+        assertThat(nStateChanges2).isEqualTo(1)
+        assertThat(nStateChangeCalls2).isEqualTo(2)
     }
 
 

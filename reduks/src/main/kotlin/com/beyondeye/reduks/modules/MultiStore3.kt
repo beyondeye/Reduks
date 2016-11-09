@@ -7,27 +7,33 @@ import com.beyondeye.reduks.*
  * Created by daely on 8/3/2016.
  */
 class MultiStore3<S1 : Any, S2 : Any, S3 : Any>(
-        ctx1: ReduksContext, @JvmField val store1: Store<S1>,
-        ctx2: ReduksContext, @JvmField val store2: Store<S2>,
-        ctx3: ReduksContext, @JvmField val store3: Store<S3>) : Store<MultiState3<S1, S2, S3>>, MultiStore(ReduksModule.multiContext(ctx1, ctx2, ctx3)) {
+        ctx1: ReduksContext, @JvmField val store1: Store<S1>, @JvmField val subscription1:StoreSubscription?,
+        ctx2: ReduksContext, @JvmField val store2: Store<S2>, @JvmField val subscription2:StoreSubscription?,
+        ctx3: ReduksContext, @JvmField val store3: Store<S3>, @JvmField val subscription3:StoreSubscription?) : Store<MultiState3<S1, S2, S3>>, MultiStore(ReduksModule.multiContext(ctx1, ctx2, ctx3)) {
     override fun replaceReducer(reducer: Reducer<MultiState3<S1, S2, S3>>) {
-        throw UnsupportedOperationException("MultiStore does not support replacing reducer")
+        throw UnsupportedOperationException("MultiStore does not support replacing reducer: replace the substate reducer instead")
     }
 
-    class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val ctx1: ReduksContext,
+    internal class Factory<S1 : Any, S2 : Any, S3 : Any>(@JvmField val ctx1: ReduksContext,
                                                 @JvmField val creator1:StoreCreator<S1>,
+                                                @JvmField val sub1:StoreSubscriberBuilder<S1>?,
                                                 @JvmField val ctx2: ReduksContext,
                                                 @JvmField val creator2:StoreCreator<S2>,
+                                                @JvmField val sub2:StoreSubscriberBuilder<S2>?,
                                                 @JvmField val ctx3: ReduksContext,
-                                                @JvmField val creator3:StoreCreator<S3>
-                                                ) : StoreCreator<MultiState3<S1, S2, S3>> {
+                                                @JvmField val creator3:StoreCreator<S3>,
+                                                @JvmField val sub3:StoreSubscriberBuilder<S3>?
+    ) : StoreCreator<MultiState3<S1, S2, S3>> {
         override fun create(reducer: Reducer<MultiState3<S1, S2, S3>>,
                             initialState: MultiState3<S1, S2, S3>): Store<MultiState3<S1, S2, S3>> {
             if (reducer !is MultiReducer3<S1, S2, S3>) throw IllegalArgumentException()
+            val store1 = creator1.create(reducer.r1, initialState.s1)
+            val store2 = creator2.create(reducer.r2, initialState.s2)
+            val store3 = creator3.create(reducer.r3, initialState.s3)
             return MultiStore3<S1, S2, S3>(
-                    ctx1, creator1.create(reducer.r1, initialState.s1),
-                    ctx2, creator2.create(reducer.r2, initialState.s2),
-                    ctx3, creator3.create(reducer.r3, initialState.s3))
+                    ctx1, store1,store1.subscribe(sub1),
+                    ctx2, store2,store2.subscribe(sub2),
+                    ctx3, store3,store3.subscribe(sub3))
         }
     }
 
