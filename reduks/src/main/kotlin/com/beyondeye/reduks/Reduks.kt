@@ -10,8 +10,14 @@ import com.beyondeye.reduks.modules.ReduksContext
 interface Reduks<State> {
     val ctx: ReduksContext
     val store: Store<State>
-    val storeSubscriber: StoreSubscriber<State>
-    val storeSubscription: StoreSubscription
+    /**
+     * the main store subscriber or null if none is defined
+     */
+    val storeSubscriber: StoreSubscriber<State>?
+    /**
+     * the subscription for the main store subscriber or null if none is defined
+     */
+    val storeSubscription: StoreSubscription?
 }
 
 

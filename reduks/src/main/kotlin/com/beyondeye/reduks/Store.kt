@@ -34,7 +34,7 @@ fun <S> Store<S>.subscribe(lambda: () -> Unit) = this.subscribe(StoreSubscriberF
 /**
  * extension method for directly subscribing using a store subscriber builder
  */
-fun <S> Store<S>.subscribe(sb: StoreSubscriberBuilder<S>) =this.subscribe(sb.build(this))
+fun <S> Store<S>.subscribe(sb: StoreSubscriberBuilder<S>?) =if(sb!=null) this.subscribe(sb.build(this)) else null
 
 /**
  * extension method for checking at compile time that we only dispatch objects derived from
