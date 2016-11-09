@@ -30,9 +30,9 @@ class MultiStore2<S1:Any,S2:Any>(
         }
     }
     override val storeMap = mapOf(
-            ctx1 to store1,
-            ctx2 to store2)
-    override val state: MultiState2<S1, S2> get()= MultiState2(ctx,store1.state,store2.state)
+            ctx1.toString() to store1,
+            ctx2.toString() to store2)
+    override val state: MultiState2<S1, S2> get()= MultiState2(store1.state,store2.state)
     override var dispatch=dispatchWrappedAction
     //call back the multi subscriber each time any component state change
     override fun subscribe(storeSubscriber: StoreSubscriber<MultiState2<S1, S2>>): StoreSubscription {

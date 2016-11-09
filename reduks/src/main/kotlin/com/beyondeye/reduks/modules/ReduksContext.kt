@@ -31,8 +31,18 @@ class ReduksContext(val moduleId:String) {
         return true
     }
 
+    override fun toString(): String {
+        return moduleId
+    }
+
     override fun hashCode(): Int {
         return moduleId.hashCode()
     }
-
+    companion object {
+        /**
+         * default ReduksContext for some state type is the state class simple name
+         */
+        inline fun<reified S:Any> default() =ReduksContext(defaultModuleId<S>())
+        inline fun<reified S:Any> defaultModuleId() =S::class.java.simpleName
+    }
 }

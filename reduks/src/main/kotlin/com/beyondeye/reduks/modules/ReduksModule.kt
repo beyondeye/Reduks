@@ -4,8 +4,19 @@ import com.beyondeye.reduks.*
 import com.beyondeye.reduks.middlewares.applyMiddleware
 
 /**
- * generic redux Redux
- * TODO substistute KovenantReduks, SimpleReduks, and RxReduks using only ReduksModule and make them deprecated
+ * a builder function for [ReduksModule.Def] that set the context to the default context for the state
+ */
+inline fun <reified S:Any> ModuleDef(
+        ctx: ReduksContext= ReduksContext.default<S>(),
+        storeCreator:StoreCreator<S>,
+        initialState: S,
+        startAction: Any=INIT(),
+        stateReducer: Reducer<S>,
+        subscriberBuilder: StoreSubscriberBuilder<S>)=
+        ReduksModule.Def<S>(ctx, storeCreator, initialState, startAction, stateReducer, subscriberBuilder)
+
+/**
+ * generic redux module
  * Created by daely on 6/8/2016.
  */
 class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
@@ -28,7 +39,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * return the initial action to dispatch to the Store
              */
-            val startAction: Any=INIT(),
+            val startAction: Any,
             /**
              * return the state reducer
              */
@@ -72,7 +83,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             return ReduksModule.Def<MultiState2<S1, S2>>(
                     ctx = mctx,
                     storeCreator = MultiStore2.Factory<S1, S2>(m1.ctx, m1.storeCreator, m2.ctx, m2.storeCreator),
-                    initialState = MultiState2(mctx, m1.initialState, m2.initialState),
+                    initialState = MultiState2(m1.initialState, m2.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx)),
@@ -104,7 +115,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             return ReduksModule.Def<MultiState3<S1, S2, S3>>(
                     ctx = mctx,
                     storeCreator = MultiStore3.Factory<S1, S2, S3>(m1.ctx,m1.storeCreator, m2.ctx,m2.storeCreator, m3.ctx,m3.storeCreator),
-                    initialState = MultiState3(mctx, m1.initialState, m2.initialState, m3.initialState),
+                    initialState = MultiState3(m1.initialState, m2.initialState, m3.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx),
@@ -141,7 +152,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             m2.ctx,m2.storeCreator,
                             m3.ctx,m3.storeCreator,
                             m4.ctx,m4.storeCreator),
-                    initialState = MultiState4(mctx, m1.initialState, m2.initialState, m3.initialState, m4.initialState),
+                    initialState = MultiState4(m1.initialState, m2.initialState, m3.initialState, m4.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx),
@@ -184,7 +195,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             m3.ctx, m3.storeCreator,
                             m4.ctx, m4.storeCreator,
                             m5.ctx, m5.storeCreator),
-                    initialState = MultiState5(mctx, m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState),
+                    initialState = MultiState5(m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState),
                     startAction = MultiActionWithContext(
                             ActionWithContext(m1.startAction, m1.ctx),
                             ActionWithContext(m2.startAction, m2.ctx),

@@ -10,12 +10,12 @@ abstract class MultiStore(@JvmField val ctx:ReduksContext) {
     /**
      *     map of all modules with  [ReduksContext] as index
      */
-    abstract val storeMap:Map<ReduksContext, Store<out Any>>
+    abstract val storeMap:Map<String, Store<out Any>>
     @JvmField internal var dispatchWrappedAction: (Any) -> Any = { action ->
         when(action) {
             is ActionWithContext -> {
                 val actionContext=action.context
-                val selectedStore=storeMap[actionContext]
+                val selectedStore=storeMap[actionContext.toString()]
                 if(selectedStore==null)
                     throw IllegalArgumentException("no registered module with context $actionContext")
                 selectedStore.dispatch(action.action)
