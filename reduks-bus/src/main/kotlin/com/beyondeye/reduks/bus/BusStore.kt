@@ -23,7 +23,7 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
     private val busDataHandlerSubscriptions:MutableList<StoreSubscription> = mutableListOf()
     fun <BusDataType> addBusDataHandler(key:String, fn: (bd: BusDataType) -> Unit): StoreSubscription {
         val sub=wrappedStore.subscribe(getStoreSubscriberBuilderForBusDataHandler<S,BusDataType>(key,fn))
-        busDataHandlerSubscriptions.add(sub)
+        busDataHandlerSubscriptions.add(sub!!)
         return sub
     }
     fun removeBusDataHandler(subscription: StoreSubscription) {
