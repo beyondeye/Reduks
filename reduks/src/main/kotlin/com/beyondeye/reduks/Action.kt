@@ -8,6 +8,6 @@ interface Action
 
 
 /**
- * default start action sent when when reduks starts up
+ * default start action sent  when reduks starts up
  */
 class INIT:Action
