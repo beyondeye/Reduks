@@ -53,26 +53,26 @@ repositories {
 }
 
 // main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b11'
 
 //rx-java based state store+ additional required dep for android support
-compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b10'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b11'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b11'
 
 //kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b10'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b11'
+compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b11'
 
 
 //dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b11'
 
 //immutable collections
-compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b11'
 
 //reduks bus
-compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b10'
-compile 'com.github.beyondeye.reduks:reduks-bus:2.0.0b10'
+compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b11'
+compile 'com.github.beyondeye.reduks:reduks-bus:2.0.0b11'
 
 ```
 
