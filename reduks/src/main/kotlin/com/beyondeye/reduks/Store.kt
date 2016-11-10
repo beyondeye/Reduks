@@ -26,13 +26,13 @@ interface Store<S> {
 
 }
 
+
 /**
- * allow to use direct call on dispatcher function reference even if it is nullable
+ * allow to use direct call on dispatcher function reference: dispatch(action) even if it is nullable
  * instead of having to write dispatch?.invoke(action)
  */
-operator fun ((action:Any) -> Any)?.invoke(action:Any) {
-    if(this!=null) this.invoke(action)
-}
+operator fun ((action:Any) -> Any)?.invoke(action:Any):Any? =
+    if(this!=null) this.invoke(action) else null
 
 /**
  * extension method for directly provide a lambda as argument for store subscribe
