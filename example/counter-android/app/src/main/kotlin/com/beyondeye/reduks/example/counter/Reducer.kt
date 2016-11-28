@@ -1,6 +1,7 @@
 package com.beyondeye.reduks.example.counter
 
 import com.beyondeye.reduks.Reducer
+import com.beyondeye.reduks.ReducerFn
 
 /**
  * Created by kittinunf on 9/1/16.
