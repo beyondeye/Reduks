@@ -1,7 +1,6 @@
 package com.beyondeye.reduks.example.counter.util
 
 import com.beyondeye.reduks.Store
-import com.beyondeye.reduks.StoreSubscriber
 import com.beyondeye.reduks.StoreSubscription
 import com.beyondeye.reduks.subscribe
 
@@ -20,7 +19,7 @@ fun <S> observeStore(store: Store<S>, onChanged: (S) -> Unit): StoreSubscription
         }
     }
 
-    val unsubscribe = store.subscribe(StoreSubscriber { handle() })
+    val unsubscribe = store.subscribe( { handle() })
     handle()
     return unsubscribe
 }
