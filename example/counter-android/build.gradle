@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.0.5'
+        kotlin_version = '1.0.6'
         android_support_version = '25.0.0'
         reduks_version = '2.0.0b11'
     }

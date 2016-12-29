@@ -23,6 +23,16 @@ android:
     #- sys-img-armeabi-v7a-android-22
     - sys-img-x86-android-23
 
+#hack to make it work
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
 script:
 #    - ./gradlew build connectedCheck
     - ./gradlew clean check
