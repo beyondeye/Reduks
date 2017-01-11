@@ -12,14 +12,16 @@ interface Reduks<State> {
     val ctx: ReduksContext
     val store: Store<State>
     /**
-     * the main store subscriber or null if none is defined
+     * the active subscriptions. for making it easier to unsubscribe by string tag, instead of keeping manually keeping
+     * a reference to the StoreSubscription
      */
-    val storeSubscriber: StoreSubscriber<State>?
-    /**
-     * the subscription for the main store subscriber or null if none is defined
-     */
-    val storeSubscription: StoreSubscription?
+    val storeSubscriptionsByTag: MutableMap<String, StoreSubscription>
+    val busStoreSubscriptionsByTag:MutableMap<String,MutableList<StoreSubscription>>
+    companion object {
+        val TagMainSubscription="*MAIN*"
+    }
 }
+
 
 
 /**
@@ -32,6 +34,23 @@ val <S>Reduks<S>.state:S get()=store.state
  */
 fun <S>Reduks<S>.dispatch(action:Any) = store.dispatch(action)
 
+
+fun <S>Reduks<S>.subscribe(subscriptionTag:String, storeSubscriber: StoreSubscriber<S>) {
+    unsubscribe(subscriptionTag)
+    storeSubscriptionsByTag.put(subscriptionTag, store.subscribe(storeSubscriber))
+}
+fun <S>Reduks<S>.subscribe(subscriptionTag:String, storeSubscriberBuilder: StoreSubscriberBuilder<S>) {
+    unsubscribe(subscriptionTag)
+    storeSubscriptionsByTag.put(subscriptionTag, store.subscribe(storeSubscriberBuilder)!!)
+}
+
+fun <S>Reduks<S>.unsubscribe(subscriptionTag:String) {
+    storeSubscriptionsByTag.remove(subscriptionTag)?.unsubscribe()
+}
+fun <S>Reduks<S>.unsubscribeAll() {
+    storeSubscriptionsByTag.values.forEach { it.unsubscribe() }
+    storeSubscriptionsByTag.clear()
+}
 
 /**
  * see [Store.subStore]

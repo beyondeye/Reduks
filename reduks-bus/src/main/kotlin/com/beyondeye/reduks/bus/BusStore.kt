@@ -16,12 +16,15 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
     override var dispatch: (Any) -> Any
         get() = wrappedStore.dispatch
         set(value) { wrappedStore.dispatch=value }
-    fun unsubscribeAllBusDataHandlers() {
+    fun removeAllBusDataHandlers() {
         busDataHandlerSubscriptions.forEach { it.unsubscribe() }
         busDataHandlerSubscriptions.clear()
     }
-    private val busDataHandlerSubscriptions:MutableList<StoreSubscription> = mutableListOf()
-    fun <BusDataType> addBusDataHandler(key:String, fn: (bd: BusDataType) -> Unit): StoreSubscription {
+    internal val busDataHandlerSubscriptions:MutableList<StoreSubscription> = mutableListOf()
+    /**
+     * this function name has _busstore suffix for avoid clash with Store.addBusDataHandler in function inlining
+     */
+    fun <BusDataType> addBusDataHandler_busstore(key:String, fn: (bd: BusDataType) -> Unit): StoreSubscription {
         val sub=wrappedStore.subscribe(getStoreSubscriberBuilderForBusDataHandler<S,BusDataType>(key,fn))
         busDataHandlerSubscriptions.add(sub!!)
         return sub
@@ -37,3 +40,4 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
         wrappedStore.replaceReducer(combineReducers(reducer, getBusReducer()))
     }
 }
+val <S:StateWithBusData> BusStore<S>.nSubscriptions:Int get()=busDataHandlerSubscriptions.size

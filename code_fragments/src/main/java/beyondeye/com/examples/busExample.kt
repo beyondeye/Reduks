@@ -42,47 +42,29 @@ fun test() {
     store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
 
 }
-
-fun Context.bindReduksFromParentActivity(): Reduks<out StateWithBusData>? =
-        if (this is ReduksActivity<*>) {
-            this.reduks as? Reduks<out StateWithBusData>
-        } else {
-            throw RuntimeException(this.toString() + " must implement ReduksActivity<out StateWithBusData>")
-        }
+fun Fragment.reduks() =
+        if (activity is ReduksActivity<*>)
+            (activity as ReduksActivity<out StateWithBusData>).reduks
+        else null
 
 class LoginFragment : Fragment() {
-    private var reduks: Reduks<out StateWithBusData>?=null
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        reduks=context?.bindReduksFromParentActivity()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        reduks=null
-    }
     fun onSubmitLogin() {
-        reduks?.postBusData(LoginFragmentResult("Kotlin","IsAwsome"))
+        reduks()?.postBusData(LoginFragmentResult("Kotlin","IsAwsome"))
     }
 }
 
 class LoginDataDisplayFragment : Fragment() {
-    private var reduks: Reduks<out StateWithBusData>?=null
-    val busHandlers:MutableList<StoreSubscription> = mutableListOf()
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        reduks=context?.bindReduksFromParentActivity()
-        reduks?.addBusDataHandler { lfr:LoginFragmentResult? ->
+        reduks()?.addBusDataHandlerWithTag(tag) { lfr:LoginFragmentResult? ->
             if(lfr!=null) {
                 print("login with username=${lfr.username} and password=${lfr.password} and ")
             }
-        }?.addToList(busHandlers)
+        }
     }
 
     override fun onDetach() {
         super.onDetach()
-        reduks?.removeBusDataHandlers(busHandlers)
-        reduks=null
+        reduks()?.removeBusDataHandlersWithTag(tag) //remove all bus data handler attached to this fragment tag
     }
 }

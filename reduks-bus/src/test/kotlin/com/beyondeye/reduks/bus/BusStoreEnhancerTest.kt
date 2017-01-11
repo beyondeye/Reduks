@@ -12,7 +12,7 @@ class Action
     class SetA(val newA:Int)
     class SetB(val newB:Int)
 }
-val testReducer = ReducerFn<TestState> { state, action ->
+val testReducer = ReducerFn<TestStateWithBusData> { state, action ->
     when (action) {
         is Action.SetA -> state.copy(a= action.newA)
         is Action.SetB -> state.copy(b= action.newB)
@@ -26,19 +26,30 @@ val testReducerNBD = ReducerFn<TestStateWithoutBusData> { state, action ->
         else -> state
     }
 }
-data class TestState(val a:Int, val b:Int, override val busData:PMap<String,Any> = emptyBusData()): StateWithBusData {
+data class TestStateWithBusData(val a:Int, val b:Int, override val busData:PMap<String,Any> = emptyBusData()): StateWithBusData {
     override fun copyWithNewBusData(newBusData: PMap<String, Any>) = copy(busData=newBusData)
 }
 data class TestStateWithoutBusData(val a:Int,val b:Int)
 
-val initialTestState=TestState(0,0)
+val initialTestState= TestStateWithBusData(0,0)
 val initialTestStateNBD=TestStateWithoutBusData(0,0)
+
+val mdef1= ModuleDef(
+        storeCreator = SimpleStore.Creator<TestStateWithBusData>().enhancedWith(BusStoreEnhancer()),
+        initialState = initialTestState,
+        stateReducer = testReducer
+)
+val mdef2= ModuleDef(
+        storeCreator = SimpleStore.Creator<TestStateWithoutBusData>(),
+        initialState = initialTestStateNBD,
+        stateReducer = testReducerNBD
+)
 
 class BusStoreEnhancerTest {
     @Test
     fun testBusStore() {
         //---given
-        val creator= SimpleStore.Creator<TestState>()
+        val creator= SimpleStore.Creator<TestStateWithBusData>()
         val store = creator.create(testReducer, initialTestState,BusStoreEnhancer())
         var iDataReceivedCount:Int=0
         var fDataReceivedCount:Int=0
@@ -117,7 +128,7 @@ class BusStoreEnhancerTest {
         assertNull(store.busData<Float>())
 
         //---when
-        store.unsubscribeAllBusDataHandlers()
+        store.removeAllBusDataHandlers()
         store.postBusData(11)
         //---then
         assert(fDataReceivedCount==0)
@@ -129,19 +140,10 @@ class BusStoreEnhancerTest {
         assert(iDataReceivedCount==0)
     }
 
+
     @Test
     fun testBusStoreForMultiStore() {
         //---given
-        val mdef1= ModuleDef(
-                storeCreator = SimpleStore.Creator<TestState>().enhancedWith(BusStoreEnhancer()),
-                initialState = initialTestState,
-                stateReducer = testReducer
-        )
-        val mdef2= ModuleDef(
-                storeCreator = SimpleStore.Creator<TestStateWithoutBusData>(),
-                initialState = initialTestStateNBD,
-                stateReducer = testReducerNBD
-        )
         val multidef=ReduksModule.MultiDef(mdef1, mdef2)
         val mr = ReduksModule(multidef)
         var iDataReceivedCount:Int=0
@@ -156,7 +158,8 @@ class BusStoreEnhancerTest {
                 assertEquals(receivedOnBus,1)
             }
         }
-        store.addBusDataHandler { floatVal:Float? ->
+        //test Reduks.addBusDataHandler extension function
+        mr.addBusDataHandlerWithTag("testtag") { floatVal:Float? ->
             val receivedOnBus=floatVal
             if(receivedOnBus!=null) {
                 fDataReceivedCount++
@@ -216,7 +219,7 @@ class BusStoreEnhancerTest {
         assertNull(store.busData<Float>())
 
         //---when
-        store.unsubscribeAllBusDataHandlers()
+        store.removeAllBusDataHandlers()
         store.postBusData(11)
         //---then
         assert(fDataReceivedCount==0)
@@ -226,6 +229,73 @@ class BusStoreEnhancerTest {
         //---then
         assert(fDataReceivedCount==0)
         assert(iDataReceivedCount==0)
+    }
+    class BusDataA(val payloadA:String)
+    class BusDataB(val payloadB:String)
+    @Test
+    fun testAddRemoveBusDataHandlers() {
+        //-------GIVEN
+        val multidef=ReduksModule.MultiDef(mdef1, mdef2)
+        val mr = ReduksModule(multidef)
+        assert(mr.busStoreSubscriptionsByTag.size==0)
+        //-------WHEN
+        val busStore=mr.subStore<TestStateWithBusData>() as? BusStore
+        //-------THEN
+        assert(busStore!=null)
+        //------AND WHEN
+        mr.addBusDataHandlerWithTag<BusDataA>("atag") {
+            throw NotImplementedError("Dummy handler!")
+        }
+        //------THEN
+        assert((mr.busStoreSubscriptionsByTag.size==1))
+        assert(busStore!!.nSubscriptions==1)
+        //------AND WHEN
+        mr.addBusDataHandlerWithTag<BusDataB>("btag") {
+            throw NotImplementedError("Dummy handler!")
+        }
+        //------THEN
+        assert((mr.busStoreSubscriptionsByTag.size==2))
+        assert(busStore.nSubscriptions==2)
+        var busSubscriptionsA=mr.busStoreSubscriptionsByTag["atag"]
+        assert(busSubscriptionsA!=null && busSubscriptionsA.size==1)
+        var busSubscriptionsB=mr.busStoreSubscriptionsByTag["btag"]
+        assert(busSubscriptionsB!=null && busSubscriptionsB.size==1)
+        //-----AND WHEN
+        mr.removeAllBusDataHandlers()
+        //------THEN
+        assert(busStore.nSubscriptions==0)
+        busSubscriptionsA=mr.busStoreSubscriptionsByTag["atag"]
+        assert(busSubscriptionsA==null || busSubscriptionsA.size==0)
+        busSubscriptionsB=mr.busStoreSubscriptionsByTag["btag"]
+        assert(busSubscriptionsB==null || busSubscriptionsB.size==0)
+
+    }
+    @Test
+    fun testRemoveBusDataHandlerWithTag() {
+        val multidef=ReduksModule.MultiDef(mdef1, mdef2)
+        val mr = ReduksModule(multidef)
+        //----AND GIVEN
+        mr.addBusDataHandlerWithTag<BusDataA>("atag") {
+            throw NotImplementedError("Dummy handler!")
+        }
+        mr.addBusDataHandlerWithTag<BusDataB>("btag") {
+            throw NotImplementedError("Dummy handler!")
+        }
+        val busSubscriptionsA=mr.busStoreSubscriptionsByTag["atag"]
+        val busSubscriptionsB=mr.busStoreSubscriptionsByTag["btag"]
+        val busStore=mr.subStore<TestStateWithBusData>() as BusStore
+        //----WHEN
+        mr.removeBusDataHandlersWithTag("atag")
+        //---THEN
+        assert(busSubscriptionsA!!.size==0)
+        assert(busSubscriptionsB!!.size==1)
+        assert(busStore.nSubscriptions==1)
+        //----AND WHEN
+        mr.removeBusDataHandlersWithTag("btag")
+        //---THEN
+        assert(busSubscriptionsA.size==0)
+        assert(busSubscriptionsB.size==0)
+        assert(busStore.nSubscriptions==0)
     }
 
 }

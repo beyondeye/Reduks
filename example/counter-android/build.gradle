@@ -3,8 +3,8 @@
 buildscript {
     ext {
         kotlin_version = '1.0.6'
-        android_support_version = '25.0.0'
-        reduks_version = '2.0.0b11'
+        android_support_version = '25.1.0'
+        reduks_version = '2.0.0b12'
     }
 
     repositories {
@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.2.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong

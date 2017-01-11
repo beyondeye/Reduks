@@ -54,14 +54,17 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val subscriberBuilder: StoreSubscriberBuilder<State>?)
     override val ctx: ReduksContext
     override val store: Store<State>
-    override val storeSubscriber: StoreSubscriber<State>?
-    override val storeSubscription: StoreSubscription?
+    override val storeSubscriptionsByTag: MutableMap<String,StoreSubscription> = mutableMapOf()
+    override val busStoreSubscriptionsByTag:MutableMap<String,MutableList<StoreSubscription>> = mutableMapOf()
     init {
         ctx=moduleDef.ctx
         val storeCreator= moduleDef.storeCreator
         store=storeCreator.create(moduleDef.stateReducer, moduleDef.initialState)
-        storeSubscriber= moduleDef.subscriberBuilder?.build(store)
-        storeSubscription = if(storeSubscriber==null) null else store.subscribe(storeSubscriber)
+        val storeSubscriber= moduleDef.subscriberBuilder?.build(store)
+        storeSubscriber?.let {
+            val storeSubscription = store.subscribe(storeSubscriber)
+            storeSubscriptionsByTag.put(Reduks.TagMainSubscription,storeSubscription)
+        }
         //split multiaction to list if required
         val actionList: List<Any> = MultiActionWithContext.toActionList(moduleDef.startAction)
         actionList.forEach { store.dispatch(it) }
