@@ -461,7 +461,7 @@ But first let's see how we post some data on the bus:
 ```kotlin
  store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
 ```
-That's it. See more code examples [here](./reduks-bus/src/test/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancerTest.kt). For the full Api see [here](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/api.kt)
+That's it. See more code examples [here](./reduks-bus/src/test/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancerTest.kt). For the full Api see [here](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/busApi.kt)
 #####Reduks bus under the hood
 What's happening when we post some data on the bus? What we are doing is actualling dispatching the Action
 ```kotlin
