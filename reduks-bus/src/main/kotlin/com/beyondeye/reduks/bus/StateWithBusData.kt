@@ -14,7 +14,7 @@ import com.beyondeye.reduks.pcollections.PMap
 interface StateWithBusData {
     /**
      * a persistent (immutable) map that contains a key for each bus data: Simply override it with
-     * override val busData:PMap<String,Any> = emptyBusData()
+     * override val busData:PMap<String,Any> = busDataEmpty()
      */
     val busData: PMap<String, Any>
 
@@ -26,5 +26,5 @@ interface StateWithBusData {
     fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData
 }
 
-fun emptyBusData():PMap<String,Any> =  HashTreePMap.empty()
+fun busDataEmpty():PMap<String,Any> =  HashTreePMap.empty()
 

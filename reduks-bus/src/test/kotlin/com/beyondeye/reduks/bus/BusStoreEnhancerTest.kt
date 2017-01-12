@@ -26,7 +26,7 @@ val testReducerNBD = ReducerFn<TestStateWithoutBusData> { state, action ->
         else -> state
     }
 }
-data class TestStateWithBusData(val a:Int, val b:Int, override val busData:PMap<String,Any> = emptyBusData()): StateWithBusData {
+data class TestStateWithBusData(val a:Int, val b:Int, override val busData:PMap<String,Any> = busDataEmpty()): StateWithBusData {
     override fun copyWithNewBusData(newBusData: PMap<String, Any>) = copy(busData=newBusData)
 }
 data class TestStateWithoutBusData(val a:Int,val b:Int)
