@@ -57,13 +57,13 @@ inline fun <reified BusDataType :Any> BusStore<out StateWithBusData>.postBusData
     dispatch(ActionSendBusData(busDataKey<BusDataType>(key),data))
 }
 
-inline fun <reified BusDataType :Any> Store<out StateWithBusData>.postBusData(data: BusDataType, key:String?=null) {
+inline fun <reified BusDataType :Any> Store<out Any>.postBusData(data: BusDataType, key:String?=null) {
     if(this is MultiStore)
         (this as MultiStore).postBusData(data,key)
     else
         (this as? BusStore<*>)?.postBusData(data,key)
 }
-inline fun <reified BusDataType :Any> Reduks<out StateWithBusData>.postBusData(data: BusDataType, key:String?=null) {
+inline fun <reified BusDataType :Any> Reduks<out Any>.postBusData(data: BusDataType, key:String?=null) {
     store.postBusData(data,store.busDataKey<BusDataType>(key))
 }
 
