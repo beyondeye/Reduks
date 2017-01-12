@@ -41,20 +41,18 @@ internal fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
         }
     }
 }
-internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
+internal object NullData
+internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType?) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
     val selector = SelectorBuilder<S>()
-    var lastBusData=WeakReference<BusDataType>(null) //NO need to keep a strong reference here
-    val busDataSel = selector.withField { busData }.compute { bd ->
-        @Suppress("UNCHECKED_CAST") Opt(bd[key] as BusDataType?) }
+    val busDataSel = selector.withSingleField { busData[key] ?: NullData }
     StoreSubscriberFn {
         val newState = store.state
-        busDataSel.onChangeIn(newState) { optNewBusData->
-            optNewBusData.it?.let { newBusData ->
-                if(newBusData!==lastBusData.get()) { //unfortunately, selectors alone cannot catch change of busData but no change to a specific key TODO try to think of a better solution
-                    fn(newBusData)
-                    lastBusData=WeakReference(newBusData)
-                }
-            }
+        busDataSel.onChangeIn(newState) { optNewBusData ->
+            val busDataVal = if (optNewBusData is NullData)
+                null
+            else
+                @Suppress("UNCHECKED_CAST") (optNewBusData as? BusDataType)
+            fn(busDataVal)
         }
     }
 }

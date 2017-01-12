@@ -24,7 +24,7 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
     /**
      * this function name has _busstore suffix for avoid clash with Store.addBusDataHandler in function inlining
      */
-    fun <BusDataType> addBusDataHandler_busstore(key:String, fn: (bd: BusDataType) -> Unit): StoreSubscription {
+    fun <BusDataType> addBusDataHandler_busstore(key:String, fn: (bd: BusDataType?) -> Unit): StoreSubscription {
         val sub=wrappedStore.subscribe(getStoreSubscriberBuilderForBusDataHandler<S,BusDataType>(key,fn))
         busDataHandlerSubscriptions.add(sub!!)
         return sub

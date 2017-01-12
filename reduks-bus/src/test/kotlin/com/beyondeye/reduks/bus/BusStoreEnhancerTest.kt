@@ -52,9 +52,12 @@ class BusStoreEnhancerTest {
         val creator= SimpleStore.Creator<TestStateWithBusData>()
         val store = creator.create(testReducer, initialTestState,BusStoreEnhancer())
         var iDataReceivedCount:Int=0
+        var iHandlerCalls=0
         var fDataReceivedCount:Int=0
+        var fHandlerCalls=0
         store.addBusDataHandler { intVal:Int? ->
             val receivedOnBus=intVal
+            ++iHandlerCalls
             if(receivedOnBus!=null) {
                 iDataReceivedCount++
                 assertEquals(receivedOnBus,1)
@@ -62,6 +65,7 @@ class BusStoreEnhancerTest {
         }
         store.addBusDataHandler { floatVal:Float? ->
             val receivedOnBus=floatVal
+            ++fHandlerCalls
             if(receivedOnBus!=null) {
                 fDataReceivedCount++
                 assertEquals(receivedOnBus,2.0F)
@@ -82,13 +86,21 @@ class BusStoreEnhancerTest {
         store.postBusData(2.0F)
         //---then
         assert(fDataReceivedCount==1)
+        assert(fHandlerCalls==1)
         assert(iDataReceivedCount==0)
+        assert(iHandlerCalls==1) //!!!with the first post on the bus, all bus data handlers are called with null TODO: document this
 
         //---when
+        iHandlerCalls=0
+        iDataReceivedCount=0
+        fHandlerCalls=0
+        fDataReceivedCount=0
         store.postBusData(1)
         //---then
+        assert(iHandlerCalls==1)
         assert(iDataReceivedCount==1)
-        assert(fDataReceivedCount==1)
+        assert(fHandlerCalls==0)
+        assert(fDataReceivedCount==0)
 
         //---when
         val ibusData:Int?=store.busData()
@@ -103,40 +115,60 @@ class BusStoreEnhancerTest {
         assertEquals(fbusData ,2.0f)
 
         //---given
+        fHandlerCalls=0
         fDataReceivedCount=0
+        iHandlerCalls=0
         iDataReceivedCount=0
         //---when
         //check that normal actions goes through as expected
         store.dispatch(Action.SetA(1))
         //---then
         assertTrue(store.state.a==1)
+        assert(iHandlerCalls==0)
         assert(iDataReceivedCount==0)
+        assert(fHandlerCalls==0)
         assert(fDataReceivedCount==0)
 
 
         //---when
+        fHandlerCalls=0
+        iHandlerCalls=0
         store.clearBusData<Int>()
         //---then
+        assert(iHandlerCalls==1) //data cleared message received
         assert(iDataReceivedCount==0)
+        assert(fHandlerCalls==0)
         assert(fDataReceivedCount==0)
         assertNull(store.busData<Int>())
         //---when
+        fHandlerCalls=0
+        iHandlerCalls=0
         store.clearBusData<Float>()
         //---then
+        assert(iHandlerCalls==0)
         assert(iDataReceivedCount==0)
+        assert(fHandlerCalls==1) //data cleared message received
         assert(fDataReceivedCount==0)
         assertNull(store.busData<Float>())
 
         //---when
+        fHandlerCalls=0
+        iHandlerCalls=0
         store.removeAllBusDataHandlers()
         store.postBusData(11)
         //---then
+        assert(fHandlerCalls==0)
         assert(fDataReceivedCount==0)
+        assert(iHandlerCalls==0)
         assert(iDataReceivedCount==0)
         //---when
+        fHandlerCalls=0
+        iHandlerCalls=0
         store.postBusData(22.0f)
         //---then
+        assert(fHandlerCalls==0)
         assert(fDataReceivedCount==0)
+        assert(iHandlerCalls==0)
         assert(iDataReceivedCount==0)
     }
 
