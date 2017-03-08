@@ -9,7 +9,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath "com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+"
         classpath "com.github.dcendents:android-maven-gradle-plugin:$dcendents_maven_plugin_version"
 
@@ -27,9 +27,9 @@ allprojects {
         GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
         sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
         targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
-        compileSdkVersion_ = 24
+        compileSdkVersion_ = 25
         minSdkVersion_ = 15 //Integer
-        targetSdkVersion_ = 24 //Integer
+        targetSdkVersion_ = 25 //Integer
         extraConfVersion = '2.2.+'
     }
 }
