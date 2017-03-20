@@ -56,7 +56,7 @@ class LoginFragment : Fragment() {
 class LoginDataDisplayFragment : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        reduks()?.addBusDataHandlerWithTag(tag) { lfr:LoginFragmentResult? ->
+        reduks()?.addBusDataHandler(tag) { lfr:LoginFragmentResult? ->
             if(lfr!=null) {
                 print("login with username=${lfr.username} and password=${lfr.password} and ")
             }
