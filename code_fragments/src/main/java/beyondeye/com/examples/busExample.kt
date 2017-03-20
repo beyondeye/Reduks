@@ -11,8 +11,8 @@ import com.beyondeye.reduksAndroid.activity.ReduksActivity
  * Created by daely on 10/6/2016.
  */
 
-data class AState(val a:Int, val b:Int, override val busData: PMap<String, Any> = emptyBusData()) :StateWithBusData {
-    override fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData = copy(busData=newBusData)
+data class AState(val a:Int, val b:Int, override val busData: BusData = BusData.empty) :StateWithBusData {
+    override fun copyWithNewBusData(newBusData: BusData): StateWithBusData = copy(busData=newBusData)
 }
 val initialState=AState(0,0)
 class Action

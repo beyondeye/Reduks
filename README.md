@@ -431,9 +431,9 @@ So why not implementing a kind of event bus on top of Reduks? This is what the [
  In order to enable support for reduks bus,  your Reduks state class need to implement the [StateWithBusData interface](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/StateWithBusData.kt):
 ```kotlin
 data class State(val a:Int, val b:Int, 
-    override val busData: PMap<String, Any> = emptyBusData()) :StateWithBusData 
+    override val busData: BusData = BusData.empty) :StateWithBusData
 {
-    override fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData = copy(busData=newBusData)
+    override fun copyWithNewBusData(newBusData: BusData): StateWithBusData = copy(busData=newBusData)
 }
 ```
 Basically we add a ```busData``` field (that is a persistent map) and we define a method that Reduks will use to create a new state with an updated version

@@ -1,8 +1,5 @@
 package com.beyondeye.reduks.bus
 
-import com.beyondeye.reduks.pcollections.HashTreePMap
-import com.beyondeye.reduks.pcollections.PMap
-
 /**
  * base interface for reduks State class that can handle bus data
  * NOTE: it would be much easier to to have StateWithBusData be an abstract Class, so that
@@ -14,17 +11,16 @@ import com.beyondeye.reduks.pcollections.PMap
 interface StateWithBusData {
     /**
      * a persistent (immutable) map that contains a key for each bus data: Simply override it with
-     * override val busData:PMap<String,Any> = busDataEmpty()
+     * override val busData:BusData = BusData.empty
      */
-    val busData: PMap<String, Any>
+    val busData: BusData
 
     /**
      * a method that returns a copy of the state, wuth the busData map substituted with the one
      * in [newBusData].If your State class is defined as a data class, simply implement this as
-     *     override fun copyWithNewBusData(newBusData: PMap<String, Any>) = copy(busData=newBusData)
+     *     override fun copyWithNewBusData(newBusData: BusData) = copy(busData=newBusData)
      */
-    fun copyWithNewBusData(newBusData: PMap<String, Any>): StateWithBusData
+    fun copyWithNewBusData(newBusData: BusData): StateWithBusData
 }
 
-fun busDataEmpty():PMap<String,Any> =  HashTreePMap.empty()
 
