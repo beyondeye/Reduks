@@ -22,8 +22,9 @@ interface SingleModuleReduksActivity<S> {
     )
     /**
      * module id used for reduks
+     * by default defined by the activity class name
      */
-    fun activityReduksContext(): ReduksContext
+    fun activityReduksContext(): ReduksContext=ReduksContext(this.javaClass.simpleName)
     /**
      * return the initial state
      */
