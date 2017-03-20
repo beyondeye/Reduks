@@ -4,7 +4,7 @@ package com.beyondeye.reduks.modules
  * context for an action, attached to an action when using Reduks modules
  * Created by daely on 7/31/2016.
  */
-class ReduksContext(val moduleId:String) {
+open class ReduksContext(val moduleId:String) {
     /**
      * check if the context is valid
      */
@@ -43,6 +43,13 @@ class ReduksContext(val moduleId:String) {
          * default ReduksContext for some state type is the state class simple name
          */
         inline fun<reified S:Any> default() =ReduksContext(defaultModuleId<S>())
+        /**
+         * default ReduksContext for some state type is the state class simple name and
+         * the action type for that context
+         *
+         */
+        inline fun<reified S:Any,ActionType:Any> defaultTyped() =ReduksContextTyped<ActionType>(defaultModuleId<S>())
+
         inline fun<reified S:Any> defaultModuleId() =S::class.java.simpleName
     }
 }
