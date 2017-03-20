@@ -191,7 +191,7 @@ class BusStoreEnhancerTest {
             }
         }
         //test Reduks.addBusDataHandler extension function
-        mr.addBusDataHandlerWithTag("testtag") { floatVal:Float? ->
+        mr.addBusDataHandler("testtag") { floatVal:Float? ->
             val receivedOnBus=floatVal
             if(receivedOnBus!=null) {
                 fDataReceivedCount++
@@ -275,14 +275,14 @@ class BusStoreEnhancerTest {
         //-------THEN
         assert(busStore!=null)
         //------AND WHEN
-        mr.addBusDataHandlerWithTag<BusDataA>("atag") {
+        mr.addBusDataHandler<BusDataA>("atag") {
             throw NotImplementedError("Dummy handler!")
         }
         //------THEN
         assert((mr.busStoreSubscriptionsByTag.size==1))
         assert(busStore!!.nSubscriptions==1)
         //------AND WHEN
-        mr.addBusDataHandlerWithTag<BusDataB>("btag") {
+        mr.addBusDataHandler<BusDataB>("btag") {
             throw NotImplementedError("Dummy handler!")
         }
         //------THEN
@@ -307,10 +307,10 @@ class BusStoreEnhancerTest {
         val multidef=ReduksModule.MultiDef(mdef1, mdef2)
         val mr = ReduksModule(multidef)
         //----AND GIVEN
-        mr.addBusDataHandlerWithTag<BusDataA>("atag") {
+        mr.addBusDataHandler<BusDataA>("atag") {
             throw NotImplementedError("Dummy handler!")
         }
-        mr.addBusDataHandlerWithTag<BusDataB>("btag") {
+        mr.addBusDataHandler<BusDataB>("btag") {
             throw NotImplementedError("Dummy handler!")
         }
         val busSubscriptionsA=mr.busStoreSubscriptionsByTag["atag"]

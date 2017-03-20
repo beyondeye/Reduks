@@ -120,12 +120,16 @@ inline fun <reified BusDataType:Any> Store<out Any>.addBusDataHandler(key:String
     return multi?: (this as? BusStore<*>)?.addBusDataHandler_busstore<BusDataType>(busDataKey<BusDataType>(key),fn)
 }
 
-
 /**
- * this function is private for avoiding the case where user mistakingly use this function instead of addBusDataHandlerWithTag
+ * [addBusDataHandler] with option to automatically clear bus data after handling
  */
-private inline fun <reified BusDataType:Any> Reduks<out Any>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription?{
-   return store.addBusDataHandler(key,fn)
+inline fun <reified BusDataType:Any> Reduks<out Any>.AddBusDataHandler(subscriptionTag:String,clearBusDataAfterHandling:Boolean,key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription? {
+    val fn_ = if (!clearBusDataAfterHandling) fn else
+        { bd ->
+            fn(bd)
+            if(bd!=null) clearBusData<BusDataType>(key)
+        }
+    return addBusDataHandler(subscriptionTag,key,fn_)
 }
 
 /**
@@ -134,7 +138,7 @@ private inline fun <reified BusDataType:Any> Reduks<out Any>.addBusDataHandler(k
  * Note also that while [key] is used for linking the handler to some specific BusDataType to be handled, [subscriptionTag] is used for grouping
  * together handlers so that it is possible to remove all at once with Reduks.removeBusDataHandlersWithTag
  */
-inline fun <reified BusDataType:Any> Reduks<out Any>. addBusDataHandlerWithTag(subscriptionTag:String,key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription?
+inline fun <reified BusDataType:Any> Reduks<out Any>. addBusDataHandler(subscriptionTag:String,key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription?
 {
     val handler=store.addBusDataHandler(key,fn)
     if(handler!=null) {
