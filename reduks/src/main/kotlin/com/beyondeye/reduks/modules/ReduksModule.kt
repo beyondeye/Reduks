@@ -31,7 +31,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * factory method for store
              */
-            val  storeCreator:StoreCreator<State>,
+            val storeCreator:StoreCreator<State>,
             /**
              * return the initial state
              */
@@ -39,7 +39,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             /**
              * return the initial action to dispatch to the Store
              */
-            val startAction: Any,
+            val startAction: Any?,
             /**
              * return the state reducer
              */
@@ -65,9 +65,11 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
             val storeSubscription = store.subscribe(storeSubscriber)
             storeSubscriptionsByTag.put(Reduks.TagMainSubscription,storeSubscription)
         }
-        //split multiaction to list if required
-        val actionList: List<Any> = MultiActionWithContext.toActionList(moduleDef.startAction)
-        actionList.forEach { store.dispatch(it) }
+        moduleDef.startAction?.let { sa->
+            //split multiaction to list if required
+            val actionList: List<Any?> = MultiActionWithContext.toActionList(sa)
+            actionList.forEach { if(it!=null) store.dispatch(it) }
+        }
     }
 
 
@@ -88,14 +90,15 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                     ctx = mctx,
                     storeCreator = MultiStore2.Factory<S1, S2>(
                             m1.ctx, m1.storeCreator, m1.subscriberBuilder,
-                            m2.ctx, m2.storeCreator,m2.subscriberBuilder),
+                            m2.ctx, m2.storeCreator, m2.subscriberBuilder),
                     initialState = MultiState2(m1.initialState, m2.initialState),
                     startAction = MultiActionWithContext(
-                            ActionWithContext(m1.startAction, m1.ctx),
-                            ActionWithContext(m2.startAction, m2.ctx)),
+                            m1.startAction?.let { ActionWithContext(it, m1.ctx) },
+                            m2.startAction?.let { ActionWithContext(it, m2.ctx) }
+                    ),
                     stateReducer = MultiReducer2<S1, S2>(m1, m2),
-                    subscriberBuilder =  null
-                    )
+                    subscriberBuilder = null
+            )
         }
         //--------------------------------
         fun <S1 : Any, S2 : Any, S3 : Any> MultiDef(      m1: ReduksModule.Def<S1>,
@@ -110,9 +113,10 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             m3.ctx,m3.storeCreator,m3.subscriberBuilder),
                     initialState = MultiState3(m1.initialState, m2.initialState, m3.initialState),
                     startAction = MultiActionWithContext(
-                            ActionWithContext(m1.startAction, m1.ctx),
-                            ActionWithContext(m2.startAction, m2.ctx),
-                            ActionWithContext(m3.startAction, m3.ctx)),
+                            m1.startAction?.let { ActionWithContext(it, m1.ctx) },
+                            m2.startAction?.let { ActionWithContext(it, m2.ctx) },
+                            m3.startAction?.let { ActionWithContext(it, m3.ctx) }
+                    ),
                     stateReducer = MultiReducer3<S1, S2, S3>(m1, m2, m3),
                     subscriberBuilder = null
                     )
@@ -132,10 +136,11 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             m4.ctx,m4.storeCreator,m4.subscriberBuilder),
                     initialState = MultiState4(m1.initialState, m2.initialState, m3.initialState, m4.initialState),
                     startAction = MultiActionWithContext(
-                            ActionWithContext(m1.startAction, m1.ctx),
-                            ActionWithContext(m2.startAction, m2.ctx),
-                            ActionWithContext(m3.startAction, m3.ctx),
-                            ActionWithContext(m4.startAction, m4.ctx)),
+                            m1.startAction?.let { ActionWithContext(it, m1.ctx) },
+                            m2.startAction?.let { ActionWithContext(it, m2.ctx) },
+                            m3.startAction?.let { ActionWithContext(it, m3.ctx) },
+                            m4.startAction?.let { ActionWithContext(it, m4.ctx) }
+                    ),
                     stateReducer = MultiReducer4<S1, S2, S3, S4>(m1, m2, m3, m4),
                     subscriberBuilder = null )
         }
@@ -157,11 +162,12 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
                             m5.ctx, m5.storeCreator,m5.subscriberBuilder),
                     initialState = MultiState5(m1.initialState, m2.initialState, m3.initialState, m4.initialState, m5.initialState),
                     startAction = MultiActionWithContext(
-                            ActionWithContext(m1.startAction, m1.ctx),
-                            ActionWithContext(m2.startAction, m2.ctx),
-                            ActionWithContext(m3.startAction, m3.ctx),
-                            ActionWithContext(m4.startAction, m4.ctx),
-                            ActionWithContext(m5.startAction, m5.ctx)),
+                            m1.startAction?.let { ActionWithContext(it, m1.ctx) },
+                            m2.startAction?.let { ActionWithContext(it, m2.ctx) },
+                            m3.startAction?.let { ActionWithContext(it, m3.ctx) },
+                            m4.startAction?.let { ActionWithContext(it, m4.ctx) },
+                            m5.startAction?.let { ActionWithContext(it, m5.ctx) }
+                    ),
                     stateReducer = MultiReducer5<S1, S2, S3, S4, S5>(m1, m2, m3, m4, m5),
                     subscriberBuilder = null )
         }

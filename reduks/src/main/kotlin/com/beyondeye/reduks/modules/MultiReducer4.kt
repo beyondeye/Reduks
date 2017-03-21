@@ -20,7 +20,7 @@ class MultiReducer4<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(
     @JvmField val ctx3 = m3.ctx
     @JvmField val ctx4 = m4.ctx
     override fun reduce(s: MultiState4<S1, S2, S3, S4>, a: Any): MultiState4<S1, S2, S3, S4> {
-        val actionList: List<Any> = MultiActionWithContext.toActionList(a)
+        val actionList = MultiActionWithContext.toActionList(a)
         var newS = s
         actionList.forEach {
             if (a is ActionWithContext) {

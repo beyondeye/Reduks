@@ -32,8 +32,9 @@ interface SingleModuleReduksActivity<S> {
 
     /**
      * return the initial action to dispatch to the Store in onCreate
+     * or null, if no initial action need to be dispatched
      */
-    fun activityStartAction(): Any=INIT()
+    fun activityStartAction(): Any?=INIT()
 
     /**
      * return the activity state reducer

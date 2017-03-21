@@ -6,11 +6,11 @@ import com.beyondeye.reduks.Action
  * don't expose this class! it is used only for implementation of MultiModuleDef
  * Created by daely on 8/3/2016.
  */
-internal class MultiActionWithContext(vararg a:ActionWithContext) : Action {
-    val actionList:List<ActionWithContext> = listOf(*a)
+internal class MultiActionWithContext(vararg a:ActionWithContext?) : Action {
+    val actionList:List<ActionWithContext?> = listOf(*a)
     companion object {
-        internal fun toActionList(a: Any): List<Any> {
-            val actionList: List<Any> =
+        internal fun toActionList(a: Any): List<Any?> {
+            val actionList: List<Any?> =
                     if (a is MultiActionWithContext)
                         a.actionList
                     else

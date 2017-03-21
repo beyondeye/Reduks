@@ -13,7 +13,7 @@ class MultiReducer2<S1:Any,S2:Any>(m1: ReduksModule.Def<S1>,
     @JvmField val ctx1 = m1.ctx
     @JvmField val ctx2 = m2.ctx
     override fun reduce(s: MultiState2<S1, S2>, a: Any): MultiState2<S1, S2> {
-        val actionList: List<Any> = MultiActionWithContext.toActionList(a)
+        val actionList= MultiActionWithContext.toActionList(a)
         var newS = s
         actionList.forEach {
             if (a is ActionWithContext) {
