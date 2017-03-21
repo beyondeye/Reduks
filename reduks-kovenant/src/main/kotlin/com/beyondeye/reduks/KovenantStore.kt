@@ -1,15 +1,13 @@
 package com.beyondeye.reduks
 
+import android.util.Log
 import com.beyondeye.reduks.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import nl.komponents.kovenant.*
 import nl.komponents.kovenant.android.androidUiDispatcher
-import nl.komponents.kovenant.ui.promiseOnUi
 
-infix fun <V, R> Promise<V, Exception>.thenUi(bind: (V) -> R): Promise<R, Exception> {
-    return this.then { promiseOnUi { bind(it) }.get() }
-}
+
 
 /**
  * Store that use kovenant promises for synchronizing action dispatches and notification to store subscribers
@@ -60,19 +58,34 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
             }
             if (observeOnUiThread) {
                 curStatePromise?.then(defaultContext) { startState ->
-                    val newState = reducer.reduce(startState, action) //return newState
+//                    Log.i("rdks","bbefore processing action $action")
+                    var newState=startState
+                    try {
+                        newState = reducer.reduce(startState, action) //return newState
+                    } catch (e:Exception) {
+                        Log.w("rdks","exception in reducer while processing $action: ${e.toString()}")
+                    }
                     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
                     // then subscribers will be notified sequentially of state changes in the correct
                     // order even if we resolve the newState promise here.
                     // If we would wait to resolve the newstate promise  after subscriber notification we risk to cause deadlocks
                     deferredNextState.resolve(newState)
+//                    Log.i("rdks","aafter processing action $action")
                     newState
                 }?.then(observeContext) { newState ->
                     notifySubscribers()
                 }
             } else {
                 curStatePromise?.then(defaultContext) { startState ->
-                    reducer.reduce(startState, action) //return newState
+//                    Log.i("rdks","bbefore processing action $action")
+                    var newState=startState
+                    try {
+                        newState=reducer.reduce(startState, action) //return newState
+                    } catch (e:Exception) {
+                        Log.w("rdks","exception in reducer while processing $action: ${e.toString()}")
+                    }
+//                    Log.i("rdks","aafter processing action $action")
+                    newState
                 }?.then(observeContext) { newState ->
                     deferredNextState.resolve(newState) //subscriber would not be able to access the newState if we not resolve the promise
                     notifySubscribers()
