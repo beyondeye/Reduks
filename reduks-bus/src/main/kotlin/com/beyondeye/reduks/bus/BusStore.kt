@@ -10,7 +10,7 @@ import com.beyondeye.reduks.*
  */
 class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer<S>) : Store<S> {
     init {
-        wrappedStore.replaceReducer(combineReducers(reducer, getBusReducer()))
+        wrappedStore.replaceReducer(combineReducers(reducer, busDataReducer()))
     }
     override val state: S get() = wrappedStore.state
     override var dispatch: (Any) -> Any
@@ -37,7 +37,7 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
         return wrappedStore.subscribe(storeSubscriber)
     }
     override fun replaceReducer(reducer: Reducer<S>) {
-        wrappedStore.replaceReducer(combineReducers(reducer, getBusReducer()))
+        wrappedStore.replaceReducer(combineReducers(reducer, busDataReducer()))
     }
 }
 val <S:StateWithBusData> BusStore<S>.nSubscriptions:Int get()=busDataHandlerSubscriptions.size

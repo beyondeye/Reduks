@@ -25,22 +25,6 @@ internal fun StateWithBusData.newStateWithRemovedBusData(key: String): StateWith
 }
 
 
-
-internal fun <S : StateWithBusData> getBusReducer(): Reducer<S> {
-    return ReducerFn { s, a ->
-        when (a) {
-            is ActionSendBusData -> {
-                @Suppress("UNCHECKED_CAST")
-                s.newStateWithUpdatedBusData(a.key,a.newData) as S
-            }
-            is ActionClearBusData -> {
-                @Suppress("UNCHECKED_CAST")
-                s.newStateWithRemovedBusData(a.key) as S
-            }
-            else -> s
-        }
-    }
-}
 internal object NullData
 internal fun <S : StateWithBusData, BusDataType> getStoreSubscriberBuilderForBusDataHandler(key: String, fn: (bd: BusDataType?) -> Unit) = StoreSubscriberBuilderFn<S> { store ->
     val selector = SelectorBuilder<S>()
