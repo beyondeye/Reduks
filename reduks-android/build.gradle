@@ -1,5 +1,6 @@
 dependencies {
     compile project(':reduks-core')
+    compile project(':reduks-bus')
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
     provided "com.android.support:appcompat-v7:$support_version"
 }
