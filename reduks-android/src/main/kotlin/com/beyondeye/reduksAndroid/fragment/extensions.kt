@@ -105,7 +105,7 @@ fun Fragment.reduksUnsubscribe(setFragmentStatusInactive:Boolean) {
     if(setFragmentStatusInactive) reduks?.setFragmentStatus(tag, FragmentStatus.fragmentStatusInactive)
     reduks?.apply {
        unsubscribe(tag)
-       removeBusDataHandlersWithTag(tag)
+       removeBusDataHandlers(tag)
     }
 }
 
