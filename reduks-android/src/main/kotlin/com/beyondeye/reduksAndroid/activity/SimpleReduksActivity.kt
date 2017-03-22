@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.activity
+package com.beyondeye.reduksAndroid.activity
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -22,7 +22,7 @@ abstract class SimpleReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
         reduks=initReduks()
     }
 
-    override fun <T> storeCreator(): StoreCreator<T> =SimpleStore.Creator<T>()
+    override fun <T> storeCreator(): StoreCreator<T> = SimpleStore.Creator<T>()
 
     //override for making this function visible to inheritors
     override fun onStop() {
