@@ -18,7 +18,9 @@
 // see https://kotlinlang.org/docs/tutorials/command-line.html
 //To run a script, we just pass the -script option to the compiler with the corresponding script file.
 //$ kotlinc -script list_folders.kts <path_to_folder_to_inspect>
+//
 
+import Knit.Consts.API_REF_REGEX
 import Knit.Consts.ARBITRARY_TIME_PREDICATE
 import Knit.Consts.CLEAR_DIRECTIVE
 import Knit.Consts.CODE_END
@@ -77,15 +79,18 @@ object Consts {
     const val FLEXIBLE_THREAD_PREDICATE = "FLEXIBLE_THREAD"
     const val LINES_START_UNORDERED_PREDICATE = "LINES_START_UNORDERED"
     const val LINES_START_PREDICATE = "LINES_START"
+
+    val API_REF_REGEX = Regex("(^|[ \\]])\\[([A-Za-z0-9_.]+)\\]($|[^\\[\\(])")
 }
 
-val API_REF_REGEX = Regex("(^|[ \\]])\\[([A-Za-z0-9_.]+)\\]($|[^\\[\\(])")
-
-    if (args.isEmpty()) {
-        println("Usage: Knit <markdown-files>")
-        exitProcess(0)
-    }
-    args.forEach{knit(it)}
+/**
+ * Here is start the script code
+ */
+if (args.isEmpty()) {
+    println("Usage: Knit <markdown-files>")
+    exitProcess(0)
+}
+args.forEach { knit(it) }
 
 fun knit(markdownFileName: String) {
     println("*** Reading $markdownFileName")
@@ -124,7 +129,7 @@ fun knit(markdownFileName: String) {
                 KNIT_DIRECTIVE -> {
                     requireSingleLine(directive)
                     require(!directive.param.isEmpty()) { "$KNIT_DIRECTIVE directive must include regex parameter" }
-                    require(knitRegex == null) { "Only one KNIT directive is supported"}
+                    require(knitRegex == null) { "Only one KNIT directive is supported" }
                     knitRegex = Regex("\\((" + directive.param + ")\\)")
                     continue@mainLoop
                 }
@@ -157,12 +162,12 @@ fun knit(markdownFileName: String) {
                     readUntil(DIRECTIVE_END).forEach { testOutLines += it }
                 }
                 TEST_DIRECTIVE -> {
-                    require(lastPgk != null) { "'$PACKAGE_PREFIX' prefix was not found in emitted code"}
+                    require(lastPgk != null) { "'$PACKAGE_PREFIX' prefix was not found in emitted code" }
                     require(testOut != null) { "$TEST_OUT_DIRECTIVE directive was not specified" }
                     var predicate = directive.param
                     if (testLines.isEmpty()) {
                         if (directive.singleLine) {
-                            require(!predicate.isEmpty()) { "$TEST_OUT_DIRECTIVE must be preceded by $TEST_START block or contain test predicate"}
+                            require(!predicate.isEmpty()) { "$TEST_OUT_DIRECTIVE must be preceded by $TEST_START block or contain test predicate" }
                         } else
                             testLines += readUntil(DIRECTIVE_END)
                     } else {
@@ -223,7 +228,7 @@ fun knit(markdownFileName: String) {
             knitRegex?.find(inLine)?.let { knitMatch ->
                 val fileName = knitMatch.groups[1]!!.value
                 val file = File(markdownFile.parentFile, fileName)
-                require(files.add(file)) { "Duplicate file: $file"}
+                require(files.add(file)) { "Duplicate file: $file" }
                 println("Knitting $file ...")
                 val outLines = arrayListOf<String>()
                 for (include in includes) {
@@ -287,7 +292,7 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
         LINES_START_UNORDERED_PREDICATE -> makeTestLines(testOutLines, prefix, "verifyLinesStartUnordered", test)
         LINES_START_PREDICATE -> makeTestLines(testOutLines, prefix, "verifyLinesStart", test)
         else -> {
-            testOutLines += prefix +  ".also { lines ->"
+            testOutLines += prefix + ".also { lines ->"
             testOutLines += "            check($predicate)"
             testOutLines += "        }"
         }
@@ -295,7 +300,7 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
     testOutLines += "    }"
 }
 
- fun makeTestLines(testOutLines: MutableList<String>, prefix: String, method: String, test: List<String>) {
+fun makeTestLines(testOutLines: MutableList<String>, prefix: String, method: String, test: List<String>) {
     testOutLines += "$prefix.$method("
     for ((index, testLine) in test.withIndex()) {
         val commaOpt = if (index < test.size - 1) "," else ""
@@ -305,7 +310,7 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
     testOutLines += "        )"
 }
 
- fun makeReplacements(line: String, match: MatchResult): String {
+fun makeReplacements(line: String, match: MatchResult): String {
     var result = line
     for ((id, group) in match.groups.withIndex()) {
         if (group != null)
@@ -314,7 +319,7 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
     return result
 }
 
- fun flushTestOut(parentDir: File?, testOut: String?, testOutLines: MutableList<String>) {
+fun flushTestOut(parentDir: File?, testOut: String?, testOutLines: MutableList<String>) {
     if (testOut == null) return
     val file = File(parentDir, testOut)
     testOutLines += "}"
@@ -322,10 +327,10 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
     testOutLines.clear()
 }
 
- fun MarkdownTextReader.readUntil(marker: String): List<String> =
-    arrayListOf<String>().also { readUntilTo(marker, it) }
+fun MarkdownTextReader.readUntil(marker: String): List<String> =
+        arrayListOf<String>().also { readUntilTo(marker, it) }
 
- fun MarkdownTextReader.readUntilTo(marker: String, list: MutableList<String>) {
+fun MarkdownTextReader.readUntilTo(marker: String, list: MutableList<String>) {
     while (true) {
         val line = readLine() ?: break
         if (line.startsWith(marker)) break
@@ -333,13 +338,13 @@ fun makeTest(testOutLines: MutableList<String>, pgk: String, test: List<String>,
     }
 }
 
- inline fun <T> buildList(block: ArrayList<T>.() -> Unit): List<T> {
+inline fun <T> buildList(block: ArrayList<T>.() -> Unit): List<T> {
     val result = arrayListOf<T>()
     result.block()
     return result
 }
 
- fun requireSingleLine(directive: Directive) {
+fun requireSingleLine(directive: Directive) {
     require(directive.singleLine) { "${directive.name} directive must end on the same line with '$DIRECTIVE_END'" }
 }
 
@@ -348,9 +353,9 @@ fun makeSectionRef(name: String): String = name.replace(' ', '-').replace(".", "
 class Include(val regex: Regex, val lines: MutableList<String> = arrayListOf())
 
 class Directive(
-    val name: String,
-    val param: String,
-    val singleLine: Boolean
+        val name: String,
+        val param: String,
+        val singleLine: Boolean
 )
 
 fun directive(line: String): Directive? {
@@ -403,7 +408,7 @@ fun <T : LineNumberReader> File.withLineNumberReader(factory: (Reader) -> T, blo
 }
 
 fun File.withMarkdownTextReader(block: MarkdownTextReader.() -> Unit): MarkdownTextReader =
-    withLineNumberReader<MarkdownTextReader>(::MarkdownTextReader, block)
+        withLineNumberReader<MarkdownTextReader>(::MarkdownTextReader, block)
 
 fun writeLinesIfNeeded(file: File, outLines: List<String>) {
     val oldLines = try {
@@ -423,8 +428,8 @@ fun writeLines(file: File, lines: List<String>) {
 }
 
 data class ApiIndexKey(
-    val docsRoot: String,
-    val pkg: String
+        val docsRoot: String,
+        val pkg: String
 )
 
 val apiIndexCache: MutableMap<ApiIndexKey, Map<String, String>> = HashMap()
@@ -434,14 +439,14 @@ val INDEX_HTML = "/index.html"
 val INDEX_MD = "/index.md"
 
 fun loadApiIndex(
-    docsRoot: String,
-    path: String,
-    pkg: String,
-    namePrefix: String = ""
+        docsRoot: String,
+        path: String,
+        pkg: String,
+        namePrefix: String = ""
 ): Map<String, String> {
     val fileName = docsRoot + "/" + path + INDEX_MD
     val visited = mutableSetOf<String>()
-    val map = HashMap<String,String>()
+    val map = HashMap<String, String>()
     File(fileName).withLineNumberReader<LineNumberReader>(::LineNumberReader) {
         while (true) {
             val line = readLine() ?: break
@@ -463,10 +468,10 @@ fun loadApiIndex(
 }
 
 fun processApiIndex(
-    siteRoot: String,
-    docsRoot: String,
-    pkg: String,
-    remainingApiRefNames: MutableSet<String>
+        siteRoot: String,
+        docsRoot: String,
+        pkg: String,
+        remainingApiRefNames: MutableSet<String>
 ): List<String> {
     val key = ApiIndexKey(docsRoot, pkg)
     val map = apiIndexCache.getOrPut(key, {
