@@ -98,17 +98,17 @@ public final class JsonDiff2 {
         if (firstType == secondType) {
             switch (firstType) {
                 case NodeType.OBJECT:
-                    computeObject(unchangedValues, path, source, target);
+                    computeObject(unchangedValues, path, source.getAsJsonObject(), target.getAsJsonObject());
                     break;
                 case NodeType.ARRAY:
-                    computeArray(unchangedValues, path, source, target);
+                    computeArray(unchangedValues, path, source.getAsJsonArray(), target.getAsJsonArray());
                 default:
                 /* nothing */
             }
         }
     }
 
-    private static void computeArray(Map<JsonElement, List<Object>> unchangedValues, List<Object> path, JsonElement source, JsonElement target) {
+    private static void computeArray(Map<JsonElement, List<Object>> unchangedValues, List<Object> path, JsonArray source, JsonArray target) {
         final int size = Math.min(source.size(), target.size());
 
         for (int i = 0; i < size; i++) {
@@ -117,7 +117,7 @@ public final class JsonDiff2 {
         }
     }
 
-    private static void computeObject(Map<JsonElement, List<Object>> unchangedValues, List<Object> path, JsonElement source, JsonElement target) {
+    private static void computeObject(Map<JsonElement, List<Object>> unchangedValues, List<Object> path, JsonObject source, JsonObject target) {
         final Iterator<String> firstFields = source.fieldNames();
         while (firstFields.hasNext()) {
             String name = firstFields.next();
@@ -262,8 +262,8 @@ public final class JsonDiff2 {
 
     private static void generateDiffs(List<Diff2> diffs, List<Object> path, JsonObject source, JsonObject target) {
         if (!source.equals(target)) {
-            final NodeType sourceType = NodeType.getNodeType(source);
-            final NodeType targetType = NodeType.getNodeType(target);
+            final int sourceType = NodeType.getNodeType(source);
+            final int targetType = NodeType.getNodeType(target);
 
             if (sourceType == NodeType.ARRAY && targetType == NodeType.ARRAY) {
                 //both are arrays
