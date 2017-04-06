@@ -33,7 +33,7 @@ object JsonDiff2 {
     internal var consts = Constants()
 
 
-    @JvmStatic fun asJson(source: JsonElement, target: JsonElement): JsonElement {
+    @JvmStatic fun asJson(source: JsonElement, target: JsonElement): JsonArray {
         val diffs = ArrayList<Diff2>()
         val path = LinkedList<Any>()
         /*
