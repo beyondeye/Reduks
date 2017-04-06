@@ -19,7 +19,7 @@ package com.beyondeye.zjsonpatch
 
 import com.google.gson.*
 
-internal class ApplyProcessor(target: JsonElement) : JsonPatchProcessor {
+class ApplyProcessor(target: JsonElement) : JsonPatchProcessor {
 
     private var target: JsonElement
 
@@ -172,8 +172,8 @@ internal class ApplyProcessor(target: JsonElement) : JsonPatchProcessor {
         return getNode(target, pathToParent, 1)
     }
 
-    private fun getNode(ret: JsonElement, path: List<String>, pos: Int): JsonElement? {
-        var pos = pos
+    private fun getNode(ret: JsonElement, path: List<String>, pos_: Int): JsonElement? {
+        var pos = pos_
         if (pos >= path.size) {
             return ret
         }

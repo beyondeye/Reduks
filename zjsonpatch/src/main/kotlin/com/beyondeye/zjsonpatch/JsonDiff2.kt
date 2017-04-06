@@ -117,7 +117,8 @@ object JsonDiff2 {
      * all the core logic resides here only
      */
     private fun compactDiffs(diffs: MutableList<Diff2>) {
-        for (i in diffs.indices) {
+        var i=-1
+        while (++i <=diffs.size-1) {
             val diff1 = diffs[i]
 
             // if not remove OR add, move to next diff

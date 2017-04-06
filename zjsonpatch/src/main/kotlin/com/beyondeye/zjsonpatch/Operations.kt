@@ -34,10 +34,14 @@ internal open class Operations {
             TEST to TEST_name)
 
     fun opFromName(rfcName: String): Int {
-        return checkNotNull(OPS.get(rfcName.toLowerCase()), { "unknown / unsupported operation $rfcName" })
+        val res=OPS.get(rfcName.toLowerCase())
+        if(res==null) throw InvalidJsonPatchException("unknown / unsupported operation $rfcName")
+        return res
     }
 
     fun nameFromOp(operation: Int): String {
-        return checkNotNull(NAMES.get(operation), { "unknown / unsupported operation $operation" })
+        val res= NAMES.get(operation)
+        if(res==null) throw InvalidJsonPatchException("unknown / unsupported operation $operation")
+        return res
     }
 }
