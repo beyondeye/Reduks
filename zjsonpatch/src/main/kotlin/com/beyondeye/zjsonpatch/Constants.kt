@@ -6,7 +6,7 @@ package com.beyondeye.zjsonpatch
  * Date: 10/07/15
  * Time: 10:35 AM
  */
-internal open class Constants {
+open class Constants {
     open val OP = "op"
     open val VALUE = "value"
     open val PATH = "path"
