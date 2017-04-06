@@ -31,13 +31,13 @@ import java.util.List;
  * User: gopi.vishwakarma
  * Date: 31/07/14
  */
-public final class JsonPatch {
+public final class JsonPatch2 {
     static Operations op= new Operations();
     static Constants  consts = new Constants();
 
     private static final DecodePathFunction DECODE_PATH_FUNCTION = new DecodePathFunction();
 
-    private JsonPatch() {}
+    private JsonPatch2() {}
 
     private final static class DecodePathFunction implements Function<String, String> {
         @Override
@@ -53,8 +53,8 @@ public final class JsonPatch {
         return child;
     }
 
-    private static JsonElement getPatchAttrWithDefault(JsonElement jsonNode, String attr, JsonElement defaultValue) {
-        JsonElement child = jsonNode.getAsJsonObject().get(attr);
+    private static JsonElement getPatchAttrWithDefault(JsonObject jsonNode, String attr, JsonElement defaultValue) {
+        JsonElement child = jsonNode.get(attr);
         if (child == null)
             return defaultValue;
         else
@@ -70,7 +70,7 @@ public final class JsonPatch {
         while (operations.hasNext()) {
             JsonElement jsonNode = operations.next();
             if (!jsonNode.isJsonObject()) throw new InvalidJsonPatchException("Invalid JSON Patch payload (not an object)");
-            int operation = Operations.fromRfcName(getPatchAttr(jsonNode.getAsJsonObject(), consts.OP).toString().replaceAll("\"", ""));
+            int operation = op.opFromName(getPatchAttr(jsonNode.getAsJsonObject(), consts.OP).toString().replaceAll("\"", ""));
             List<String> path = getPath(getPatchAttr(jsonNode, consts.PATH));
 
             switch (operation) {
