@@ -1,4 +1,3 @@
-package com.beyondeye.zjsonpatch;
 /*
  * Copyright 2016 flipkart.com zjsonpatch.
  *
@@ -14,6 +13,9 @@ package com.beyondeye.zjsonpatch;
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+package com.beyondeye.zjsonpatch;
+
 import com.beyondeye.zjsonpatch.utils.GsonObjectMapper;
 import com.beyondeye.zjsonpatch.utils.IOUtils;
 import com.google.gson.JsonArray;
@@ -39,7 +41,7 @@ public class JsonDiffTest {
         String path = "/testdata/sample.json";
         InputStream resourceAsStream = JsonDiffTest.class.getResourceAsStream(path);
         String testData = IOUtils.toString(resourceAsStream, "UTF-8");
-        jsonNode =  objectMapper.readTree(testData).getAsJsonArray();
+        jsonNode = objectMapper.readTree(testData).getAsJsonArray();
     }
 
     @Test
@@ -52,7 +54,7 @@ public class JsonDiffTest {
             System.out.println(first);
             System.out.println(second);
 
-            JsonArray actualPatch = JsonDiff.asJson(first, second);
+            JsonElement actualPatch = JsonDiff.asJson(first, second);
 
 
             System.out.println(actualPatch);
@@ -70,7 +72,7 @@ public class JsonDiffTest {
             JsonElement first = TestDataGenerator.generate(random.nextInt(10));
             JsonElement second = TestDataGenerator.generate(random.nextInt(10));
 
-            JsonArray actualPatch = JsonDiff.asJson(first, second);
+            JsonElement actualPatch = JsonDiff.asJson(first, second);
             System.out.println("Test # " + i);
 
             System.out.println(first);

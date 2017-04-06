@@ -38,7 +38,7 @@ public class JsonDiffTest2 {
     @BeforeClass
     public static void beforeClass() throws IOException {
         String path = "/testdata/diff.json";
-        InputStream resourceAsStream = JsonDiffTest.class.getResourceAsStream(path);
+        InputStream resourceAsStream = JsonDiffTest2.class.getResourceAsStream(path);
         String testData = IOUtils.toString(resourceAsStream, "UTF-8");
         jsonNode = objectMapper.readTree(testData).getAsJsonArray();
     }
@@ -56,7 +56,7 @@ public class JsonDiffTest2 {
             System.out.println(second);
             System.out.println(patch);
 
-            JsonElement secondPrime = JsonPatch2.apply(patch, first);
+            JsonElement secondPrime = JsonPatch.apply(patch, first);
             System.out.println(secondPrime);
             Assert.assertThat(message, secondPrime, equalTo(second));
         }

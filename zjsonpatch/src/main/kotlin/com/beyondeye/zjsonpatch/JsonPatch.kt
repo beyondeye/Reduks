@@ -1,195 +1,118 @@
+/*
+ * Copyright 2016 flipkart.com zjsonpatch.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
 package com.beyondeye.zjsonpatch
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
-import com.google.gson.publicDeepCopy
+
+import java.util.EnumSet
 
 /**
  * User: gopi.vishwakarma
  * Date: 31/07/14
-
- * * use Gson instead of Jackson, converted to Kotlin and some clean up
- * Dario Elyasy 22/7/2016
  */
 object JsonPatch {
-    internal val op= Operations()
-    internal val consts= Constants()
-    @JvmStatic fun apply(patch: JsonArray, source: JsonElement): JsonElement {
-        val operations = patch.iterator()
-        var ret = source.publicDeepCopy()
+    internal var op = Operations()
+    internal var consts = Constants()
+
+    private fun getPatchAttr(jsonNode: JsonObject, attr: String): JsonElement {
+        val child = jsonNode.get(attr) ?: throw InvalidJsonPatchException("Invalid JSON Patch payload (missing '$attr' field)")
+        return child
+    }
+
+    private fun getPatchAttrWithDefault(jsonNode: JsonObject, attr: String, defaultValue: JsonElement): JsonElement {
+        val child = jsonNode.get(attr)
+        if (child == null)
+            return defaultValue
+        else
+            return child
+    }
+
+    @Throws(InvalidJsonPatchException::class)
+    private fun process(patch: JsonElement, processor: JsonPatchProcessor, flags: EnumSet<CompatibilityFlags>) {
+
+        if (!patch.isJsonArray)
+            throw InvalidJsonPatchException("Invalid JSON Patch payload (not an array)")
+        val operations = patch.asJsonArray.iterator()
         while (operations.hasNext()) {
-            val jsonNode = operations.next() as JsonObject
-            val operation = op.opFromName(jsonNode.get(consts.OP).toString().replace("\"".toRegex(), ""))
-            val path = getPath(jsonNode.get(consts.PATH))
-            var fromPath: List<String>? = null
-            if (op.MOVE == operation) {
-                fromPath = getPath(jsonNode.get(consts.FROM))
-            }
-            var value: JsonElement? = null
-            if (op.REMOVE != operation && op.MOVE != operation) {
-                value = jsonNode.get(consts.VALUE)
-            }
+            val jsonNode_ = operations.next()
+            if (!jsonNode_.isJsonObject) throw InvalidJsonPatchException("Invalid JSON Patch payload (not an object)")
+            val jsonNode = jsonNode_.asJsonObject
+            val operation = op.opFromName(getPatchAttr(jsonNode.asJsonObject, consts.OP).toString().replace("\"".toRegex(), ""))
+            val path = getPath(getPatchAttr(jsonNode, consts.PATH))
 
             when (operation) {
-                op.REMOVE -> remove(ret, path)
-                op.REPLACE -> ret = replace(ret, path, value!!)
-                op.ADD -> ret = add(ret, path, value!!)
-                op.MOVE -> ret = move(ret, fromPath!!, path)
-            }
-        }
-        return ret
-    }
-
-    private fun move(node: JsonElement, fromPath: List<String>, toPath: List<String>): JsonElement {
-        val parentNode = getParentNode(node, fromPath)
-        val field = fromPath[fromPath.size - 1].replace("\"".toRegex(), "")
-        //        JsonElement valueNode =  parentNode.isJsonArray() ? parentNode.get(Integer.parseInt(field)) : parentNode.get(field);
-        val valueNode: JsonElement
-        if (parentNode!!.isJsonArray)
-            valueNode = (parentNode as JsonArray).get(Integer.parseInt(field))
-        else
-            valueNode = (parentNode as JsonObject).get(field)
-        remove(node, fromPath)
-        return add(node, toPath, valueNode)
-    }
-
-    private fun add(node: JsonElement, path: List<String>, value: JsonElement): JsonElement {
-        if (path.isEmpty()) {
-            throw RuntimeException("[ADD Operation] path is empty , path : ")
-        } else {
-            val parentNode = getParentNode(node, path)
-            if (parentNode == null) {
-                throw RuntimeException("[ADD Operation] noSuchPath in source, path provided : " + path)
-            } else {
-                val fieldToReplace = path[path.size - 1].replace("\"".toRegex(), "")
-                if (fieldToReplace == "" && path.size == 1) {
-                    return value
+                op.REMOVE -> {
+                    processor.remove(path)
                 }
-                if (!isContainerNode(parentNode))
-                //not array or object node
-                {
-                    throw RuntimeException("[ADD Operation] parent is not a container in source, path provided : $path | node : $parentNode")
-                } else {
-                    if (parentNode.isJsonArray) {
-                        addToArray(path, value, parentNode)
-                    } else {
-                        addToObject(path, parentNode, value)
-                    }
+
+                op.ADD -> {
+                    val value: JsonElement
+                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+                        value = getPatchAttr(jsonNode, consts.VALUE)
+                    else
+                        value = getPatchAttrWithDefault(jsonNode, consts.VALUE, JsonNull.INSTANCE)
+                    processor.add(path, value)
                 }
-            }
-        }
-        return node
-    }
 
-    private fun isContainerNode(parentNode: JsonElement): Boolean {
-        return parentNode.isJsonObject || parentNode.isJsonArray
-    }
+                op.REPLACE -> {
+                    val value: JsonElement
+                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+                        value = getPatchAttr(jsonNode, consts.VALUE)
+                    else
+                        value = getPatchAttrWithDefault(jsonNode, consts.VALUE, JsonNull.INSTANCE)
+                    processor.replace(path, value)
+                }
 
-    private fun addToObject(path: List<String>, node: JsonElement, value: JsonElement) {
-        val target = node as JsonObject
-        val key = path[path.size - 1].replace("\"".toRegex(), "")
-        target.add(key, value)
-    }
+                op.MOVE -> {
+                    val fromPath = getPath(getPatchAttr(jsonNode, consts.FROM))
+                    processor.move(fromPath, path)
+                }
 
-    private fun addToArray(path: List<String>, value: JsonElement, parentNode: JsonElement) {
-        val target = parentNode as JsonArray
-        val idxStr = path[path.size - 1]
+                op.COPY -> {
+                    val fromPath = getPath(getPatchAttr(jsonNode, consts.FROM))
+                    processor.copy(fromPath, path)
+                }
 
-        if ("-" == idxStr) {
-            // see http://tools.ietf.org/html/rfc6902#section-4.1
-            target.add(value)
-        } else {
-            val idx = Integer.parseInt(idxStr.replace("\"".toRegex(), ""))
-            if (idx < target.size()) {
-                insert(target, idx, value)
-            } else {
-                if (idx === target.size()) {
-                    target.add(value)
-                } else {
-                    throw RuntimeException("[ADD Operation] [addToArray] index Out of bound, index provided is higher than allowed, path " + path)
+                op.TEST -> {
+                    val value: JsonElement
+                    if (!flags.contains(CompatibilityFlags.MISSING_VALUES_AS_NULLS))
+                        value = getPatchAttr(jsonNode, consts.VALUE)
+                    else
+                        value = getPatchAttrWithDefault(jsonNode, consts.VALUE, JsonNull.INSTANCE)
+                    processor.test(path, value)
                 }
             }
         }
     }
 
-    //TODO insert not very efficient: find a better way to do it?
-    private fun insert(target: JsonArray, idx: Int, value: JsonElement) {
-        val lastidx = target.size() - 1
-        val last = target.get(lastidx)
-        target.add(last)
-        //move up elements after idx
-        for (i in (lastidx - 1) downTo idx)
-            target.set(i + 1, target.get(i))
-        //finally insert new value
-        target.set(idx, value)
+    @Throws(InvalidJsonPatchException::class)
+    @JvmStatic @JvmOverloads fun validate(patch: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()) {
+        process(patch, NoopProcessor.INSTANCE, flags)
     }
 
-    private fun replace(node: JsonElement, path: List<String>, value: JsonElement): JsonElement {
-        if (path.isEmpty()) {
-            throw RuntimeException("[Replace Operation] path is empty")
-        } else {
-            val parentNode = getParentNode(node, path)
-            if (parentNode == null) {
-                throw RuntimeException("[Replace Operation] noSuchPath in source, path provided : " + path)
-            } else {
-                val fieldToReplace = path[path.size - 1].replace("\"".toRegex(), "")
-                if (isNullOrEmpty(fieldToReplace) && path.size == 1) {
-                    return value
-                }
-                if (parentNode.isJsonObject)
-                    (parentNode as JsonObject).add(fieldToReplace, value)
-                else
-                    (parentNode as JsonArray).set(Integer.parseInt(fieldToReplace), value)
-            }
-            return node
-        }
+    @Throws(JsonPatchApplicationException::class)
+    @JvmStatic @JvmOverloads fun apply(patch: JsonElement, source: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()): JsonElement {
+        val processor = ApplyProcessor(source)
+        process(patch, processor, flags)
+        return processor.result()
     }
 
-    private fun isNullOrEmpty(s: String?): Boolean {
-        return s == null || s.length == 0
-    }
-
-    private fun remove(node: JsonElement, path: List<String>) {
-        if (path.isEmpty()) {
-            throw RuntimeException("[Remove Operation] path is empty")
-        } else {
-            val parentNode = getParentNode(node, path)
-            if (parentNode == null) {
-                throw RuntimeException("[Remove Operation] noSuchPath in source, path provided : " + path)
-            } else {
-                val fieldToRemove = path[path.size - 1].replace("\"".toRegex(), "")
-                if (parentNode.isJsonObject)
-                    (parentNode as JsonObject).remove(fieldToRemove)
-                else
-                    (parentNode as JsonArray).remove(Integer.parseInt(fieldToRemove))
-            }
-        }
-    }
-
-    private fun getParentNode(node: JsonElement, fromPath: List<String>): JsonElement? {
-        val pathToParent = fromPath.subList(0, fromPath.size - 1) // would never by out of bound, lets see
-        return getNode(node, pathToParent, 1)
-    }
-
-    private fun getNode(ret: JsonElement, path: List<String>, pos: Int): JsonElement? {
-        var pos = pos
-        if (pos >= path.size) {
-            return ret
-        }
-        val key = path[pos]
-        if (ret.isJsonArray) {
-            val keyInt = Integer.parseInt(key.replace("\"".toRegex(), ""))
-            return getNode((ret as JsonArray).get(keyInt), path, ++pos)
-        } else if (ret.isJsonObject) {
-            if ((ret as JsonObject).has(key)) {
-                return getNode(ret.get(key), path, ++pos)
-            }
-            return null
-        } else {
-            return ret
-        }
-    }
 
     private fun decodePath(path: String): String {
         return path.replace("~1".toRegex(), "/").replace("~0".toRegex(), "~") // see http://tools.ietf.org/html/rfc6901#section-4

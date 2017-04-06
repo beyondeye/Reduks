@@ -33,7 +33,7 @@ public class ApiTest {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("[{\"not\": \"a patch\"}]");
         JsonElement to = objectMapper.readTree("{\"a\":1}");
-        JsonPatch2.apply(invalid.getAsJsonArray(), to);
+        JsonPatch.apply(invalid.getAsJsonArray(), to);
     }
 
     @Test(expected = InvalidJsonPatchException.class)
@@ -41,7 +41,7 @@ public class ApiTest {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("[1, 2, 3, 4, 5]");
         JsonElement to = objectMapper.readTree("{\"a\":1}");
-        JsonPatch2.apply(invalid.getAsJsonArray(), to);
+        JsonPatch.apply(invalid.getAsJsonArray(), to);
     }
 
     @Test(expected = InvalidJsonPatchException.class)
@@ -49,27 +49,27 @@ public class ApiTest {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("[{\"op\": \"what\"}]");
         JsonElement to = objectMapper.readTree("{\"a\":1}");
-        JsonPatch2.apply(invalid.getAsJsonArray(), to);
+        JsonPatch.apply(invalid.getAsJsonArray(), to);
     }
 
     @Test(expected = InvalidJsonPatchException.class)
     public void validatingNonArrayPatchShouldThrowAnException() throws IOException {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("{\"not\": \"a patch\"}");
-        JsonPatch2.validate(invalid);
+        JsonPatch.validate(invalid);
     }
 
     @Test(expected = InvalidJsonPatchException.class)
     public void validatingAnInvalidArrayShouldThrowAnException() throws IOException {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("[1, 2, 3, 4, 5]");
-        JsonPatch2.validate(invalid);
+        JsonPatch.validate(invalid);
     }
 
     @Test(expected = InvalidJsonPatchException.class)
     public void validatingAPatchWithAnInvalidOperationShouldThrowAnException() throws IOException {
         GsonObjectMapper objectMapper = new GsonObjectMapper();
         JsonElement invalid = objectMapper.readTree("[{\"op\": \"what\"}]");
-        JsonPatch2.validate(invalid);
+        JsonPatch.validate(invalid);
     }
 }

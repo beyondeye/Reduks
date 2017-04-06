@@ -45,25 +45,25 @@ public class CompatibilityTest {
     @Test
     public void withFlagAddShouldTreatMissingValuesAsNulls() throws IOException {
         JsonElement expected = mapper.readTree("{\"a\":null}");
-        JsonElement result = JsonPatch2.apply(addNodeWithMissingValue, new JsonObject(), EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
+        JsonElement result = JsonPatch.apply(addNodeWithMissingValue, new JsonObject(), EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
         assertThat(result, equalTo(expected));
     }
 
     @Test
     public void withFlagAddNodeWithMissingValueShouldValidateCorrectly() {
-        JsonPatch2.validate(addNodeWithMissingValue, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
+        JsonPatch.validate(addNodeWithMissingValue, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
     }
 
     @Test
     public void withFlagReplaceShouldTreatMissingValuesAsNull() throws IOException {
         JsonElement source = mapper.readTree("{\"a\":\"test\"}");
         JsonElement expected = mapper.readTree("{\"a\":null}");
-        JsonElement result = JsonPatch2.apply(replaceNodeWithMissingValue, source, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
+        JsonElement result = JsonPatch.apply(replaceNodeWithMissingValue, source, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
         assertThat(result, equalTo(expected));
     }
 
     @Test
     public void withFlagReplaceNodeWithMissingValueShouldValidateCorrectly() {
-        JsonPatch2.validate(addNodeWithMissingValue, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
+        JsonPatch.validate(addNodeWithMissingValue, EnumSet.of(CompatibilityFlags.MISSING_VALUES_AS_NULLS));
     }
 }
