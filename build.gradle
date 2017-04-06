@@ -67,7 +67,7 @@ configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcoll
     }
 
 }
-configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-logger' || it.name =='reduks-rx' || it.name =='zjsonpatch'}) {
+configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-logger' || it.name =='reduks-rx'}) {
     repositories {
         mavenCentral()
     }

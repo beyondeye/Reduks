@@ -1,8 +1,8 @@
 package com.beyondeye.reduks.logger
 
+import com.beyondeye.kjsonpatch.JsonDiff
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.logger.logformatter.LogFormatter
-import com.beyondeye.zjsonpatch.JsonDiff
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser

@@ -1,7 +1,10 @@
+repositories {
+    maven { url 'https://jitpack.io' }
+}
 dependencies {
     compile project(':reduks-core')
-    compile project(':zjsonpatch')
     compile "com.google.code.gson:gson:$gson_version"
+    compile 'com.github.beyondeye:kjsonpatch:0.3.1'
 }
 
 apply from: '../maven-push.gradle'
