@@ -102,12 +102,12 @@ object JsonPatch2 {
     }
 
     @Throws(InvalidJsonPatchException::class)
-    @JvmOverloads fun validate(patch: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()) {
+    @JvmStatic @JvmOverloads fun validate(patch: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()) {
         process(patch, NoopProcessor.INSTANCE, flags)
     }
 
     @Throws(JsonPatchApplicationException::class)
-    @JvmOverloads fun apply(patch: JsonElement, source: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()): JsonElement {
+    @JvmStatic @JvmOverloads fun apply(patch: JsonElement, source: JsonElement, flags: EnumSet<CompatibilityFlags> = CompatibilityFlags.defaults()): JsonElement {
         val processor = ApplyProcessor(source)
         process(patch, processor, flags)
         return processor.result()

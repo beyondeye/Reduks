@@ -16,10 +16,10 @@
 
 package com.beyondeye.zjsonpatch
 
-import com.beyondeye.zjsonpatch.lcs.ListUtils
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.publicDeepCopy
 
 
 import java.util.*
@@ -33,7 +33,7 @@ object JsonDiff2 {
     internal var consts = Constants()
 
 
-    fun asJson(source: JsonElement, target: JsonElement): JsonElement {
+    @JvmStatic fun asJson(source: JsonElement, target: JsonElement): JsonElement {
         val diffs = ArrayList<Diff2>()
         val path = LinkedList<Any>()
         /*
@@ -60,7 +60,7 @@ object JsonDiff2 {
         val unchangedValues = getUnchangedPart(source, target)
         for (i in diffs.indices) {
             val diff = diffs[i]
-            if (op.ADD.equals(diff.operation)) {
+            if (op.ADD==diff.operation) {
                 val matchingValuePath = getMatchingValuePath(unchangedValues, diff.value)
                 if (matchingValuePath != null) {
                     diffs[i] = Diff2(op.COPY, matchingValuePath, diff.path)
@@ -92,7 +92,7 @@ object JsonDiff2 {
         }
     }
 
-    private fun computeArray(unchangedValues: Map<JsonElement, List<Any>>, path: List<Any>, source: JsonArray, target: JsonArray) {
+    private fun computeArray(unchangedValues: MutableMap<JsonElement, List<Any>>, path: List<Any>, source: JsonArray, target: JsonArray) {
         val size = Math.min(source.size(), target.size())
 
         for (i in 0..size - 1) {
@@ -101,7 +101,7 @@ object JsonDiff2 {
         }
     }
 
-    private fun computeObject(unchangedValues: Map<JsonElement, List<Any>>, path: List<Any>, source: JsonObject, target: JsonObject) {
+    private fun computeObject(unchangedValues: MutableMap<JsonElement, List<Any>>, path: List<Any>, source: JsonObject, target: JsonObject) {
         val firstFields = source.entrySet().iterator()
         while (firstFields.hasNext()) {
             val name = firstFields.next().key
@@ -121,7 +121,7 @@ object JsonDiff2 {
             val diff1 = diffs[i]
 
             // if not remove OR add, move to next diff
-            if (!(op.REMOVE.equals(diff1.operation) || op.ADD.equals(diff1.operation))) {
+            if (!(op.REMOVE==diff1.operation || op.ADD==diff1.operation)) {
                 continue
             }
 
@@ -132,11 +132,11 @@ object JsonDiff2 {
                 }
 
                 var moveDiff: Diff2? = null
-                if (op.REMOVE.equals(diff1.operation) && op.ADD.equals(diff2.operation)) {
+                if (op.REMOVE==diff1.operation && op.ADD==diff2.operation) {
                     computeRelativePath(diff2.path, i + 1, j - 1, diffs)
                     moveDiff = Diff2(op.MOVE, diff1.path, diff2.path)
 
-                } else if (op.ADD.equals(diff1.operation) && op.REMOVE.equals(diff2.operation)) {
+                } else if (op.ADD==diff1.operation && op.REMOVE==diff2.operation) {
                     computeRelativePath(diff2.path, i, j - 1, diffs) // diff1's add should also be considered
                     moveDiff = Diff2(op.MOVE, diff2.path, diff1.path)
                 }
@@ -159,7 +159,7 @@ object JsonDiff2 {
         for (i in startIdx..endIdx) {
             val diff = diffs[i]
             //Adjust relative path according to #ADD and #Remove
-            if (op.ADD.equals(diff.operation) || op.REMOVE.equals(diff.operation)) {
+            if (op.ADD==diff.operation || op.REMOVE==diff.operation) {
                 updatePath(path, diff, counters)
             }
         }
@@ -203,17 +203,17 @@ object JsonDiff2 {
     }
 
     private fun updateCounters(pseudo: Diff2, idx: Int, counters: MutableList<Int>) {
-        if (op.ADD.equals(pseudo.operation)) {
+        if (op.ADD==pseudo.operation) {
             counters[idx] = counters[idx] - 1
         } else {
-            if (op.REMOVE.equals(pseudo.operation)) {
+            if (op.REMOVE==pseudo.operation) {
                 counters[idx] = counters[idx] + 1
             }
         }
     }
 
     private fun getJsonNodes(diffs: List<Diff2>): JsonArray {
-        val patch = JsonObject()
+        val patch = JsonArray()
         for (diff in diffs) {
             val jsonNode = getJsonNode(diff)
             patch.add(jsonNode)
@@ -224,12 +224,12 @@ object JsonDiff2 {
     private fun getJsonNode(diff: Diff2): JsonObject {
         val jsonNode = JsonObject()
         jsonNode.addProperty(consts.OP, op.nameFromOp(diff.operation))
-        if (op.MOVE.equals(diff.operation) || op.COPY.equals(diff.operation)) {
+        if (op.MOVE==diff.operation || op.COPY==diff.operation) {
             jsonNode.addProperty(consts.FROM, getArrayNodeRepresentation(diff.path)) //required {from} only in case of Move Operation
             jsonNode.addProperty(consts.PATH, getArrayNodeRepresentation(diff.toPath))  // destination Path
         } else {
             jsonNode.addProperty(consts.PATH, getArrayNodeRepresentation(diff.path))
-            jsonNode.addProperty(consts.VALUE, diff.value)
+            jsonNode.add(consts.VALUE, diff.value)
         }
         return jsonNode
     }
@@ -254,17 +254,17 @@ object JsonDiff2 {
 
 
 
-    private fun generateDiffs(diffs: MutableList<Diff2>, path: List<Any>, source: JsonObject, target: JsonObject) {
+    private fun generateDiffs(diffs: MutableList<Diff2>, path: List<Any>, source: JsonElement, target: JsonElement) {
         if (source != target) {
             val sourceType = NodeType.getNodeType(source)
             val targetType = NodeType.getNodeType(target)
 
             if (sourceType == NodeType.ARRAY && targetType == NodeType.ARRAY) {
                 //both are arrays
-                compareArray(diffs, path, source, target)
+                compareArray(diffs, path, source.asJsonArray, target.asJsonArray)
             } else if (sourceType == NodeType.OBJECT && targetType == NodeType.OBJECT) {
                 //both are json
-                compareObjects(diffs, path, source, target)
+                compareObjects(diffs, path, source.asJsonObject, target.asJsonObject)
             } else {
                 //can be replaced
 
@@ -273,9 +273,7 @@ object JsonDiff2 {
         }
     }
 
-    private fun compareArray(diffs: MutableList<Diff2>, path: List<Any>, source_: JsonElement, target_: JsonElement) {
-        val source = source_.asJsonArray
-        val target = target_.asJsonArray
+    private fun compareArray(diffs: MutableList<Diff2>, path: List<Any>, source: JsonArray, target: JsonArray) {
         val lcs = getLCS(source, target)
         var srcIdx = 0
         var targetIdx = 0
@@ -332,8 +330,8 @@ object JsonDiff2 {
         removeRemaining(diffs, path, pos, srcIdx, srcSize, source)
     }
 
-    private fun removeRemaining(diffs: MutableList<Diff2>, path: List<Any>, pos: Int, srcIdx: Int, srcSize: Int, source_: JsonElement): Int {
-        var srcIdx = srcIdx
+    private fun removeRemaining(diffs: MutableList<Diff2>, path: List<Any>, pos: Int, srcIdx_: Int, srcSize: Int, source_: JsonElement): Int {
+        var srcIdx = srcIdx_
         val source = source_.asJsonArray
         while (srcIdx < srcSize) {
             val currPath = getPath(path, pos)
@@ -343,14 +341,14 @@ object JsonDiff2 {
         return pos
     }
 
-    private fun addRemaining(diffs: MutableList<Diff2>, path: List<Any>, target_: JsonElement, pos: Int, targetIdx: Int, targetSize: Int): Int {
-        var pos = pos
-        var targetIdx = targetIdx
+    private fun addRemaining(diffs: MutableList<Diff2>, path: List<Any>, target_: JsonElement, pos_: Int, targetIdx_: Int, targetSize: Int): Int {
+        var pos = pos_
+        var targetIdx = targetIdx_
         val target = target_.asJsonArray
         while (targetIdx < targetSize) {
             val jsonNode = target.get(targetIdx)
             val currPath = getPath(path, pos)
-            diffs.add(Diff2.generateDiff(op.ADD, currPath, jsonNode.deepCopy()))
+            diffs.add(Diff2.generateDiff(op.ADD, currPath, jsonNode.publicDeepCopy()))
             pos++
             targetIdx++
         }

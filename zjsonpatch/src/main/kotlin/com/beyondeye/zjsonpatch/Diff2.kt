@@ -17,6 +17,7 @@
 package com.beyondeye.zjsonpatch
 
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 
 /**
  * User: gopi.vishwakarma
@@ -25,13 +26,13 @@ import com.google.gson.JsonElement
 internal class Diff2 {
     val operation: Int
     val path: MutableList<Any>
-    val value: JsonElement?
-    val toPath: List<Any>? //only to be used in move operation
+    val value: JsonElement
+    val toPath: List<Any> //only to be used in move operation
 
     constructor(operation: Int, path: List<Any>, value: JsonElement) {
         this.operation = operation
         this.path = path.toMutableList()
-        this.toPath=null
+        this.toPath= listOf()
         this.value = value
     }
 
@@ -39,7 +40,7 @@ internal class Diff2 {
         this.operation = operation
         this.path = fromPath.toMutableList()
         this.toPath = toPath
-        this.value = null
+        this.value = JsonNull.INSTANCE
     }
 
     companion object {
