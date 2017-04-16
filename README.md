@@ -104,7 +104,7 @@ The implementation details of the Store  and their variations can be quite impor
 This is Reduks in brief. let us now discuss it more in detail
 
 <a name="the_state"></a>
-##The State
+## The State
 The state is the set of data that uniquely identify the current state of the application. 
 Typically in Android, this is the state of the current Activity.
 
@@ -129,7 +129,7 @@ fun copy(email: String?=null, password:String?=null, emailConfirmed:Boolean?=nul
 ```
 
 <a name="subscribers"></a>
-###State Change Subscribers
+### State Change Subscribers
 Before we discuss how the state changes, let's see how we listen to those changes. 
 Through the store method
 ```kotlin
@@ -192,7 +192,7 @@ Selectors can detect quite efficiently changes in the state, thanks to a techniq
 Look [here](./reduks/src/test/kotlin/com/beyondeye/reduks/ReselectTest.kt) for more examples on how to build selectors.
 
 <a name="actions"></a>  
-###Actions and Reducers
+### Actions and Reducers
 As we mentioned above, whenever we want to change the state of the application we need to send(dispatch) an *Action*  object, that will be processed by the *Reducers*,
 that are pure functions that take as input the action and the current state and outputs a new modified state.
 An action object can be literally any object. For example we can define the following actions
@@ -203,7 +203,7 @@ class LoginAction {
     class EmailConfirmed
 }
 ```
-####Reducers
+#### Reducers
 a sample [Reducer](./reduks/src/main/java/com/beyondeye/reduks/Reducer.java) can be the following 
 ```kotlin
 val reducer = ReducerFn<LoginActivityState> { state, action ->
@@ -218,7 +218,7 @@ val reducer = ReducerFn<LoginActivityState> { state, action ->
 Reducers must be pure functions, without side-effects except for updating the state. In particular in a reducer you cannot dispatch actions
 
 <a name="sealedclasses"></a>  
-####Better Actions with Kotlin sealed classes
+#### Better Actions with Kotlin sealed classes
 You may have noticed a potential source of bugs in our previous reducer code. There is a risk that we simply forget to enumerate all action types in the ```when``` expression.
 
 We can catch this type of errors at compile time thanks to [ Kotlin sealed classes](https://kotlinlang.org/docs/reference/classes.html#sealed-classes).
@@ -248,7 +248,7 @@ Note that the exhaustive check is activated only for [when expressions](https://
 the  ```when``` block, like in the code above.
 
 <a name="standardaction"></a>  
-####Even Better Actions with Reduks StandardAction
+#### Even Better Actions with Reduks StandardAction
 Reduks  [StandardAction](./reduks/src/main/kotlin/com/beyondeye/reduks/StandardAction.kt) is a base interface for actions that provide a standard way to define actions also for failed/async operations:
  
 ```kotlin
@@ -300,7 +300,7 @@ val reducer2 = ReducerFn<LoginActivityState2> { s, a ->
 ```
 
 <a name="combinereducers"></a>
-####Combining Reducers
+#### Combining Reducers
 When your application start getting complex, your reducer code will start getting difficult too manage.
 To solve this problem, Reduks provide the method ```combineReducers``` that allows  splitting the definition of the reducer and even put each part of the definition in a different file. 
 
@@ -351,7 +351,7 @@ Note that this is different from how it works in   [reduxjs combineReducers](htt
 implemented and extended in Reduks Modules (see below)
 
 <a name="dispatch_from_reducer"></a>
-####If I feel like I want to dispatch from my Reducer what is the correct thing to do instead?
+#### If I feel like I want to dispatch from my Reducer what is the correct thing to do instead?
 This is one of the most typical things that confuse beginners.
 
 For example let's say that in order to verify the email address at user registration we must
@@ -375,15 +375,15 @@ If you find yourself in this situation then you should defer dispatching an acti
 At a later stage you can eventually also split the chain into multiple actions (so that you can update the UI at different stages of the user authentication process), 
 but always keep the chain logic in the original place. We will discuss later the [Thunk middleware](./reduks/src/main/kotlin/com/beyondeye/reduks/middlewares/ThunkMiddleware.kt)
 and [AsyncAction middleware](./reduks-kovenant/src/main/kotlin/com/beyondeye/reduks/middlewares/AsyncActionMiddleWare.kt) that will help you handle these chains of actions better
-###Reduks Modules
+### Reduks Modules
 TODO
-####Combining Reduks modules
+#### Combining Reduks modules
 TODO
-###Reduks Activity
+### Reduks Activity
 TODO
 
 <a name="pcollections"></a>
-####Immutable (Persistent) Collections with Reduks
+#### Immutable (Persistent) Collections with Reduks
 A critical component, from a performance point of view, when defining complex Reduks states are so called _persistent collections_ , that is collections
 that when modified always create a copy of the original collection, with efficient data sharing mechanims between multiple versions of the modified collections.
 Unfortunately there are not yet persistent collection in kotlin standard library (there is [a proposal](https://github.com/Kotlin/kotlinx.collections.immutable/blob/master/proposal.md)).
@@ -398,7 +398,7 @@ Although it is not the most efficient implementation, it is not too far behind f
 for reduks bus store enhancer (see below)
 
 <a name="reduksbus"></a>
-####Reduks bus: a communication channel between fragments
+#### Reduks bus: a communication channel between fragments
 The official method in Android for communicating results from a fragment to the parent activity or between fragments are [callback interfaces](http://developer.android.com/training/basics/fragments/communicating.html).
 This design pattern is very problematic, as it is proven by the success of libraries like [Square Otto](https://github.com/square/otto) and [GreenRobot EventBus](https://github.com/greenrobot/EventBus).
 Reduks architecture has actually severally things in common with  an event bus 
@@ -462,7 +462,7 @@ But first let's see how we post some data on the bus:
  store.postBusData(LoginFragmentResult(username = "Kotlin", password = "IsAwsome"))
 ```
 That's it. See more code examples [here](./reduks-bus/src/test/kotlin/com/beyondeye/reduks/bus/BusStoreEnhancerTest.kt). For the full Api see [here](./reduks-bus/src/main/kotlin/com/beyondeye/reduks/bus/busApi.kt)
-#####Reduks bus under the hood
+##### Reduks bus under the hood
 What's happening when we post some data on the bus? What we are doing is actualling dispatching the Action
 ```kotlin
 class ActionSendBusData(val key: String, val newData: Any)
@@ -481,7 +481,7 @@ the `no data present` state is triggered when we call
 store.clearBusData<LoginFragmentResult>()
 ```
 that will clear the bus data for the specified object type and trigger the bus data handler with a null value as input.
-####Reduks bus in Android Fragments
+#### Reduks bus in Android Fragments
 Finally we can show the code for handling communication  between a Fragment and a parent activity, or another Fragment.
 We assume that the parent activity implement the [ReduksActivity interface](./reduks-android/src/main/kotlin/com/beyondeye/reduksAndroid/activity/ReduksActivity.kt)
 ```kotlin
@@ -525,27 +525,27 @@ class LoginDataDisplayFragment : Fragment() {
 ```
 Notices that we are using the Fragment tag (assuming it is defined) for automatically keeping track of all registered bus data handlers and removing them when the Fragment is detached from the activity
 for the full source code of the example discussed see [here](./code_fragments/src/main/java/beyondeye/com/examples/busExample.kt) 
-####Persisting Reduks state and activity lifecycle
+#### Persisting Reduks state and activity lifecycle
 TODO
-###Middlewares
+### Middlewares
 TODO
-####Thunk Middleware
+#### Thunk Middleware
 TODO
-####Promise Middleware
+#### Promise Middleware
 TODO
-####Logger Middleware
+#### Logger Middleware
 TODO
-###Types of Reduks Stores
+### Types of Reduks Stores
 TODO
-####Simple Store
+#### Simple Store
 TODO
-####RxJava based Store
+#### RxJava based Store
 TODO
-####Promise based (Kovenant) Store
+#### Promise based (Kovenant) Store
 TODO
-###Store Enhancers
+### Store Enhancers
 TODO
-####Reduks DevTools
+#### Reduks DevTools
 TODO
 
 <a name="opensource"></a>
