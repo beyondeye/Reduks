@@ -60,9 +60,6 @@ class ReselectTest {
     }
 
 
-
-
-
     @Test
     fun chainedSelectorTest() {
         val selector1 = SelectorBuilder<StateSubStateA>()
@@ -174,7 +171,7 @@ class ReselectTest {
         assertThat(selp3(state)).isEqualTo(3.0)
     }
 
-/*
+    /*
     //test for short syntax for single field selector disabled because of kotlin compiler bug
     @Test
     fun singleFieldSelectorShortSyntaxText() {
@@ -207,6 +204,26 @@ class ReselectTest {
         assertThat(secondChangedA).isNull()
 
     }
-}
 
+    @Test
+    fun WhenChangedTest() {
+        val sel_a = SelectorBuilder<StateA>().withSingleField { a }
+        val state = StateA(a = 0)
+        assertThat(sel_a(state)).isEqualTo(0)
+        val changedState = state.copy(a = 1)
+        var firstChangedA: Int? = null
+        var secondChangedA: Int? = null
+        with(changedState) {
+            whenChangeOf(sel_a) {
+                firstChangedA = it
+            }
+            whenChangeOf(sel_a) {
+                secondChangedA = it
+            }
+            assertThat(firstChangedA).isEqualTo(1)
+            assertThat(secondChangedA).isNull()
+
+        }
+    }
+}
 

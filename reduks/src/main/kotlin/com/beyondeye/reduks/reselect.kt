@@ -72,6 +72,14 @@ interface Selector<S, O> : SelectorInput<S, O> {
     }
 }
 
+/**
+ * same as [Selector.onChangeIn], but as extension function of state:
+ * it checks if the specified selector value  is changed for the input state and if so, call [blockfn]
+ * with the updated selector value
+ */
+fun <S,O> S.whenChangeOf(selector:Selector<S,O>,blockfn: (O) -> Unit) {
+    selector.getIfChangedIn(this)?.let(blockfn)
+}
 
 /**
  * abstract base class for all selectors
