@@ -1,4 +1,4 @@
-[![Kotlin 1.0](https://img.shields.io/badge/Kotlin-1.0.6-blue.svg)](http://kotlinlang.org)
+[![Kotlin 1.1.2-3](https://img.shields.io/badge/Kotlin-1.1.2-3-blue.svg)](http://kotlinlang.org)
 [![](https://jitpack.io/v/beyondeye/reduks.svg)](https://jitpack.io/#beyondeye/reduks)
 [![Build Status](https://travis-ci.org/beyondeye/Reduks.svg?branch=master)](https://travis-ci.org/beyondeye/Reduks)
 [![Slack channel](https://img.shields.io/badge/Chat-Slack-green.svg)](https://kotlinlang.slack.com/messages/reduks/)
@@ -40,8 +40,13 @@ Some notable features:
 - [Combining Reducers](#combinereducers)
 - [No dispatch from reducers!](#dispatch_from_reducer)
 - [Immutable Collections with Reduks](#pcollections)
-- [Reduks bus: a communication channel between fragments](#reduksbus)
+- [Reduks on Android](#reduks_on_android)
+    - [Activities](#reduks_activities)
+    - [Fragments](#reduks_fragments)
+    - [Saving and Restoring Reduks state on Device Configuration Changes](reduks_onsaveinstancestate)
+    - [Reduks bus: a communication channel between fragments](#reduksbus)
 - [Credits from other open source libraries](#opensource)
+
 
 <a name="gradledeps"></a>
 ## dependencies for gradle
@@ -379,8 +384,6 @@ and [AsyncAction middleware](./reduks-kovenant/src/main/kotlin/com/beyondeye/red
 TODO
 #### Combining Reduks modules
 TODO
-### Reduks Activity
-TODO
 
 <a name="pcollections"></a>
 #### Immutable (Persistent) Collections with Reduks
@@ -395,7 +398,15 @@ But there are several implementations of persistent collections for the JVM. Som
 For a discussion of performance of various implementations see [here](https://github.com/Kotlin/kotlinx.collections.immutable/issues/6).
 Currently the `reduks-pcollections` module include a stripped down version of the pcollections library (only [Pmap](./reduks-pcollections/src/main/kotlin/com/beyondeye/reduks/pcollections/PMap.java) and [PStack](./reduks-pcollections/src/main/kotlin/com/beyondeye/reduks/pcollections/PStack.java)).
 Although it is not the most efficient implementation, it is not too far behind for maps, it has low method count and play well with standard Java collections. It is used as the building block
-for reduks bus store enhancer (see below)
+for [reduks bus](#reduksbus)
+<a name="reduks_on_android"></a>
+## Reduks on Android
+<a name="reduks_activities"></a>
+### Activities
+<a name="reduks_fragments"></a>
+### Fragments
+<a name="reduks_onsaveinstancestate"></a>
+### Saving and Restoring Reduks state on Device Configuration Changes
 
 <a name="reduksbus"></a>
 #### Reduks bus: a communication channel between fragments
@@ -525,8 +536,7 @@ class LoginDataDisplayFragment : Fragment() {
 ```
 Notices that we are using the Fragment tag (assuming it is defined) for automatically keeping track of all registered bus data handlers and removing them when the Fragment is detached from the activity
 for the full source code of the example discussed see [here](./code_fragments/src/main/java/beyondeye/com/examples/busExample.kt) 
-#### Persisting Reduks state and activity lifecycle
-TODO
+
 ### Middlewares
 TODO
 #### Thunk Middleware
