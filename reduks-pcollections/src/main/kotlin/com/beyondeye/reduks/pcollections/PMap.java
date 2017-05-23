@@ -1,5 +1,6 @@
 package com.beyondeye.reduks.pcollections;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  * @param <K>
  * @param <V>
  */
-public interface PMap<K,V> extends Map<K,V> {
+public interface PMap<K,V> extends Map<K,V>, Serializable {
 	/**
 	 * @param key non-null
 	 * @param value non-null

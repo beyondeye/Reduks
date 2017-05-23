@@ -1,5 +1,8 @@
 package com.beyondeye.reduks.pcollections;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -66,10 +69,34 @@ public final class IntTreePMap<V> extends AbstractMap<Integer,V> implements PMap
 									// but that's good enough for an immutable
 									// (i.e. we can't mess someone else up by adding the wrong type to it)
 		return IntTreePMap.<V>empty().plusAll(map); }
-	
+
+	private void writeObject(ObjectOutputStream o) throws IOException
+	{
+		int size=this.size();
+		o.writeInt(size);
+		for (Entry<Integer, V> entry:this.entrySet()) {
+			o.writeInt(entry.getKey());
+			o.writeObject(entry.getValue());
+		}
+	}
+	private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException{
+		int size=o.readInt();
+		IntTreePMap<V> readTree = empty();
+		for (int i = 0; i < size; i++) {
+			int key=o.readInt();
+			V value= (V) o.readObject();
+			readTree=readTree.plus(key,value);
+		}
+		this.root=readTree.root;
+		validate();
+	}
+
+	private void validate(){
+//		throw new IllegalArgumentException(); //on validation error
+	}
 
 //// PRIVATE CONSTRUCTORS ////
-	private final IntTree<V> root;
+	private IntTree<V> root;
 	// not externally instantiable (or subclassable):
 	private IntTreePMap(final IntTree<V> root) {
 		this.root = root; }

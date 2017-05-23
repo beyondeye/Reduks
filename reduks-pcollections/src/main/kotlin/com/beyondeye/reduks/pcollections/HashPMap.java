@@ -1,5 +1,8 @@
 package com.beyondeye.reduks.pcollections;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -37,11 +40,33 @@ public final class HashPMap<K,V> extends AbstractMap<K,V> implements PMap<K,V> {
 	 */
 	public static <K,V> HashPMap<K,V> empty(final PMap<Integer,PSequence<Entry<K,V>>> intMap) {
 		return new HashPMap<K,V>(intMap.minusAll(intMap.keySet()), 0); }
-	
 
+	private void writeObject(ObjectOutputStream o) throws IOException
+	{
+		o.writeInt(size);
+		for (Entry<K, V> entry:this.entrySet()) {
+			o.writeObject(entry.getKey());
+			o.writeObject(entry.getValue());
+		}
+	}
+	private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException{
+		size=o.readInt();
+		HashPMap<K,V> readTree = HashTreePMap.empty();
+		for (int i = 0; i < size; i++) {
+			K key= (K) o.readObject();
+			V value= (V) o.readObject();
+			readTree=readTree.plus(key,value);
+		}
+		this.intMap=readTree.intMap;
+		validate();
+	}
+
+	private void validate(){
+	//		throw new IllegalArgumentException(); //on validation error
+	}
 //// PRIVATE CONSTRUCTORS ////
-	private final PMap<Integer,PSequence<Entry<K,V>>> intMap;
-	private final int size;
+	private PMap<Integer,PSequence<Entry<K,V>>> intMap;
+	private int size;
 	// not externally instantiable (or subclassable):
 	private HashPMap(final PMap<Integer,PSequence<Entry<K,V>>> intMap, final int size) {
 		this.intMap = intMap; this.size = size; }
