@@ -75,9 +75,14 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observ
 
     private fun notifySubscribers() {
         for (i in subscribers.indices) {
-            subscribers[i].onStateChange()
+            try {
+                subscribers[i].onStateChange()
+            } catch(e:Exception) {
+                Log.w(SimpleStore.redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
+            }
         }
     }
+
 
     /**
      * dispach an action to the store and return it (eventually after it is transformed by middlewares)

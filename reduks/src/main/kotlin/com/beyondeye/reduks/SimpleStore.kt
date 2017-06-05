@@ -55,5 +55,8 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
             }
         }
     }
+    companion object {
+        val redukstag = "rdks"
+    }
 }
 

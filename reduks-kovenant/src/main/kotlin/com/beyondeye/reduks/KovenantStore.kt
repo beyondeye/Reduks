@@ -1,6 +1,7 @@
 package com.beyondeye.reduks
 
 import android.util.Log
+import com.beyondeye.reduks.SimpleStore.Companion.redukstag
 import com.beyondeye.reduks.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
@@ -82,7 +83,7 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
                     try {
                         newState=reducer.reduce(startState, action) //return newState
                     } catch (e:Exception) {
-                        Log.w("rdks","exception in reducer while processing $action: ${e.toString()}")
+                        Log.w(redukstag,"exception in reducer while processing $action: ${e.toString()}")
                     }
 //                    Log.i("rdks","aafter processing action $action")
                     newState
@@ -98,7 +99,11 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
 
     private fun notifySubscribers() {
         for (i in subscribers.indices) {
-            subscribers[i].onStateChange()
+            try {
+                subscribers[i].onStateChange()
+            } catch(e:Exception) {
+                Log.w(redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
+            }
         }
     }
 
@@ -120,5 +125,6 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
             }
         }
     }
+
 }
 
