@@ -48,7 +48,7 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
     val statePromise: Promise<S, Exception> get() = _statePromise
     override val state: S
         get() = _statePromise.get() //wait completion of all current queued promises
-    private val subscribers= mutableListOf<StoreSubscriber<S> >()
+    private var subscribers= listOf<StoreSubscriber<S> >()
     private val mainDispatcher = object : Middleware<S> {
         override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any): Any {
             val deferredNextState = deferred<S, Exception>()
@@ -98,9 +98,9 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
     }
 
     private fun notifySubscribers() {
-        for (i in subscribers.indices) {
+        subscribers.forEach { sub->
             try {
-                subscribers[i].onStateChange()
+                sub.onStateChange()
             } catch(e:Exception) {
                 Log.w(redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
             }
@@ -118,10 +118,14 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
     }
 
     override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
-        this.subscribers.add(storeSubscriber)
+        synchronized(subscribers) {
+            subscribers= subscribers.plus(storeSubscriber)
+        }
         return object : StoreSubscription {
             override fun unsubscribe() {
-                subscribers.remove(storeSubscriber)
+                synchronized(subscribers) {
+                    subscribers= subscribers.minus(storeSubscriber)
+                }
             }
         }
     }

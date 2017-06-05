@@ -30,7 +30,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observ
     }
     override var state:S=initialState
             private set
-    private val subscribers= mutableListOf<StoreSubscriber<S>>()
+    private var subscribers= listOf<StoreSubscriber<S>>()
     private val subscriberNotifierActor: ActorJob<S>
     private val reducerActor: ActorJob<Any>
     init {
@@ -74,9 +74,9 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observ
     }
 
     private fun notifySubscribers() {
-        for (i in subscribers.indices) {
+        subscribers.forEach { sub->
             try {
-                subscribers[i].onStateChange()
+                sub.onStateChange()
             } catch(e:Exception) {
                 Log.w(SimpleStore.redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
             }
@@ -99,10 +99,14 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observ
     }
 
     override fun subscribe(storeSubscriber: StoreSubscriber<S>): StoreSubscription {
-        this.subscribers.add(storeSubscriber)
+        synchronized(subscribers) {
+            subscribers= subscribers.plus(storeSubscriber)
+        }
         return object : StoreSubscription {
             override fun unsubscribe() {
-                subscribers.remove(storeSubscriber)
+                synchronized(subscribers) {
+                    subscribers= subscribers.minus(storeSubscriber)
+                }
             }
         }
     }
