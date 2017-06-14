@@ -1,13 +1,8 @@
 //disable warnings when using coroutines
 kotlin { experimental { coroutines 'enable' } }
 
-repositories {
-    jcenter() //for coroutines
-}
-
 dependencies {
     compile project(':reduks-android')
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
 
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin

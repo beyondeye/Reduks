@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.experimental
 
-import android.util.Log
+//import android.util.Log
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
@@ -19,11 +19,11 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 
 class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
-                    subscribeContext: CoroutineContext=newSingleThreadContext("SubscribeThread"),
-                    reduceContext:CoroutineContext=CommonPool
+                    subscribeContext: CoroutineContext =newSingleThreadContext("SubscribeThread"),
+                    reduceContext: CoroutineContext =CommonPool
                     ) : Store<S> {
-    class Creator<S>( val subscribeContext: CoroutineContext=newSingleThreadContext("SubscribeThread"),
-                      val reduceContext:CoroutineContext=CommonPool,
+    class Creator<S>(val subscribeContext: CoroutineContext =newSingleThreadContext("SubscribeThread"),
+                     val reduceContext: CoroutineContext =CommonPool,
                      val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
             val res = AsyncStore<S>(initialState, reducer,reduceContext,subscribeContext)
@@ -44,18 +44,18 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
     }
     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
     // then subscribers will be notified sequentially of state changes in the correct
-    private fun startSubscriberNotifierActor(c:CoroutineContext=CommonPool) = actor<S>(c) {
+    private fun startSubscriberNotifierActor(c: CoroutineContext =CommonPool) = actor<S>(c) {
         for(updatedState in channel) { //iterate over incoming state updates
             notifySubscribers()
         }
     }
-    private fun startReducerActor(subscriberNotifierChannel:SendChannel<S>,c:CoroutineContext=CommonPool)= actor<Any>(c) {
+    private fun startReducerActor(subscriberNotifierChannel:SendChannel<S>,c: CoroutineContext =CommonPool)= actor<Any>(c) {
         for(action in channel) { //iterate over incoming actions
             var newState=state
             try {
                 newState = reducer.reduce(state, action) //return newState
             } catch (e:Exception) {
-                Log.w("rdks","exception in reducer while processing $action: ${e.toString()}")
+                //Log.w("rdks","exception in reducer while processing $action: ${e.toString()}")
             }
             state=newState
             subscriberNotifierChannel.send(newState)
@@ -82,7 +82,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
             try {
                 sub.onStateChange()
             } catch(e:Exception) {
-                Log.w(SimpleStore.redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
+               // Log.w(SimpleStore.redukstag,"exception while notifying state change to subscriber: ${e.toString()}")
             }
         }
     }

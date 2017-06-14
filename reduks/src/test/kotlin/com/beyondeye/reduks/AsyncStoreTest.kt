@@ -2,7 +2,6 @@ package com.beyondeye.reduks
 
 import com.beyondeye.reduks.experimental.AsyncStore
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -29,7 +28,7 @@ class AsyncStoreTest {
         })
 
         store.dispatch(TestAction(type = "to invoke"))
-        lock.await(1000,TimeUnit.MILLISECONDS)
+        lock.await(1000, TimeUnit.MILLISECONDS)
         assertThat(store.state.message).isEqualTo("reduced")
     }
 
@@ -65,11 +64,11 @@ class AsyncStoreTest {
         })
 
         store.dispatch(TestAction(type = helloReducer1))
-        lock.await(500,TimeUnit.MILLISECONDS)
+        lock.await(500, TimeUnit.MILLISECONDS)
         assertThat(store.state.message).isEqualTo("oh hai")
         //--------
         store.dispatch(TestAction(type = helloReducer2))
-        lock.await(500,TimeUnit.MILLISECONDS)
+        lock.await(500, TimeUnit.MILLISECONDS)
         assertThat(store.state.message).isEqualTo("mark")
     }
 
@@ -91,7 +90,7 @@ class AsyncStoreTest {
 
         store.dispatch(TestAction())
 
-        lock.await(1000,TimeUnit.MILLISECONDS)
+        lock.await(1000, TimeUnit.MILLISECONDS)
 
         assertThat(subscriber1Called).isTrue()
         assertThat(subscriber2Called).isTrue()
@@ -117,7 +116,7 @@ class AsyncStoreTest {
 
         store.dispatch(TestAction())
 
-        lock.await(500,TimeUnit.MILLISECONDS)
+        lock.await(500, TimeUnit.MILLISECONDS)
 
         assert(lock.count==1L)
         assertThat(subscriber1Called).isTrue()
@@ -148,7 +147,7 @@ class AsyncStoreTest {
         }
         )
         store.dispatch(TestAction(type = "to invoke"))
-        lock.await(1000,TimeUnit.MILLISECONDS)
+        lock.await(1000, TimeUnit.MILLISECONDS)
         assertThat(store.state).isEqualTo(actual)
     }
 }

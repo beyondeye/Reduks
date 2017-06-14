@@ -42,7 +42,7 @@ class AsyncStoreMiddlewareTest {
 
     @Test
     fun actions_should_pass_through_the_middleware_chain_in_the_correct_order() {
-        val counter = CountDownLatch(3)
+        val counter = CountDownLatch(4)
         val order = mutableListOf<String>()
 
         val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
@@ -75,7 +75,7 @@ class AsyncStoreMiddlewareTest {
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "hey hey!"))
-        counter.await(1000,TimeUnit.MILLISECONDS)
+        counter.await(100, TimeUnit.MILLISECONDS) //we will actually wait here, since the counter is decremented three time but initialized to 4
         assertThat(order).isEqualTo(listOf("first", "second", "third"))
         assertThat(store.state).isEqualTo(TestState("howdy!"))
     }

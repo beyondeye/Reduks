@@ -46,6 +46,7 @@ allprojects {
 configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcollections'|| it.name =='reduks-bus'}) {
     repositories {
         mavenCentral()
+        jcenter() //for coroutines
     }
     apply plugin: 'kotlin'
     apply plugin: 'maven'
@@ -69,6 +70,7 @@ configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcoll
 }
 configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-async' || it.name =='reduks-logger' || it.name =='reduks-rx'}) {
     repositories {
+        jcenter() //for coroutines
         mavenCentral()
     }
     apply plugin: 'com.android.library'
