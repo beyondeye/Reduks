@@ -3,7 +3,10 @@
 [![Build Status](https://travis-ci.org/beyondeye/Reduks.svg?branch=master)](https://travis-ci.org/beyondeye/Reduks)
 [![Slack channel](https://img.shields.io/badge/Chat-Slack-green.svg)](https://kotlinlang.slack.com/messages/reduks/)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Reduks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/4245)
+## IMPORTANT NOTICE: THIS README FILE IS HEAVILY OUTDATE, THE UPDATED DOCUMENTATION FOR REDUKS 3.x is still in the works ##
+
 # Reduks: a port of Reduxjs for Kotlin+Android
+
 Some notable features:
 
  - RxJava+RxAndroid support
