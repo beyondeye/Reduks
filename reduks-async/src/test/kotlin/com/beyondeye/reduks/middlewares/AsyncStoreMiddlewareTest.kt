@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import rx.Observable
 import rx.schedulers.TestScheduler
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -30,7 +31,7 @@ class AsyncStoreMiddlewareTest {
             next(action)
         }
 
-        val store = AsyncStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare)
 
         store.dispatch(TestAction(type = "hey hey!"))
@@ -41,19 +42,21 @@ class AsyncStoreMiddlewareTest {
 
     @Test
     fun actions_should_pass_through_the_middleware_chain_in_the_correct_order() {
-        var counter = 0
+        val counter = CountDownLatch(3)
         val order = mutableListOf<String>()
 
         val middleWare1 = MiddlewareFn<TestState> { store, next, action ->
-            counter += 1
             order.add("first")
+            counter.countDown()
             next(action)
             order.add("third")
+            counter.countDown()
+            action
         }
 
         val middleWare2 = MiddlewareFn<TestState> { store, next, action ->
-            counter += 1
             order.add("second")
+            counter.countDown()
             next(action)
         }
 
@@ -68,14 +71,13 @@ class AsyncStoreMiddlewareTest {
         }
 
 
-        val store = AsyncStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(),reducer) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "hey hey!"))
-
-        assertThat(store.state).isEqualTo(TestState("howdy!"))
-        assertThat(counter).isEqualTo(2)
+        counter.await(1000,TimeUnit.MILLISECONDS)
         assertThat(order).isEqualTo(listOf("first", "second", "third"))
+        assertThat(store.state).isEqualTo(TestState("howdy!"))
     }
 
     @Test
@@ -122,7 +124,7 @@ class AsyncStoreMiddlewareTest {
             }
         }
 
-        val store = AsyncStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer) //false: otherwise exception if not running on android
         store.applyMiddleware(fetchMiddleware, loggerMiddleware)
 
         store.dispatch(TestAction(type = "CALL_API"))
@@ -165,7 +167,7 @@ class AsyncStoreMiddlewareTest {
             state
         }
 
-        val store = AsyncStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "around!"))

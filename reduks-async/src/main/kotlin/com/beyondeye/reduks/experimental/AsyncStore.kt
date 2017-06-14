@@ -5,11 +5,11 @@ import com.beyondeye.reduks.*
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.channels.ActorJob
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlin.coroutines.experimental.CoroutineContext
 
 
@@ -18,10 +18,15 @@ import kotlin.coroutines.experimental.CoroutineContext
  * state changes
  */
 
-class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observeOnUiThread: Boolean = true) : Store<S> {
-    class Creator<S>(val observeOnUiThread: Boolean = true, val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
+class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
+                    subscribeContext: CoroutineContext=newSingleThreadContext("SubscribeThread"),
+                    reduceContext:CoroutineContext=CommonPool
+                    ) : Store<S> {
+    class Creator<S>( val subscribeContext: CoroutineContext=newSingleThreadContext("SubscribeThread"),
+                      val reduceContext:CoroutineContext=CommonPool,
+                     val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
-            val res = AsyncStore<S>(initialState, reducer, observeOnUiThread)
+            val res = AsyncStore<S>(initialState, reducer,reduceContext,subscribeContext)
             return if (!withStandardMiddleware)
                 res
             else
@@ -34,9 +39,8 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>, val observ
     private val subscriberNotifierActor: ActorJob<S>
     private val reducerActor: ActorJob<Any>
     init {
-        val subscriberContext=if(observeOnUiThread) UI else CommonPool
-        subscriberNotifierActor = startSubscriberNotifierActor(subscriberContext)
-        reducerActor = startReducerActor(subscriberNotifierActor.channel)
+        subscriberNotifierActor = startSubscriberNotifierActor(subscribeContext)
+        reducerActor = startReducerActor(subscriberNotifierActor.channel,reduceContext)
     }
     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
     // then subscribers will be notified sequentially of state changes in the correct

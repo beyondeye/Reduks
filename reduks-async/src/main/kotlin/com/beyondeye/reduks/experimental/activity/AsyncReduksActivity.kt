@@ -6,6 +6,7 @@ import com.beyondeye.reduks.*
 import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity
+import kotlinx.coroutines.experimental.android.UI
 
 /**
  * An activity base class for avoiding writing boilerplate code for initializing reduks and handling save and restoring reduks state
@@ -20,7 +21,7 @@ abstract class AsyncReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
         reduks=initReduks()
     }
 
-    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>()
+    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(subscribeContext = UI)
 
     //override for making this function visible to inheritors
     override fun onStop() {
