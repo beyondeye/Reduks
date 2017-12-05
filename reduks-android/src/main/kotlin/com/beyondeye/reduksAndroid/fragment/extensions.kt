@@ -68,10 +68,16 @@ fun  Store<out Any>.setFragmentStatus(fragmentTag:String,newStatus: FragmentStat
     else
         dispatch(ActionSetFragmentStatus(fragmentTag,newStatus))
 }
-fun  Reduks<out Any>.setFragmentStatus( fragmentTag:String,newStatus: FragmentStatus) {
-    store.setFragmentStatus(fragmentTag,newStatus)
+
+fun requireFragmentTagNotNull(fragmentTag: String?) {
+    if (fragmentTag == null)
+        throw IllegalArgumentException("Android Fragment Tag Is Not Set")
 }
 
+fun  Reduks<out Any>.setFragmentStatus( fragmentTag:String?,newStatus: FragmentStatus) {
+    requireFragmentTagNotNull(fragmentTag)
+    store.setFragmentStatus(fragmentTag!!,newStatus)
+}
 //------------------
 val Fragment.reduks: Reduks<out Any>? get() {
     val fsa=activity as? ReduksActivity<*>
@@ -85,7 +91,9 @@ fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriberB
     if(setFragmentStatusActive) reduks?.setFragmentStatus(tag, FragmentStatus.fragmentStatusActive)
     @Suppress("UNCHECKED_CAST")
     val fsa=activity as? ReduksActivity<S>
-    fsa?.reduks?.subscribe(tag,storeSubscriberBuilder)
+
+    requireFragmentTagNotNull(tag)
+    fsa?.reduks?.subscribe(tag!!,storeSubscriberBuilder)
 }
 /**
  * TO be called in Fragment OnViewCreated, for detaching the bus data handler/reduks subscriber associated to this fragment
@@ -95,7 +103,8 @@ fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriber:
     @Suppress("UNCHECKED_CAST")
     val fsa=activity as? ReduksActivity<S>
     @Suppress("UNCHECKED_CAST")
-    fsa?.reduks?.subscribe(tag,storeSubscriber)
+    requireFragmentTagNotNull(tag)
+    fsa?.reduks?.subscribe(tag!!,storeSubscriber)
 }
 
 /**
@@ -103,9 +112,10 @@ fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriber:
  */
 fun Fragment.reduksUnsubscribe(setFragmentStatusInactive:Boolean) {
     if(setFragmentStatusInactive) reduks?.setFragmentStatus(tag, FragmentStatus.fragmentStatusInactive)
+    requireFragmentTagNotNull(tag)
     reduks?.apply {
-       unsubscribe(tag)
-       removeBusDataHandlers(tag)
+       unsubscribe(tag!!)
+       removeBusDataHandlers(tag!!)
     }
 }
 
@@ -117,8 +127,10 @@ inline fun <reified BusDataType:Any> ReduksActivity<out Any>.reduksAddBusDataHan
  * fragment store subscribers can be destroyed and then get notifications from old bus data so by default we
  * should clear bus data after handling it
  */
-inline fun <reified BusDataType:Any> Fragment.reduksAddBusDataHandler(noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription? =
-        reduks?.AddBusDataHandler(tag,true,null,fn)
+inline fun <reified BusDataType:Any> Fragment.reduksAddBusDataHandler(noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription? {
+    requireFragmentTagNotNull(tag)
+    return reduks?.AddBusDataHandler(tag!!,true,null,fn)
+}
 
 fun Fragment.reduksDispatch(action:Any) {
 //    LogRdks("dispatch of $action").before
