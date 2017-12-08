@@ -1,6 +1,7 @@
 dependencies {
-    compile project(':reduks-core')
-    compile project(':reduks-pcollections')
+    implementation project(':reduks-pcollections')
+    apiElements project(':reduks-pcollections') //pcollections are part of reduks-bus api
+    implementation project(':reduks-core') //core dep is not exposed to consumer, that must include core explicitely
 
 }
 

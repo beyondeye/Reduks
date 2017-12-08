@@ -1,9 +1,10 @@
 dependencies {
-    compile project(':reduks-android')
-    compile "io.reactivex:rxjava:$rxjava_version"
-    compile "io.reactivex:rxandroid:$rxandroid_version"
+    api project(':reduks-android') //when including reduks-kovenent dep, no need to include also reduks-core or reduks-android
+    implementation libraries.rxJava //rx is part of the
+   // apiElements libraries.rxJava
+    implementation libraries.rxAndroid
     //  // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$support_version"
+    compileOnly libraries.supportAppCompat
 
 }
 

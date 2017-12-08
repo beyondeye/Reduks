@@ -58,10 +58,6 @@ afterEvaluate { project ->
         failOnError false //don't stop build if error in building javadocs
     }
 
-//from lock.android maven-push TODO do I need this?
-afterEvaluate {
-    javadoc.classpath += project.android.libraryVariants.toList().first().javaCompile.classpath
-}
 
 
     // build a jar with javadoc

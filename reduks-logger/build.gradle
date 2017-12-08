@@ -2,9 +2,9 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
-    compile project(':reduks-core')
-    compile "com.google.code.gson:gson:$gson_version"
-    compile 'com.github.beyondeye:kjsonpatch:0.3.2'
+    implementation project(':reduks-core') //reduks-core dep not exposed to consumer: consumer need to to include reduks-core dep explicitely
+    implementation libraries.gson
+    implementation libraries.kjsonpatch
 }
 
 apply from: '../maven-push.gradle'

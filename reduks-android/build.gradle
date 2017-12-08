@@ -1,8 +1,8 @@
 dependencies {
-    compile project(':reduks-core')
-    compile project(':reduks-bus')
-    // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$support_version"
+    api project(':reduks-core') //when including reduks-android dep, no need to include also reduks-core
+    api project(':reduks-bus')
+    // compileOnly for appCompats, means the actual lib must but provided by consumer
+    compileOnly libraries.supportAppCompat
 }
 
 apply from: '../maven-push.gradle'

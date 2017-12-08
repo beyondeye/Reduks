@@ -1,13 +1,13 @@
 dependencies {
-    compile project(':reduks-android')
-    compile "nl.komponents.kovenant:kovenant:$kovenant_version"
-    compile "nl.komponents.kovenant:kovenant-ui:$kovenant_version"
-    compile "nl.komponents.kovenant:kovenant-android:$kovenant_version"
+    api project(':reduks-android') //when including reduks-kovenent dep, no need to include also reduks-core or reduks-android
+    implementation libraries.kovenant
+    implementation libraries.kovenantUi
+    implementation libraries.kovenantAndroid
 
-    // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$support_version"
+    //provided libraries, not passed to consumer
+    compileOnly libraries.supportAppCompat
 
-    testCompile "io.reactivex:rxjava:$rxjava_version"
+    testImplementation libraries.rxJava
 }
 
 apply from: '../maven-push.gradle'

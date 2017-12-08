@@ -2,13 +2,13 @@
 kotlin { experimental { coroutines 'enable' } }
 
 dependencies {
-    compile project(':reduks-android')
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
+    api project(':reduks-android') //when including reduks-async dep, no need to include also reduks-core or reduks-android
+    implementation libraries.kotlinCoroutinesAndroid
 
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin
-    provided "com.android.support:appcompat-v7:$support_version"
+    compileOnly libraries.supportAppCompat
 
-    testCompile "io.reactivex:rxjava:$rxjava_version"
+    testImplementation libraries.rxJava
 }
 
 apply from: '../maven-push.gradle'

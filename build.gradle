@@ -1,61 +1,74 @@
+apply from: 'buildsystem/dependencies.gradle'
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+//COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
+ext {
+    VERSION_NAME='3.0.1-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
+    POM_NAME='Reduks: Reduxjs for Kotlin+Android'
+    GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
+    //TODO: decide when to migrate to 1.8: see https://developer.android.com/studio/write/java8-support.html
+    sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
+    targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
+}
+
+
 buildscript {
     repositories {
         mavenCentral()
         jcenter()
-        maven {
-            url 'http://oss.sonatype.org/content/repositories/snapshots'
-        }
-        google()
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:$dcendents_maven_plugin_version"
+    rootProject.ext.versions = [
+            kotlin: '1.2.0',
+            dokka: '0.9.15'
+    ]
 
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
+        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$rootProject.versions.dokka"
     }
 }
-allprojects {
 
+
+allprojects {
+   repositories {
+       mavenCentral()
+       jcenter() //for coroutines
+       google()
+   }
     configurations {
         javadocDeps
     }
-    //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
-    ext {
-        VERSION_NAME='3.0.1-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
-        POM_NAME='Reduks: Reduxjs for Kotlin+Android'
-        GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
-        sourceCompatibility_ = 1.6 //I want this library to be linkable from android projects
-        targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
-        compileSdkVersion_ = 25
-        minSdkVersion_ = 15 //Integer
-        targetSdkVersion_ = 25 //Integer
-        extraConfVersion = '2.2.+'
+    // Workaround to prevent Gradle from stealing focus from other apps during tests run/etc.
+    // https://gist.github.com/artem-zinnatullin/4c250e04636e25797165
+    tasks.withType(JavaForkOptions) {
+        jvmArgs '-Djava.awt.headless=true'
     }
 }
 
 
-//config for android specific libs
-//configure(subprojects.findAll {it.name != 'reduks-core' && it.name != 'zjsonpatch'}) {
-//
-//}
-//config for java specific libs
-//configure(subprojects.findAll {it.name == 'reduks-core' || it.name == 'zjsonpatch'}) {
-//
-//}
 configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcollections'|| it.name =='reduks-bus'}) {
-    repositories {
-        mavenCentral()
-        jcenter() //for coroutines
-        google()
-    }
+
     apply plugin: 'kotlin'
+    apply plugin: 'org.jetbrains.dokka'
     apply plugin: 'maven'
     group = 'com.github.beyondeye.reduks' //required by jitpack
 
-    sourceCompatibility = sourceCompatibility_ //I want this library to be linkable from android projects
-    targetCompatibility = targetCompatibility_ //I want this library to be linkable from android projects
+    compileKotlin {
+//        sourceCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = sourceCompatibility_ //I want this library to be linkable from android projects
+//        targetCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = targetCompatibility_ //I want this library to be linkable from android projects
+//        kotlinOptions.jvmTarget = "1.8"
+    }
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
+    javadoc.dependsOn dokka
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -63,31 +76,29 @@ configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcoll
     }
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-        testCompile "junit:junit:$junit_version"
-        testCompile 'org.assertj:assertj-core:1.7.1'
-        testCompile "io.reactivex:rxjava:$rxjava_version"
+        implementation libraries.kotlinStdLib
+        apiElements libraries.kotlinStdLib
+        testImplementation libraries.junit
+        testImplementation libraries.assertJ
+        testImplementation libraries.rxJava
     }
 
 }
 configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-async' || it.name =='reduks-logger' || it.name =='reduks-rx'}) {
-    repositories {
-        jcenter() //for coroutines
-        mavenCentral()
-        google()
-    }
+
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
+    apply plugin: 'org.jetbrains.dokka-android'
     apply plugin: 'com.github.dcendents.android-maven'
     group = 'com.github.beyondeye.reduks' //required by jitpack
 
     android {
-        compileSdkVersion compileSdkVersion_
+        compileSdkVersion versions.compileSdk
 //        buildToolsVersion androidBuildToolsVersion
 
         defaultConfig {
-            minSdkVersion minSdkVersion_
-            targetSdkVersion targetSdkVersion_
+            minSdkVersion versions.minSdk
+            targetSdkVersion versions.targetSdk
             versionCode = 1
             versionName VERSION_NAME
         }
@@ -104,14 +115,18 @@ configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-and
             abortOnError false
         }
     }
+    dokka {
+        outputFormat = 'html'
+        outputDirectory = "$buildDir/javadoc"
+    }
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        implementation libraries.kotlinStdLib
+        //api libraries.kotlinStdLib
 
-        testCompile "junit:junit:$junit_version"
-        testCompile 'org.assertj:assertj-core:1.7.1'
-        // testCompile "com.google.truth:truth:0.28"
-        testCompile 'nl.jqno.equalsverifier:equalsverifier:2.0.2'
-        testCompile "org.robolectric:robolectric:$robolectric_version"
+        testImplementation libraries.junit
+        testImplementation libraries.assertJ
+        testImplementation libraries.robolectric
+        testImplementation libraries.equalsverifier
     }
     //Test Logging
     tasks.withType(Test) {
