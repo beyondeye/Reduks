@@ -15,6 +15,7 @@ ext {
 buildscript {
     repositories {
         jcenter()
+        google()
 //        mavenCentral()
     }
     rootProject.ext.versions = [
