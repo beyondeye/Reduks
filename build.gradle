@@ -14,8 +14,8 @@ ext {
 
 buildscript {
     repositories {
-        mavenCentral()
         jcenter()
+//        mavenCentral()
     }
     rootProject.ext.versions = [
             kotlin: '1.2.0',
@@ -35,8 +35,8 @@ buildscript {
 
 allprojects {
    repositories {
-       mavenCentral()
        jcenter() //for coroutines
+//       mavenCentral()
        google()
    }
     configurations {
