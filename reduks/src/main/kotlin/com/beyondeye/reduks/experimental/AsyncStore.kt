@@ -8,20 +8,25 @@ import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.channels.SendChannel
 import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
+//import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlinx.coroutines.experimental.android.UI
 
 
 /**
  * Store that use kotlin coroutine channels for notifying asynchronously to store subscribers about
- * state changes
+ * state changes.
+ * By default the subscribeContext (the coroutine context used by subscribers when notified of store changes
+ * is the Android UI thread, because usually subscribers need to update views according to state changes
+ * More in general you can use any single thread context, for example:
+ * val subscribeContext=newSingleThreadContext("SubscribeThread")
  */
-
+//
 class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
-                    subscribeContext: CoroutineContext =newSingleThreadContext("SubscribeThread"),
+                    subscribeContext: CoroutineContext =UI,
                     reduceContext: CoroutineContext =DefaultDispatcher
                     ) : Store<S> {
-    class Creator<S>(val subscribeContext: CoroutineContext =newSingleThreadContext("SubscribeThread"),
+    class Creator<S>(val subscribeContext: CoroutineContext =UI,
                      val reduceContext: CoroutineContext =DefaultDispatcher,
                      val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {

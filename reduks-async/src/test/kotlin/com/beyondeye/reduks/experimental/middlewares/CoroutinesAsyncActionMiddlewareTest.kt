@@ -1,15 +1,17 @@
-package com.beyondeye.reduks.middlewares
+package com.beyondeye.reduks.experimental.middlewares
 
-import com.beyondeye.reduks.KovenantStore
+import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
+import com.beyondeye.reduks.middlewares.applyMiddleware
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
 /**
  * Created by Dario on 3/22/2016.
  */
-class AsyncActionMiddlewareTest {
+class CoroutinesAsyncActionMiddlewareTest {
     class IncrementCounterAction
     class EndAction
     data class TestState(val counter:Int=0,val actionCounter:Int=0,val lastAsyncActionMessage: String = "none",val lastAsyncActionError: String? =null,
@@ -19,13 +21,13 @@ class AsyncActionMiddlewareTest {
     val actionDifficultError ="Sometimes difficult problems cannot be solved"
     val reducer = ReducerFn<TestState> { state, action ->
         var res: TestState? = null
-        AsyncAction.withPayload<Integer>( action)
+        AsyncAction.withPayload<Int>( action)
                 ?.onCompleted { payload ->
                     res = TestState(
                             actionCounter = state.actionCounter+1,
                             lastAsyncActionMessage = actionDifficultTag,
                             lastAsyncActionError = null,
-                            lastAsyncActionResult = payload.toInt()
+                            lastAsyncActionResult = payload
                     )
                 }?.onFailed { error ->
                     res=TestState(
@@ -55,7 +57,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation() {
-        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //don't use android ui thread: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -79,7 +81,7 @@ class AsyncActionMiddlewareTest {
     }
     @Test
     fun test_two_async_actions_with_different_payload_type() {
-        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -110,7 +112,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation_that_fails() {
 
-        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!
@@ -129,7 +131,7 @@ class AsyncActionMiddlewareTest {
                     }
                 }
         )
-        val asyncAction = AsyncAction.start<Integer> {
+        val asyncAction = AsyncAction.start<Int> {
             throw Exception(actionDifficultError)
         }
         store.dispatch(asyncAction)
@@ -138,7 +140,7 @@ class AsyncActionMiddlewareTest {
     @Test
     fun test_that_normal_actions_pass_through_the_middleware() {
 
-        val store = KovenantStore(TestState(), reducer,observeOnUiThread = false) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
 
