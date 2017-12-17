@@ -1,13 +1,10 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
 import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ProducerJob
-import kotlinx.coroutines.experimental.channels.ProducerScope
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.*
+import kotlin.coroutines.experimental.ContinuationInterceptor
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.coroutines.experimental.startCoroutine
-
 
 /**
  * Created by daely on 12/16/2017.
@@ -37,7 +34,7 @@ import kotlin.coroutines.experimental.startCoroutine
  * See [newCoroutineContext] for a description of debugging facilities that are available for newly created coroutine.
  *
  * @param context context of the coroutine. The default value is [DefaultDispatcher].
- * @param channel the output channel *DARIO* this is passed from outside
+ * @param outputChannel the output channel *DARIO* this is passed from outside
  * @param parent explicitly specifies the parent job, overrides job from the [context] (if any).*
  * @param block the coroutine code.
  */
@@ -59,8 +56,8 @@ public fun <E> produceToChannel(
 //val channel = Channel<E>(capacity)
 
 
-private class ProducerCoroutineCustom<E>(parentContext: CoroutineContext,override val inputActions:Channel<E>, channel: Channel<E>) :
-        ChannelCoroutineCustom<E>(parentContext, inputActions,channel, active = true), ProducerScope<E>, SagaScope<E>,ProducerJob<E> {
+private class ProducerCoroutineCustom<E>(parentContext: CoroutineContext, override val inputActions:Channel<E>, outputChannel: Channel<E>) :
+        ChannelCoroutineCustom<E>(parentContext, inputActions, outputChannel, active = true), ProducerScope<E>, SagaScope<E>,ProducerJob<E> {
 }
 
 internal open class ChannelCoroutineCustom<E>(

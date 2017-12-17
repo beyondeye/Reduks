@@ -7,53 +7,41 @@ import kotlinx.coroutines.experimental.channels.*
 import kotlinx.coroutines.experimental.launch
 import kotlin.coroutines.experimental.CoroutineContext
 
-interface SagaScope<A>:ProducerScope<A> {
+interface SagaScope<A> : ProducerScope<A> {
     val inputActions: Channel<A>
-    suspend fun takeEvery(filter: (A) -> A?, process: (A) -> A?) = produce<A>(context) {
+
+    fun takeEvery(filter: (A) -> A?, process: (A) -> A?) = produce<A>(coroutineContext) {
         for (a in inputActions) {
             filter(a)?.let { filtered -> process(filtered)?.let { send(it) } }
         }
     }
-    suspend fun yield(value: A) {
+
+    suspend fun yieldSingle(value: A) {
         send(value)
     }
-    suspend fun yieldAll(inputChannel:Channel<A>) {
+
+    suspend fun yield(inputChannel: ReceiveChannel<A>) {
         for (a in inputChannel) {
             send(a)
         }
     }
 }
 
-class Saga<S,E>(val context: CoroutineContext = DefaultDispatcher, inputActions:Channel<E>,outputChannel: Channel<E>, sagafn: suspend SagaScope<E>.() -> Unit) {
+inline fun <reified B> SagaScope<Any>.takeEvery(crossinline process: (B) -> Any?) = produce<Any>(coroutineContext) {
+    val actionType=B::class.java
+    for (a in inputActions) {
+        if (a::class.java == actionType) {
+            process(a as B)?.let {
+                send(it)
+            }
+        }
+    }
+}
+
+
+class Saga<S,E>(context: CoroutineContext, val inputActions:Channel<E>,outputChannel: Channel<E>, sagafn: suspend SagaScope<E>.() -> Unit) {
     val sagaCoroutine= produceToChannel<E>(context, inputActions, outputChannel, block = sagafn)
 }
-
-
-/*
-
-class SagaAction
-fun saga2(context: CoroutineContext, inputActions: ReceiveChannel<SagaAction>,filter:(Any)->Any?, process:(Any)->Any?) = produce<SagaAction>(context) {
-    sendAll(takeEvery(context,inputActions,filter,process))
-}
-
-suspend fun sendAll(channel: ReceiveChannel<SagaAction>) {
-    for (a in channel) {
-        send(a)
-    }
-}
-*/
-
-
-
-/*
-
-fun saga(context: CoroutineContext, inputActions: ReceiveChannel<SagaAction>, block:(Any)->Any?) = produce<SagaAction>(context) {
-    for (a in inputActions)
-    {
-        block(a)?.let{send(it)}
-    }
-}
-*/
 
 /**
  * a port of saga middleware
@@ -63,30 +51,31 @@ fun saga(context: CoroutineContext, inputActions: ReceiveChannel<SagaAction>, bl
  * Created by daely on 12/15/2017.
  */
 class SagaMiddleWare<S>(val sagaContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
-    private val inputActionsChannel:Channel<Any>
     private val processedActionsChannel:Channel<Any>
     private val dispatcherChannel: Job
     private val childSagas:MutableList<Saga<S, Any>>
     private var store:Store<S>?=null
     init {
-        inputActionsChannel=Channel()
         processedActionsChannel = Channel()
-        dispatcherChannel=launch(sagaContext) {
-            for(a in processedActionsChannel) {
-                store?.let { it.dispatch(a) }
+        dispatcherChannel = launch(sagaContext) {
+            for (a in processedActionsChannel) {
+                if (store == null) continue
+                store!!.dispatch(a)
             }
         }
         childSagas= mutableListOf()
     }
     fun runSaga(sagafn: suspend SagaScope<Any>.() -> Unit) {
-        val newSaga= Saga<S, Any>(sagaContext, inputActionsChannel, processedActionsChannel, sagafn)
+        val newSaga= Saga<S, Any>(sagaContext, Channel(), processedActionsChannel, sagafn)
         childSagas.add(newSaga)
     }
 
     override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
         this.store=store
         launch(sagaContext) {
-            inputActionsChannel.send(action)
+            for(s in childSagas) {
+                s.inputActions.send(action)
+            }
         }
         return nextDispatcher(action)
     }
