@@ -5,6 +5,8 @@ import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
 import com.beyondeye.reduks.experimental.middlewares.saga.SagaMiddleWare
 import com.beyondeye.reduks.experimental.middlewares.saga.takeEvery
+import com.beyondeye.reduks.experimental.middlewares.saga.takeLatest
+import com.beyondeye.reduks.experimental.middlewares.saga.throttle
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions
@@ -19,40 +21,49 @@ class SagaMiddlewareTest {
     sealed class SagaAction {
         class Plus(val value:Int) : SagaAction()
         class Minus(val value:Int) : SagaAction()
+        class SetPlus(val value:Int):SagaAction()
+        class SetMinus(val value:Int):SagaAction()
     }
     sealed class ActualAction {
-        class IncrementCounterAction(val incrValue: Int):ActualAction()
-        class DecrementCounterAction(val decrValue: Int):ActualAction()
+        class IncrementCounter(val incrValue: Int):ActualAction()
+        class DecrementCounter(val decrValue: Int):ActualAction()
+        class SetIncrCounter(val incrValue: Int):ActualAction()
+        class SetDecrCounter(val decrValue: Int):ActualAction()
         class EndAction:ActualAction()
     }
     data class TestState(val incrCounter: Int = 0,val decrCounter: Int = 0, val actionCounter: Int = 0, val endActionReceived: Boolean = false)
 
     val reducer = ReducerFn<TestState> { state, action ->
-        var res: TestState? = null
-        if (action is ActualAction.DecrementCounterAction)
-            res = state.copy(decrCounter = state.decrCounter - action.decrValue, actionCounter = state.actionCounter + 1)
-        if (action is ActualAction.IncrementCounterAction)
-            res = state.copy(incrCounter = state.incrCounter + action.incrValue, actionCounter = state.actionCounter + 1)
-        if (action is ActualAction.EndAction)
-            res = state.copy(endActionReceived = true)
-        res ?: state
+       when(action) {
+           is ActualAction.DecrementCounter ->
+                state.copy(decrCounter = state.decrCounter - action.decrValue, actionCounter = state.actionCounter + 1)
+            is ActualAction.IncrementCounter ->
+                state.copy(incrCounter = state.incrCounter + action.incrValue, actionCounter = state.actionCounter + 1)
+            is ActualAction.SetIncrCounter ->
+                state.copy(incrCounter = action.incrValue, actionCounter = state.actionCounter + 1)
+            is ActualAction.SetDecrCounter ->
+                state.copy(decrCounter = action.decrValue, actionCounter = state.actionCounter + 1)
+            is ActualAction.EndAction ->
+                state.copy(endActionReceived = true)
+            else -> state
+        }
     }
 
 
 
     @Test
-    fun testSaga1() {
+    fun testSagaTakeEvery() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
         val sagaMiddleware = SagaMiddleWare<TestState>()
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga {
             yield(takeEvery<SagaAction.Plus>{ a ->
-                ActualAction.IncrementCounterAction(a.value)
+                ActualAction.IncrementCounter(a.value)
             })
         }
         sagaMiddleware.runSaga {
             yield(takeEvery<SagaAction.Minus>{ a ->
-                ActualAction.DecrementCounterAction(a.value)
+                ActualAction.DecrementCounter(a.value)
             })
         }
         val lock = CountDownLatch(1)
@@ -74,6 +85,89 @@ class SagaMiddlewareTest {
         Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
 //        store.dispatch(EndAction())
     }
+    @Test
+    fun testSagaTakeLatest() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare<TestState>()
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga {
+            yield(takeLatest<SagaAction.SetPlus>{ a ->
+                ActualAction.SetIncrCounter(a.value)
+            })
+        }
+        sagaMiddleware.runSaga {
+            yield(takeLatest<SagaAction.SetMinus>{ a ->
+                ActualAction.SetDecrCounter(a.value)
+            })
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+//                        if (actionCounter==2) {
+//                            lock.countDown()
+//                        }
+                    }
+                })
+        val totrepsplus=100
+        repeat(totrepsplus) {
+            store.dispatch(SagaAction.SetPlus(123))
+        }
+        val totrepsminus=100
+        repeat(totrepsminus) {
+            store.dispatch(SagaAction.SetMinus(-321))
+        }
+        val totreps=totrepsplus+totrepsminus
+        lock.await(2,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isLessThan(totreps) //take latest will conflate action of same type
+        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+//        store.dispatch(EndAction())
+    }
+    @Test
+    fun testSagaThrottle() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare<TestState>()
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga {
+            yield(throttle<SagaAction.SetPlus>(100){ a ->
+                ActualAction.SetIncrCounter(a.value)
+            })
+        }
+        sagaMiddleware.runSaga {
+            yield(throttle<SagaAction.SetMinus>(100){ a ->
+                ActualAction.SetDecrCounter(a.value)
+            })
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        //                        if (actionCounter==2) {
+//                            lock.countDown()
+//                        }
+                    }
+                })
+        val totrepsplus=100
+        repeat(totrepsplus) {
+            store.dispatch(SagaAction.SetPlus(123))
+        }
+        val totrepsminus=100
+        repeat(totrepsminus) {
+            store.dispatch(SagaAction.SetMinus(-321))
+        }
+        val totreps=totrepsplus+totrepsminus
+        lock.await(2,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isLessThan(totreps) //take latest will conflate action of same type
+        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+//        store.dispatch(EndAction())
+    }
+
 }
 
 

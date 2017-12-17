@@ -4,6 +4,7 @@ import com.beyondeye.reduks.*
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.channels.*
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlin.coroutines.experimental.CoroutineContext
 
@@ -37,6 +38,32 @@ inline fun <reified B> SagaScope<Any>.takeEvery(crossinline process: (B) -> Any?
         }
     }
 }
+
+//TODO refactor common code between takeEvery and takeLatest and throttle
+inline fun <reified B> SagaScope<Any>.takeLatest(crossinline process: (B) -> Any?) = produce<Any>(coroutineContext,Channel.CONFLATED) {
+    val actionType=B::class.java
+    for (a in inputActions) {
+        if (a::class.java == actionType) {
+            process(a as B)?.let {
+                send(it)
+            }
+        }
+    }
+}
+
+//TODO refactor common code between takeEvery and takeLatest and throttle
+inline fun <reified B> SagaScope<Any>.throttle(delayMs:Long,crossinline process: (B) -> Any?) = produce<Any>(coroutineContext,Channel.CONFLATED) {
+    val actionType=B::class.java
+    for (a in inputActions) {
+        if (a::class.java == actionType) {
+            process(a as B)?.let {
+                send(it)
+            }
+            delay(delayMs)
+        }
+    }
+}
+
 
 
 class Saga<S,E>(context: CoroutineContext, val inputActions:Channel<E>,outputChannel: Channel<E>, sagafn: suspend SagaScope<E>.() -> Unit) {
