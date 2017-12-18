@@ -47,20 +47,30 @@ class SagaProcessor<S>(
     }
 }
 
-
-class Saga2<S>(private val sagaProcessor:SagaProcessor<S>) {
-    fun put(value:Any)= SagaProcessor.Put(value)
-    fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)= SagaProcessor.TakeEvery<S,B>(process)
-
-    suspend fun yieldSingle(value: Any) {
+class SagaYeldSingle<S>(private val sagaProcessor: SagaProcessor<S>){
+    suspend infix fun put(value:Any) {
+        yieldSingle(SagaProcessor.Put(value))
+    }
+    suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
+    {
+        yieldSingle( SagaProcessor.TakeEvery<S,B>(process))
+    }
+    private suspend fun yieldSingle(value: Any) {
         sagaProcessor.channel.send(value)
     }
 
-    suspend fun yieldAll(inputChannel: ReceiveChannel<Any>) {
+}
+class SagaYeldAll<S>(private val sagaProcessor: SagaProcessor<S>){
+    private suspend  fun yieldAll(inputChannel: ReceiveChannel<Any>) {
         for (a in inputChannel) {
             sagaProcessor.channel.send(a)
         }
     }
+}
+
+class Saga2<S>(sagaProcessor:SagaProcessor<S>) {
+    val yieldSingle= SagaYeldSingle(sagaProcessor)
+    val yieldAll= SagaYeldAll(sagaProcessor)
 }
 
 /**

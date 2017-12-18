@@ -62,12 +62,12 @@ class SagaMiddleware2Test {
                     }
                 })
         sagaMiddleware.runSaga("incr") {
-            yieldSingle(put(ActualAction.IncrementCounter(123)))
+            yieldSingle put(ActualAction.IncrementCounter(123))
         }
         sagaMiddleware.runSaga("decr") {
-            yieldSingle(put(ActualAction.DecrementCounter(321)))
+            yieldSingle put(ActualAction.DecrementCounter(321))
         }
-        lock.await(1000,TimeUnit.SECONDS)
+        lock.await(5,TimeUnit.SECONDS)
         val state=store.state
         Assertions.assertThat(state.actionCounter).isEqualTo(2) //one action failed
         Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
@@ -81,14 +81,14 @@ class SagaMiddleware2Test {
         val sagaMiddleware = SagaMiddleWare2<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
-            yieldSingle(takeEvery<SagaAction.Plus> { a ->
+            yieldSingle takeEvery { a:SagaAction.Plus ->
                 ActualAction.IncrementCounter(a.value)
-            })
+            }
         }
         sagaMiddleware.runSaga("decr") {
-            yieldSingle(takeEvery<SagaAction.Minus> { a ->
+            yieldSingle takeEvery { a:SagaAction.Minus ->
                 ActualAction.DecrementCounter(a.value)
-            })
+            }
         }
         val lock = CountDownLatch(1)
 
