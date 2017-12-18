@@ -49,7 +49,7 @@ class SagaMiddleware2Test {
     @Test
     fun testSagaPut() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare2<TestState>()
+        val sagaMiddleware = SagaMiddleWare2(store)
         store.applyMiddleware(sagaMiddleware)
         val lock = CountDownLatch(1)
 
@@ -61,11 +61,11 @@ class SagaMiddleware2Test {
                         }
                     }
                 })
-        sagaMiddleware.runSaga {
-            yieldSingle(SagaScope2.put(ActualAction.IncrementCounter(123)))
+        sagaMiddleware.runSaga("incr") {
+            yieldSingle(put(ActualAction.IncrementCounter(123)))
         }
-        sagaMiddleware.runSaga {
-            yieldSingle(SagaScope2.put(ActualAction.DecrementCounter(321)))
+        sagaMiddleware.runSaga("decr") {
+            yieldSingle(put(ActualAction.DecrementCounter(321)))
         }
         lock.await(1000,TimeUnit.SECONDS)
         val state=store.state
@@ -78,15 +78,15 @@ class SagaMiddleware2Test {
     @Test
     fun testSagaTakeEvery() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare2<TestState>()
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
-        sagaMiddleware.runSaga {
-            yieldSingle(SagaScope2.takeEvery2<SagaAction.Plus> { a ->
+        sagaMiddleware.runSaga("incr") {
+            yieldSingle(takeEvery<SagaAction.Plus> { a ->
                 ActualAction.IncrementCounter(a.value)
             })
         }
-        sagaMiddleware.runSaga {
-            yieldSingle(SagaScope2.takeEvery2<SagaAction.Minus> { a ->
+        sagaMiddleware.runSaga("decr") {
+            yieldSingle(takeEvery<SagaAction.Minus> { a ->
                 ActualAction.DecrementCounter(a.value)
             })
         }
