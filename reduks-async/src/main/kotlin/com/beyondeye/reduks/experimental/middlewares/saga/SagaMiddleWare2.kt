@@ -9,93 +9,6 @@ import kotlinx.coroutines.experimental.launch
 import java.lang.ref.WeakReference
 import kotlin.coroutines.experimental.CoroutineContext
 
-
-
-class SagaProcessor<S:Any>(
-        private val dispatcherActor:SendChannel<Any>
-)
-{
-    class Put(val value:Any)
-    class Take<B>(val type:Class<B>)
-    class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?)
-    class SagaFinished(val sm:SagaMiddleWare2<*>, val sagaName: String)
-
-    /**
-     * channel for communication between Saga and Saga processor
-     */
-    val inChannel :Channel<Any> = Channel()
-    val outChannel :Channel<Any> = Channel()
-    /**
-     * channel where processor receive actions dispatched to the store
-     */
-    suspend fun start(inputActions:ReceiveChannel<Any>) {
-        for(a in inChannel) {
-            when(a) {
-                is Put ->
-                    dispatcherActor.send(a.value)
-                is Take<*> -> {
-//                    launch { //launch aynchronously, to avoid dead locks?
-                        for(ia in inputActions) {
-                            if(ia::class.java==a.type) {
-                                outChannel.send(ia)
-                                break
-                            }
-                        }
-//                    }
-
-                }
-                is SagaFinished -> {
-                    a.sm.sagaProcessorFinished(a.sagaName)
-                    return
-                }
-                else ->  {
-                    print("unsupported saga operation: ${a::class.java}")
-                }
-            }
-        }
-    }
-
-    fun stop() {
-        inChannel.close()
-        outChannel.close()
-    }
-}
-
-class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
-    suspend infix fun put(value:Any) {
-        yieldSingle(SagaProcessor.Put(value))
-    }
-
-
-    suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
-    {
-        yieldSingle( SagaProcessor.TakeEvery<S,B>(process))
-    }
-    //-----------------------------------------------
-    suspend fun yieldSingle(value: Any) {
-        sagaProcessor.inChannel.send(value)
-    }
-    suspend fun yieldBackSingle(): Any {
-        return sagaProcessor.outChannel.receive()
-    }
-}
-suspend inline fun <reified B> SagaYeldSingle<*>.take():B {
-    yieldSingle(SagaProcessor.Take<B>(B::class.java))
-    return yieldBackSingle() as B
-}
-class SagaYeldAll<S:Any>(private val sagaProcessor: SagaProcessor<S>){
-    private suspend  fun yieldAll(inputChannel: ReceiveChannel<Any>) {
-        for (a in inputChannel) {
-            sagaProcessor.inChannel.send(a)
-        }
-    }
-}
-
-class Saga2<S:Any>(sagaProcessor:SagaProcessor<S>) {
-    val yieldSingle= SagaYeldSingle(sagaProcessor)
-    val yieldAll= SagaYeldAll(sagaProcessor)
-}
-
 /**
  * a port of saga middleware
  * It store a (weak) reference to the store, so a distinct instance must be created for each store
@@ -141,12 +54,12 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
 
     private data class SagaData<S:Any>(
             val inputActionsChannel: SendChannel<Any>?,
-            val sagaProcessor:SagaProcessor<S>?,
+            val sagaProcessor: SagaProcessor<S>?,
             val sagaJob: Job?)
 
     fun runSaga(sagaName:String,sagafn: suspend Saga2<S>.() -> Unit) {
 
-        val sagaProcessor=SagaProcessor<S>(dispatcherActor)
+        val sagaProcessor= SagaProcessor<S>(dispatcherActor)
         //define the saga processor receive channel, that is used to receive actions from dispatcher
         //to have unlimited buffer, because we don't want to block the dispatcher
         val sagaInputActionsChannel=actor<Any>(sagaContext,Channel.UNLIMITED) {
@@ -217,7 +130,4 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
         }
         return deletedSaga
     }
-
-
-
 }
