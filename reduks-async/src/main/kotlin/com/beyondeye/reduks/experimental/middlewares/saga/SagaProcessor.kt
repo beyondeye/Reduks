@@ -3,28 +3,31 @@ package com.beyondeye.reduks.experimental.middlewares.saga
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.SendChannel
+import kotlinx.coroutines.experimental.delay
+import java.util.concurrent.TimeUnit
 
 class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     suspend infix fun put(value:Any) {
-        yieldSingle(SagaProcessor.Put(value))
+        _yieldSingle(OpCode.Put(value))
+    }
+    suspend infix fun delay(timeMsecs: Long):Any {
+        return _yieldSingle(OpCode.Delay(timeMsecs))
     }
 
 
     suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
     {
-        yieldSingle( SagaProcessor.TakeEvery<S,B>(process))
+        _yieldSingle( OpCode.TakeEvery<S,B>(process))
     }
     //-----------------------------------------------
-    suspend fun yieldSingle(value: Any) {
-        sagaProcessor.inChannel.send(value)
-    }
-    suspend fun yieldBackSingle(): Any {
+    suspend fun _yieldSingle(opcode: OpCode):Any {
+        sagaProcessor.inChannel.send(opcode)
+        if(opcode !is OpCode.OpCodeWithResult) return Unit
         return sagaProcessor.outChannel.receive()
     }
 }
 suspend inline fun <reified B> SagaYeldSingle<*>.take():B {
-    yieldSingle(SagaProcessor.Take<B>(B::class.java))
-    return yieldBackSingle() as B
+    return _yieldSingle(OpCode.Take<B>(B::class.java)) as B
 }
 class SagaYeldAll<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     private suspend  fun yieldAll(inputChannel: ReceiveChannel<Any>) {
@@ -38,16 +41,20 @@ class Saga2<S:Any>(sagaProcessor: SagaProcessor<S>) {
     val yieldSingle= SagaYeldSingle(sagaProcessor)
     val yieldAll= SagaYeldAll(sagaProcessor)
 }
-
+sealed class OpCode {
+    open class OpCodeWithResult:OpCode()
+    class Delay(val time: Long,val unit: TimeUnit = TimeUnit.MILLISECONDS):OpCodeWithResult()
+    class Put(val value:Any): OpCode()
+    class Take<B>(val type:Class<B>): OpCodeWithResult()
+    class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?): OpCode()
+    class SagaFinished(val sm: SagaMiddleWare2<*>, val sagaName: String): OpCode()
+}
 
 class SagaProcessor<S:Any>(
         private val dispatcherActor: SendChannel<Any>
 )
 {
-    class Put(val value:Any)
-    class Take<B>(val type:Class<B>)
-    class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?)
-    class SagaFinished(val sm: SagaMiddleWare2<*>, val sagaName: String)
+
 
     /**
      * channel for communication between Saga and Saga processor
@@ -60,9 +67,13 @@ class SagaProcessor<S:Any>(
     suspend fun start(inputActions: ReceiveChannel<Any>) {
         for(a in inChannel) {
             when(a) {
-                is Put ->
+                is OpCode.Delay -> {
+                    delay(a.time,a.unit)
+                    outChannel.send(Unit)
+                }
+                is OpCode.Put ->
                     dispatcherActor.send(a.value)
-                is Take<*> -> {
+                is OpCode.Take<*> -> {
 //                    launch { //launch aynchronously, to avoid dead locks?
                         for(ia in inputActions) {
                             if(ia::class.java==a.type) {
@@ -71,9 +82,8 @@ class SagaProcessor<S:Any>(
                             }
                         }
 //                    }
-
                 }
-                is SagaFinished -> {
+                is OpCode.SagaFinished -> {
                     a.sm.sagaProcessorFinished(a.sagaName)
                     return
                 }

@@ -7,9 +7,11 @@ import com.beyondeye.reduks.experimental.middlewares.saga.*
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions
+import org.junit.Ignore
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.system.measureTimeMillis
 
 /**
  * Created by Dario on 17/12/2017.
@@ -69,9 +71,9 @@ class SagaMiddleware2Test {
         }
         lock.await(5,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2) //one action failed
-        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+        Assertions.assertThat(state.actionCounter).isEqualTo(2)
+        Assertions.assertThat(state.incrCounter).isEqualTo(123)
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
     @Test
@@ -105,11 +107,41 @@ class SagaMiddleware2Test {
         store.dispatch(SagaAction.Minus(321))
         lock.await(50,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2) //one action failed
-        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+        Assertions.assertThat(state.actionCounter).isEqualTo(2)
+        Assertions.assertThat(state.incrCounter).isEqualTo(123)
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
+    @Test
+    fun testSagaDelay() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+        val expectedDelay=1500L
+        sagaMiddleware.runSaga("delay") {
+            //wait for SagaAction.Plus type of action
+            val actualDelay=measureTimeMillis {
+                yieldSingle.delay(expectedDelay)
+            }
+            yieldSingle put(ActualAction.SetIncrCounter(actualDelay.toInt()))
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==1) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        lock.await(50,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isEqualTo(1)
+        Assertions.assertThat(state.incrCounter-expectedDelay).isLessThan(100)
+//        store.dispatch(EndAction())
+    }
+    @Ignore
     @Test
     fun testSagaTakeEvery() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
@@ -139,9 +171,9 @@ class SagaMiddleware2Test {
         store.dispatch(SagaAction.Minus(321))
         lock.await(100,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2) //one action failed
-        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+        Assertions.assertThat(state.actionCounter).isEqualTo(2)
+        Assertions.assertThat(state.incrCounter).isEqualTo(123)
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
 }

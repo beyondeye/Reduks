@@ -84,7 +84,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
             if(finishedSaga==null)
                 throw Exception("this must not happen")
             launch(sagaContext) {
-                finishedSaga.sagaProcessor?.inChannel?.send(SagaProcessor.SagaFinished(this@SagaMiddleWare2, sagaName))
+                finishedSaga.sagaProcessor?.inChannel?.send(OpCode.SagaFinished(this@SagaMiddleWare2, sagaName))
             }
             finishedSaga.copy(sagaJob = null)
         }
