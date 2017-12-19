@@ -74,7 +74,42 @@ class SagaMiddleware2Test {
         Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
 //        store.dispatch(EndAction())
     }
+    @Test
+    fun testSagaTake() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga("incr") {
+            //wait for SagaAction.Plus type of action
+            val a:SagaAction.Plus=yieldSingle.take()
+            yieldSingle put(ActualAction.IncrementCounter(a.value))
+        }
+        sagaMiddleware.runSaga("decr") {
+            //wait for SagaAction.Minus type of action
+            val a:SagaAction.Minus=yieldSingle.take()
+            yieldSingle put(ActualAction.DecrementCounter(a.value))
+        }
+        val lock = CountDownLatch(1)
 
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==2) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        //dispatch a SagaAction that will be translated to an actual action that the reducer can handle
+        store.dispatch("some unhandled action")
+        store.dispatch(SagaAction.Plus(123))
+        store.dispatch(SagaAction.Minus(321))
+        lock.await(50,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isEqualTo(2) //one action failed
+        Assertions.assertThat(state.incrCounter).isEqualTo(123) //one action failed
+        Assertions.assertThat(state.decrCounter).isEqualTo(-321) //one action failed
+//        store.dispatch(EndAction())
+    }
     @Test
     fun testSagaTakeEvery() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android

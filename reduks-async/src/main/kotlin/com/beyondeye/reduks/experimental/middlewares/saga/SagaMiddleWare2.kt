@@ -11,26 +11,39 @@ import kotlin.coroutines.experimental.CoroutineContext
 
 
 
-class SagaProcessor<S>(
+class SagaProcessor<S:Any>(
         private val dispatcherActor:SendChannel<Any>
 )
 {
     class Put(val value:Any)
-    class TakeEvery<S,B>(val process: Saga2<S>.(B) -> Any?)
+    class Take<B>(val type:Class<B>)
+    class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?)
     class SagaFinished(val sm:SagaMiddleWare2<*>, val sagaName: String)
 
     /**
      * channel for communication between Saga and Saga processor
      */
-    var channel :Channel<Any> = Channel()
+    val inChannel :Channel<Any> = Channel()
+    val outChannel :Channel<Any> = Channel()
     /**
      * channel where processor receive actions dispatched to the store
      */
     suspend fun start(inputActions:ReceiveChannel<Any>) {
-        for(a in channel) {
+        for(a in inChannel) {
             when(a) {
                 is Put ->
                     dispatcherActor.send(a.value)
+                is Take<*> -> {
+//                    launch { //launch aynchronously, to avoid dead locks?
+                        for(ia in inputActions) {
+                            if(ia::class.java==a.type) {
+                                outChannel.send(ia)
+                                break
+                            }
+                        }
+//                    }
+
+                }
                 is SagaFinished -> {
                     a.sm.sagaProcessorFinished(a.sagaName)
                     return
@@ -43,32 +56,42 @@ class SagaProcessor<S>(
     }
 
     fun stop() {
-        channel.close()
+        inChannel.close()
+        outChannel.close()
     }
 }
 
-class SagaYeldSingle<S>(private val sagaProcessor: SagaProcessor<S>){
+class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     suspend infix fun put(value:Any) {
         yieldSingle(SagaProcessor.Put(value))
     }
+
+
     suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
     {
         yieldSingle( SagaProcessor.TakeEvery<S,B>(process))
     }
-    private suspend fun yieldSingle(value: Any) {
-        sagaProcessor.channel.send(value)
+    //-----------------------------------------------
+    suspend fun yieldSingle(value: Any) {
+        sagaProcessor.inChannel.send(value)
     }
-
+    suspend fun yieldBackSingle(): Any {
+        return sagaProcessor.outChannel.receive()
+    }
 }
-class SagaYeldAll<S>(private val sagaProcessor: SagaProcessor<S>){
+suspend inline fun <reified B> SagaYeldSingle<*>.take():B {
+    yieldSingle(SagaProcessor.Take<B>(B::class.java))
+    return yieldBackSingle() as B
+}
+class SagaYeldAll<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     private suspend  fun yieldAll(inputChannel: ReceiveChannel<Any>) {
         for (a in inputChannel) {
-            sagaProcessor.channel.send(a)
+            sagaProcessor.inChannel.send(a)
         }
     }
 }
 
-class Saga2<S>(sagaProcessor:SagaProcessor<S>) {
+class Saga2<S:Any>(sagaProcessor:SagaProcessor<S>) {
     val yieldSingle= SagaYeldSingle(sagaProcessor)
     val yieldAll= SagaYeldAll(sagaProcessor)
 }
@@ -81,14 +104,14 @@ class Saga2<S>(sagaProcessor:SagaProcessor<S>) {
  *
  * Created by daely on 12/15/2017.
  */
-class SagaMiddleWare2<S>(store_:Store<S>,val sagaContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
+class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
-    private val childSagas:MutableMap<String,SagaData<S>>
+    private var childSagas:Map<String,SagaData<S>>
     private val store:WeakReference<Store<S>>
     init {
         store=WeakReference(store_)
-        childSagas= mutableMapOf()
+        childSagas= mapOf()
         //use an actor for dispatching so that we ensure we preserve action order
         dispatcherActor = actor<Any>(sagaContext) {
             for (a in channel) { //loop over incoming message
@@ -96,7 +119,8 @@ class SagaMiddleWare2<S>(store_:Store<S>,val sagaContext:CoroutineContext= Defau
             }
         }
         //use an actor for distributing incoming actions so we ensure we preserve action order
-        incomingActionsDistributionActor = actor<Any>(sagaContext) {
+        //define a channel with unlimited capacity, because we don't want the action dispatcher
+        incomingActionsDistributionActor = actor<Any>(sagaContext,Channel.UNLIMITED) {
             for (a in channel) { // iterate over incoming actions
                 //distribute incoming actions to sagas
                 for (saga in childSagas.values) {
@@ -115,7 +139,7 @@ class SagaMiddleWare2<S>(store_:Store<S>,val sagaContext:CoroutineContext= Defau
         return res
     }
 
-    private data class SagaData<S>(
+    private data class SagaData<S:Any>(
             val inputActionsChannel: SendChannel<Any>?,
             val sagaProcessor:SagaProcessor<S>?,
             val sagaJob: Job?)
@@ -123,7 +147,9 @@ class SagaMiddleWare2<S>(store_:Store<S>,val sagaContext:CoroutineContext= Defau
     fun runSaga(sagaName:String,sagafn: suspend Saga2<S>.() -> Unit) {
 
         val sagaProcessor=SagaProcessor<S>(dispatcherActor)
-        val sagaInputActionsChannel=actor<Any>(sagaContext) {
+        //define the saga processor receive channel, that is used to receive actions from dispatcher
+        //to have unlimited buffer, because we don't want to block the dispatcher
+        val sagaInputActionsChannel=actor<Any>(sagaContext,Channel.UNLIMITED) {
             sagaProcessor.start(this)
         }
 
@@ -136,29 +162,60 @@ class SagaMiddleWare2<S>(store_:Store<S>,val sagaContext:CoroutineContext= Defau
                 sagaFinished(sagaName)
             }
         }
-        val sagaData=SagaData<S>(sagaInputActionsChannel,sagaProcessor,sagaJob)
-        childSagas.put(sagaName,sagaData)
+        addSagaData(sagaName, SagaData(sagaInputActionsChannel, sagaProcessor, sagaJob))
         //we are ready to start now
         sagaJob.start()
     }
     private suspend fun sagaFinished(sagaName: String) {
-        childSagas.remove(sagaName)?.let { sagaData->
-            sagaData.sagaProcessor?.channel?.send(SagaProcessor.SagaFinished(this, sagaName))
-            childSagas.put(sagaName,sagaData.copy(sagaJob = null))
+        updateSagaData(sagaName) { finishedSaga->
+            if(finishedSaga==null)
+                throw Exception("this must not happen")
+            launch(sagaContext) {
+                finishedSaga.sagaProcessor?.inChannel?.send(SagaProcessor.SagaFinished(this@SagaMiddleWare2, sagaName))
+            }
+            finishedSaga.copy(sagaJob = null)
         }
     }
     internal fun sagaProcessorFinished(sagaName: String) {
-        childSagas.remove(sagaName)?.let { sagaData->
+        updateSagaData(sagaName) { sagaData ->
+            if(sagaData==null) return@updateSagaData null
             sagaData.inputActionsChannel?.close()
-            childSagas.put(sagaName,sagaData.copy(sagaProcessor = null,inputActionsChannel = null))
+            sagaData.copy(sagaProcessor = null,inputActionsChannel = null)
         }
     }
     fun stopSaga(sagaName:String) {
-        childSagas.remove(sagaName)?.apply {
+        val deletedSaga=deleteSagaData(sagaName)
+        deletedSaga?.apply {
             sagaJob?.cancel()
             inputActionsChannel?.close()
             sagaProcessor?.stop()
         }
+    }
+    private fun updateSagaData(sagaName:String,updatefn:(SagaData<S>?)->SagaData<S>?) {
+        synchronized(this) {
+            val curData=childSagas[sagaName]
+            val newChildSagas= childSagas.toMutableMap()
+            updatefn(curData)?.let{ newData->
+                newChildSagas.put(sagaName,newData)
+            }
+            childSagas=newChildSagas
+        }
+    }
+    private fun addSagaData(sagaName:String,sagaData:SagaData<S>) {
+        synchronized(this) {
+            val newChildSagas= childSagas.toMutableMap()
+            newChildSagas.put(sagaName,sagaData)
+            childSagas=newChildSagas
+        }
+    }
+    private fun deleteSagaData(sagaName:String): SagaData<S>? {
+        var deletedSaga:SagaData<S>?=null
+        synchronized(this) {
+            val newChildSagas= childSagas.toMutableMap()
+            deletedSaga=newChildSagas.remove(sagaName)
+            childSagas=newChildSagas
+        }
+        return deletedSaga
     }
 
 
