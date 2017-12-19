@@ -3,7 +3,6 @@ package com.beyondeye.reduks.experimental.middlewares.saga
 import com.beyondeye.reduks.*
 import kotlinx.coroutines.experimental.CoroutineStart
 import kotlinx.coroutines.experimental.DefaultDispatcher
-import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.channels.*
 import kotlinx.coroutines.experimental.launch
 import java.lang.ref.WeakReference
@@ -20,11 +19,11 @@ import kotlin.coroutines.experimental.CoroutineContext
 class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
-    private var childSagas:Map<String,SagaData<S>>
+    private var sagaMap:Map<String, SagaData<S>>
     private val store:WeakReference<Store<S>>
     init {
         store=WeakReference(store_)
-        childSagas= mapOf()
+        sagaMap = mapOf()
         //use an actor for dispatching so that we ensure we preserve action order
         dispatcherActor = actor<Any>(sagaContext) {
             for (a in channel) { //loop over incoming message
@@ -40,7 +39,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
         incomingActionsDistributionActor = actor<Any>(sagaContext,Channel.UNLIMITED) {
             for (a in channel) { // iterate over incoming actions
                 //distribute incoming actions to sagas
-                for (saga in childSagas.values) {
+                for (saga in sagaMap.values) {
                     saga.inputActionsChannel?.send(a)
                 }
             }
@@ -56,33 +55,61 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
         return res
     }
 
-    private data class SagaData<S:Any>(
-            val inputActionsChannel: SendChannel<Any>?,
-            val sagaProcessor: SagaProcessor<S>?,
-            val sagaJob: Job?)
+    /**
+     * return true is saga with specified name does not exist or if it is completed
+     */
+    fun isCompleted(sagaName: String):Boolean
+    {
+        val sagaData= sagaMap[sagaName]
+        if(sagaData==null) return true
+        return sagaData.isCompleted()
+    }
 
+
+    /**
+     * start a new saga with the specified name:
+     * if you want to replace a saga that already exists, use [replaceSaga]. Trying to call [runSaga] with [sagaName] of
+     * existing NOT COMPLETED saga will result in an exception
+     */
     fun runSaga(sagaName:String,sagafn: suspend Saga2<S>.() -> Unit) {
+        sagaMap[sagaName]?.let { existingSaga->
+            if(!existingSaga.isCompleted())
+                throw IllegalArgumentException("saga with name: $sagaName  already running: use replaceSaga() instead")
+        }
+        _runSaga(sagafn, sagaName)
+    }
+    /**
+     * replace an existing saga with the specified name. If a saga with the specified name exists and its is running, it wll be cancelled
+     */
+    fun replaceSaga(sagaName:String,sagafn: suspend Saga2<S>.() -> Unit) {
+        if(sagaMap.containsKey(sagaName)) {
+            stopSaga(sagaName)
+        }
+        _runSaga(sagafn, sagaName)
+    }
 
-        val sagaProcessor= SagaProcessor<S>(dispatcherActor)
+    private fun _runSaga(sagafn: suspend Saga2<S>.() -> Unit, sagaName: String) {
+        val sagaProcessor = SagaProcessor<S>(dispatcherActor)
         //define the saga processor receive channel, that is used to receive actions from dispatcher
         //to have unlimited buffer, because we don't want to block the dispatcher
-        val sagaInputActionsChannel=actor<Any>(sagaContext,Channel.UNLIMITED) {
+        val sagaInputActionsChannel = actor<Any>(sagaContext, Channel.UNLIMITED) {
             sagaProcessor.start(this)
         }
 
-        val saga=Saga2(sagaProcessor)
-        //start lazily, so that we have time to insert sagaData in childSagas map
+        val saga = Saga2(sagaProcessor)
+        //start lazily, so that we have time to insert sagaData in sagaMap map
         //because otherwise stopSaga() at the end of the sagaJob will not work
-        val sagaJob= launch(sagaContext,start = CoroutineStart.LAZY) {
+        val sagaJob = launch(sagaContext, start = CoroutineStart.LAZY) {
             saga.sagafn()
-            launch(sagaContext){
+            launch(sagaContext) {
                 sagaFinished(sagaName)
             }
         }
-        addSagaData(sagaName, SagaData(sagaInputActionsChannel, sagaProcessor, sagaJob))
+        addSagaData(sagaName, SagaData(sagaInputActionsChannel, sagaProcessor, sagaJob, ""))
         //we are ready to start now
         sagaJob.start()
     }
+
     private suspend fun sagaFinished(sagaName: String) {
         updateSagaData(sagaName) { finishedSaga->
             if(finishedSaga==null)
@@ -103,35 +130,42 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
     fun stopSaga(sagaName:String) {
         val deletedSaga=deleteSagaData(sagaName)
         deletedSaga?.apply {
-            sagaJob?.cancel()
-            inputActionsChannel?.close()
-            sagaProcessor?.stop()
-        }
-    }
-    private fun updateSagaData(sagaName:String,updatefn:(SagaData<S>?)->SagaData<S>?) {
-        synchronized(this) {
-            val curData=childSagas[sagaName]
-            val newChildSagas= childSagas.toMutableMap()
-            updatefn(curData)?.let{ newData->
-                newChildSagas.put(sagaName,newData)
+            if(!isCompleted()) {
+                sagaJob?.cancel()
+                inputActionsChannel?.close()
+                sagaProcessor?.stop()
             }
-            childSagas=newChildSagas
+        }
+        val childSagasNames=sagaMap.entries.filter { it.value.sagaParentName==sagaName }.map { it.key }
+        childSagasNames.forEach { childSagaName->
+            stopSaga(childSagaName)
         }
     }
-    private fun addSagaData(sagaName:String,sagaData:SagaData<S>) {
+    private fun updateSagaData(sagaName:String,updatefn:(SagaData<S>?)-> SagaData<S>?) {
         synchronized(this) {
-            val newChildSagas= childSagas.toMutableMap()
-            newChildSagas.put(sagaName,sagaData)
-            childSagas=newChildSagas
+            val curData= sagaMap[sagaName]
+            val newSagaMap= sagaMap.toMutableMap()
+            updatefn(curData)?.let{ newData->
+                newSagaMap.put(sagaName,newData)
+            }
+            sagaMap =newSagaMap
+        }
+    }
+    private fun addSagaData(sagaName:String,sagaData: SagaData<S>) {
+        synchronized(this) {
+            val newSagaMap= sagaMap.toMutableMap()
+            newSagaMap.put(sagaName,sagaData)
+            sagaMap =newSagaMap
         }
     }
     private fun deleteSagaData(sagaName:String): SagaData<S>? {
-        var deletedSaga:SagaData<S>?=null
+        var deletedSaga: SagaData<S>?=null
         synchronized(this) {
-            val newChildSagas= childSagas.toMutableMap()
-            deletedSaga=newChildSagas.remove(sagaName)
-            childSagas=newChildSagas
+            val newSagaMap= sagaMap.toMutableMap()
+            deletedSaga=newSagaMap.remove(sagaName)
+            sagaMap =newSagaMap
         }
         return deletedSaga
     }
+
 }
