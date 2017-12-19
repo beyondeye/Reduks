@@ -28,7 +28,11 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val sagaContext:CoroutineContext= D
         //use an actor for dispatching so that we ensure we preserve action order
         dispatcherActor = actor<Any>(sagaContext) {
             for (a in channel) { //loop over incoming message
-                store.get()?.dispatch?.invoke(a)
+                try { //don't let exception bubble up to sagas
+                    store.get()?.dispatch?.invoke(a)
+                } catch (e:Exception) {
+
+                }
             }
         }
         //use an actor for distributing incoming actions so we ensure we preserve action order
