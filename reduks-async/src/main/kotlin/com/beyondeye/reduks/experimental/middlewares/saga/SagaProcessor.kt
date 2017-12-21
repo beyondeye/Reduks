@@ -57,7 +57,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * the cancellation will also propagate to the Saga executing the join effect.
      * Similarly, any potential callers of those joiners will be cancelled as well.
      */
-    suspend  fun<R:Any> join( task:SagaTask<R>):R {
+    suspend  infix fun<R:Any> join( task:SagaTask<R>):R {
         val res=_yieldSingle(OpCode.JoinTasks(listOf(task)))
         if(res is Exception) throw res
         @Suppress("UNCHECKED_CAST")
@@ -72,8 +72,8 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * Notes
      *   It simply wraps the array of tasks in join effects, roughly becoming the equivalent of yield tasks.map(t => join(t)).
      **/
-    suspend fun join( vararg tasks:SagaTask<Any>):List<Any> {
-       val res= _yieldSingle(OpCode.JoinTasks(tasks.toList()))
+    suspend infix fun join(tasks:List<SagaTask<Any>>):List<Any> {
+       val res= _yieldSingle(OpCode.JoinTasks(tasks))
         if(res is Exception) throw res
         @Suppress("UNCHECKED_CAST")
         return res as List<Any>
@@ -100,8 +100,11 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      *
      *      cancel is a non-blocking Effect. i.e. the Saga executing it will resume immediately after performing the cancellation.
      */
-    suspend fun cancel( vararg tasks:SagaTask<Any>) {
-        _yieldSingle(OpCode.CancelTasks(tasks.toList()))
+    suspend infix fun cancel( task:SagaTask<Any>) {
+        _yieldSingle(OpCode.CancelTasks(listOf(task)))
+    }
+    suspend infix fun cancel( tasks:List<SagaTask<Any>>) {
+        _yieldSingle(OpCode.CancelTasks(tasks))
     }
     //TODO write docs
     suspend fun cancel() {

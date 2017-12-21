@@ -182,6 +182,58 @@ class SagaMiddleware2Test {
         Assertions.assertThat(state.incrCounter).isEqualTo(totIncr)
         Assertions.assertThat(state.decrCounter).isEqualTo(totDecr)
     }
+    @Test
+    fun testSagaForkSpawnAndJoin() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+
+        val totIncr=333
+        val totDecr=-333
+        val delayMs=1000L
+
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==4) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        sagaMiddleware.runSaga("main") {
+            val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
+                yieldSingle.delay(delayMs)
+                yieldSingle put(ActualAction.SetIncrCounter(p1))
+                totIncr-p1
+            }
+
+            val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
+                yieldSingle.delay(delayMs)
+                yieldSingle put(ActualAction.SetDecrCounter(p1))
+                totDecr-p1
+            }
+            val incrForkTask = yieldSingle fork (childSagaIncr.withArgs(123))
+            val decrSpawnTask = yieldSingle spawn (childSagaDecr.withArgs(-123))
+
+            val resIncr=yieldSingle join(incrForkTask)
+            yieldSingle put(ActualAction.IncrementCounter(resIncr))
+            val resDecr=yieldSingle join(decrSpawnTask)
+            yieldSingle put(ActualAction.DecrementCounter(-resDecr))
+
+        }
+        val actualExecTime= measureTimeMillis{
+            lock.await(100,TimeUnit.SECONDS)
+        }
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isEqualTo(4)
+        Assertions.assertThat(state.incrCounter).isEqualTo(totIncr)
+        Assertions.assertThat(state.decrCounter).isEqualTo(totDecr)
+        //check that child sagas are executed in parallel
+        Assertions.assertThat(actualExecTime).isGreaterThan(delayMs)
+        Assertions.assertThat(actualExecTime).isLessThan(2*delayMs)
+    }
     @Ignore
     @Test
     fun testSagaTakeEvery() {
