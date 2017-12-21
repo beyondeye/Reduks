@@ -267,8 +267,8 @@ class SagaMiddleware2Test {
             }
             val incrForkTask = yieldSingle fork childSagaIncr.withArgs(canceledIncr)
             yieldSingle  cancel incrForkTask //immediately cancel child tasks so that it does not dispatch any action
-            val decrForkTask = yieldSingle spawn childSagaDecr.withArgs(canceledDecr)
-            yieldSingle  cancel decrForkTask //immediately cancel child tasks so that it does not dispatch any action
+            val decrSpawnTask = yieldSingle spawn childSagaDecr.withArgs(canceledDecr)
+            yieldSingle  cancel decrSpawnTask //immediately cancel child tasks so that it does not dispatch any action
             yieldSingle delay  delayMs*2 //wait, to be sure that cancel actually blocked child task execution
 
             yieldSingle put(ActualAction.IncrementCounter(actualIncr))
