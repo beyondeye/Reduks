@@ -100,7 +100,8 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      *
      *      cancel is a non-blocking Effect. i.e. the Saga executing it will resume immediately after performing the cancellation.
      */
-    suspend infix fun cancel( task:SagaTask<Any>) {
+
+    suspend infix fun<R:Any> cancel( task:SagaTask<R>) {
         _yieldSingle(OpCode.CancelTasks(listOf(task)))
     }
     suspend infix fun cancel( tasks:List<SagaTask<Any>>) {
@@ -212,7 +213,7 @@ sealed class OpCode {
     class Fork<S:Any,R:Any>(val childSaga: SagaFn<S,R>) : OpCodeWithResult()
     class Spawn<S:Any,R:Any>(val childSaga: SagaFn<S,R>) : OpCodeWithResult()
     class JoinTasks(val tasks:List<SagaTask<out Any>>): OpCodeWithResult()
-    class CancelTasks(val tasks:List<SagaTask<out Any>>): OpCode()
+    class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
 //    class Cancelled:OpCode()
 }
