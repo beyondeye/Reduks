@@ -5,7 +5,9 @@ import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
 import com.beyondeye.reduks.experimental.middlewares.saga.*
 import com.beyondeye.reduks.middlewares.applyMiddleware
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.experimental.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Ignore
 import org.junit.Test
@@ -280,6 +282,50 @@ class SagaMiddleware2Test {
         Assertions.assertThat(state.actionCounter).isEqualTo(2)
         Assertions.assertThat(state.incrCounter).isEqualTo(actualIncr)
         Assertions.assertThat(state.decrCounter).isEqualTo(-actualDecr)
+    }
+    @Test
+    fun testSagaSpawnForkParentCancel() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+
+        val forkIncr=333
+        val spawnDecr=-333
+        val delayMs=500L
+
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==1) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        sagaMiddleware.runSaga("main") {
+            val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
+                yieldSingle delay delayMs
+                yieldSingle put ActualAction.SetIncrCounter(p1)
+            }
+            val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
+                yieldSingle delay delayMs
+                yieldSingle put ActualAction.SetDecrCounter(p1)
+            }
+            val incrForkTask = yieldSingle fork childSagaIncr.withArgs(forkIncr)
+            val decrSpawnTask = yieldSingle spawn childSagaDecr.withArgs(spawnDecr)
+            //immediately cancel main saga
+            yieldSingle.cancelSelf()
+        }
+        //give time to make sure that cancellation actually happened
+        runBlocking { delay(delayMs*2) }
+        lock.await(100,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isEqualTo(1)
+        //fork child Saga was cancelled by parent cancel!
+        Assertions.assertThat(state.incrCounter).isEqualTo(0)
+        //spawn child Saga was not cancelled by parent cancel!
+        Assertions.assertThat(state.decrCounter).isEqualTo(spawnDecr)
     }
     @Ignore
     @Test

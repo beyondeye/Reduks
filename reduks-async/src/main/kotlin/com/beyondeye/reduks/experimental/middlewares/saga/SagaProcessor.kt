@@ -108,7 +108,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
         _yieldSingle(OpCode.CancelTasks(tasks))
     }
     //TODO write docs
-    suspend fun cancel() {
+    suspend fun cancelSelf() {
         _yieldSingle(OpCode.CancelSelf())
     }
     /*
