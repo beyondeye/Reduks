@@ -48,6 +48,7 @@ class SagaMiddleware2Test {
         }
     }
 
+
     @Test
     fun testSagaPut() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
@@ -121,7 +122,7 @@ class SagaMiddleware2Test {
         sagaMiddleware.runSaga("delay") {
             //wait for SagaAction.Plus type of action
             val actualDelay=measureTimeMillis {
-                yieldSingle.delay(expectedDelay)
+                yieldSingle delay(expectedDelay)
             }
             yieldSingle put(ActualAction.SetIncrCounter(actualDelay.toInt()))
         }
@@ -140,6 +141,46 @@ class SagaMiddleware2Test {
         Assertions.assertThat(state.actionCounter).isEqualTo(1)
         Assertions.assertThat(state.incrCounter-expectedDelay).isLessThan(100)
 //        store.dispatch(EndAction())
+    }
+    @Test
+    fun testSagaCall() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+
+        val totIncr=333
+        val totDecr=-333
+        val childSagaIncr=SagaFn1<TestState,Int,Int>("childSagaIncr") { p1->
+            yieldSingle put(ActualAction.SetIncrCounter(p1))
+            totIncr-p1
+        }
+        sagaMiddleware.runSaga("main") {
+            val resIncr:Int=yieldSingle call(childSagaIncr.withArgs(123))
+            yieldSingle put(ActualAction.IncrementCounter(resIncr))
+
+            val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
+                yieldSingle put(ActualAction.SetDecrCounter(p1))
+                totDecr-p1
+            }
+            val resDecr:Int=yieldSingle call(childSagaDecr.withArgs(-123))
+            yieldSingle put(ActualAction.DecrementCounter(-resDecr))
+
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==4) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        lock.await(100,TimeUnit.SECONDS)
+        val state=store.state
+        Assertions.assertThat(state.actionCounter).isEqualTo(4)
+        Assertions.assertThat(state.incrCounter).isEqualTo(totIncr)
+        Assertions.assertThat(state.decrCounter).isEqualTo(totDecr)
     }
     @Ignore
     @Test
