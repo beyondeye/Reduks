@@ -327,8 +327,49 @@ class SagaMiddleware2Test {
         //spawn child Saga was not cancelled by parent cancel!
         assertThat(state.decrCounter).isEqualTo(spawnDecr)
     }
+    @Test
     fun TestSagaForkExceptionInParentTerminateChildren() {
-        TODO()
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+
+        val forkIncr=333
+        val spawnDecr=-333
+        val delayMs=500L
+
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter>=1) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        sagaMiddleware.runSaga("main") {
+            val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
+                yield_ delay delayMs
+                yield_ put ActualAction.SetIncrCounter(p1)
+            }
+            val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
+                yield_ delay delayMs
+                yield_ put ActualAction.SetDecrCounter(p1)
+            }
+            val incrForkTask = yield_ fork childSagaIncr.withArgs(forkIncr)
+            val decrSpawnTask = yield_ spawn childSagaDecr.withArgs(spawnDecr)
+            //immediately throw exception in main saga
+            throw Exception("something went wrong in main saga! forked children should be automatically cancelled")
+        }
+        //give time to make sure that cancellation actually happened
+        runBlocking { delay(delayMs*2) }
+        lock.await(100,TimeUnit.SECONDS)
+        val state=store.state
+        assertThat(state.actionCounter).isEqualTo(1)
+        //fork child Saga was cancelled by parent exception!
+        assertThat(state.incrCounter).isEqualTo(0)
+        //spawn child Saga was not cancelled by parent exception!
+        assertThat(state.decrCounter).isEqualTo(spawnDecr)
     }
     @Test
     fun testSagaForkParentAutomaticallyWaitForChildCompletion() {
