@@ -8,7 +8,7 @@ import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.*
 import org.junit.Ignore
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -67,16 +67,16 @@ class SagaMiddleware2Test {
                     }
                 })
         sagaMiddleware.runSaga("incr") {
-            yieldSingle put ActualAction.IncrementCounter(123)
+            yield_ put ActualAction.IncrementCounter(123)
         }
         sagaMiddleware.runSaga("decr") {
-            yieldSingle put ActualAction.DecrementCounter(321)
+            yield_ put ActualAction.DecrementCounter(321)
         }
         lock.await(5,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2)
-        Assertions.assertThat(state.incrCounter).isEqualTo(123)
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(123)
+        assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
     @Test
@@ -86,13 +86,13 @@ class SagaMiddleware2Test {
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
             //wait for SagaAction.Plus type of action
-            val a:SagaAction.Plus=yieldSingle.take()
-            yieldSingle put ActualAction.IncrementCounter(a.value)
+            val a:SagaAction.Plus= yield_.take()
+            yield_ put ActualAction.IncrementCounter(a.value)
         }
         sagaMiddleware.runSaga("decr") {
             //wait for SagaAction.Minus type of action
-            val a:SagaAction.Minus=yieldSingle.take()
-            yieldSingle put ActualAction.DecrementCounter(a.value)
+            val a:SagaAction.Minus= yield_.take()
+            yield_ put ActualAction.DecrementCounter(a.value)
         }
         val lock = CountDownLatch(1)
 
@@ -110,9 +110,9 @@ class SagaMiddleware2Test {
         store.dispatch(SagaAction.Minus(321))
         lock.await(50,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2)
-        Assertions.assertThat(state.incrCounter).isEqualTo(123)
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(123)
+        assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
     @Test
@@ -124,9 +124,9 @@ class SagaMiddleware2Test {
         sagaMiddleware.runSaga("delay") {
             //wait for SagaAction.Plus type of action
             val actualDelay=measureTimeMillis {
-                yieldSingle delay expectedDelay
+                yield_ delay expectedDelay
             }
-            yieldSingle put(ActualAction.SetIncrCounter(actualDelay.toInt()))
+            yield_ put(ActualAction.SetIncrCounter(actualDelay.toInt()))
         }
         val lock = CountDownLatch(1)
 
@@ -140,8 +140,8 @@ class SagaMiddleware2Test {
                 })
         lock.await(50,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(1)
-        Assertions.assertThat(state.incrCounter-expectedDelay).isLessThan(100)
+        assertThat(state.actionCounter).isEqualTo(1)
+        assertThat(state.incrCounter-expectedDelay).isLessThan(100)
 //        store.dispatch(EndAction())
     }
     @Test
@@ -153,19 +153,19 @@ class SagaMiddleware2Test {
         val totIncr=333
         val totDecr=-333
         val childSagaIncr=SagaFn1<TestState,Int,Int>("childSagaIncr") { p1->
-            yieldSingle put(ActualAction.SetIncrCounter(p1))
+            yield_ put(ActualAction.SetIncrCounter(p1))
             totIncr-p1
         }
         sagaMiddleware.runSaga("main") {
-            val resIncr:Int=yieldSingle call childSagaIncr.withArgs(123)
-            yieldSingle put ActualAction.IncrementCounter(resIncr)
+            val resIncr:Int= yield_ call childSagaIncr.withArgs(123)
+            yield_ put ActualAction.IncrementCounter(resIncr)
 
             val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
-                yieldSingle put ActualAction.SetDecrCounter(p1)
+                yield_ put ActualAction.SetDecrCounter(p1)
                 totDecr-p1
             }
-            val resDecr:Int=yieldSingle call childSagaDecr.withArgs(-123)
-            yieldSingle put ActualAction.DecrementCounter(-resDecr)
+            val resDecr:Int= yield_ call childSagaDecr.withArgs(-123)
+            yield_ put ActualAction.DecrementCounter(-resDecr)
 
         }
         val lock = CountDownLatch(1)
@@ -180,9 +180,9 @@ class SagaMiddleware2Test {
                 })
         lock.await(100,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(4)
-        Assertions.assertThat(state.incrCounter).isEqualTo(totIncr)
-        Assertions.assertThat(state.decrCounter).isEqualTo(totDecr)
+        assertThat(state.actionCounter).isEqualTo(4)
+        assertThat(state.incrCounter).isEqualTo(totIncr)
+        assertThat(state.decrCounter).isEqualTo(totDecr)
     }
     @Test
     fun testSagaForkSpawnAndJoin() {
@@ -206,35 +206,35 @@ class SagaMiddleware2Test {
                 })
         sagaMiddleware.runSaga("main") {
             val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
-                yieldSingle delay delayMs
-                yieldSingle put ActualAction.SetIncrCounter(p1)
+                yield_ delay delayMs
+                yield_ put ActualAction.SetIncrCounter(p1)
                 totIncr-p1
             }
 
             val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
-                yieldSingle.delay(delayMs)
-                yieldSingle put ActualAction.SetDecrCounter(p1)
+                yield_.delay(delayMs)
+                yield_ put ActualAction.SetDecrCounter(p1)
                 totDecr-p1
             }
-            val incrForkTask = yieldSingle fork childSagaIncr.withArgs(123)
-            val decrSpawnTask = yieldSingle spawn childSagaDecr.withArgs(-123)
+            val incrForkTask = yield_ fork childSagaIncr.withArgs(123)
+            val decrSpawnTask = yield_ spawn childSagaDecr.withArgs(-123)
 
-            val resIncr=yieldSingle join incrForkTask
-            yieldSingle put ActualAction.IncrementCounter(resIncr)
-            val resDecr=yieldSingle join decrSpawnTask
-            yieldSingle put ActualAction.DecrementCounter(-resDecr)
+            val resIncr= yield_ join incrForkTask
+            yield_ put ActualAction.IncrementCounter(resIncr)
+            val resDecr= yield_ join decrSpawnTask
+            yield_ put ActualAction.DecrementCounter(-resDecr)
 
         }
         val actualExecTime= measureTimeMillis{
             lock.await(100,TimeUnit.SECONDS)
         }
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(4)
-        Assertions.assertThat(state.incrCounter).isEqualTo(totIncr)
-        Assertions.assertThat(state.decrCounter).isEqualTo(totDecr)
+        assertThat(state.actionCounter).isEqualTo(4)
+        assertThat(state.incrCounter).isEqualTo(totIncr)
+        assertThat(state.decrCounter).isEqualTo(totDecr)
         //check that child sagas are executed in parallel
-        Assertions.assertThat(actualExecTime).isGreaterThan(delayMs)
-        Assertions.assertThat(actualExecTime).isLessThan(2*delayMs)
+        assertThat(actualExecTime).isGreaterThan(delayMs)
+        assertThat(actualExecTime).isLessThan(2*delayMs)
     }
     @Test
     fun testSagaForkSpawnAndCancelChildren() {
@@ -260,28 +260,28 @@ class SagaMiddleware2Test {
                 })
         sagaMiddleware.runSaga("main") {
             val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
-                yieldSingle delay delayMs
-                yieldSingle put ActualAction.SetIncrCounter(p1)
+                yield_ delay delayMs
+                yield_ put ActualAction.SetIncrCounter(p1)
             }
             val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
-                yieldSingle delay delayMs
-                yieldSingle put ActualAction.SetDecrCounter(p1)
+                yield_ delay delayMs
+                yield_ put ActualAction.SetDecrCounter(p1)
             }
-            val incrForkTask = yieldSingle fork childSagaIncr.withArgs(canceledIncr)
-            yieldSingle  cancel incrForkTask //immediately cancel child tasks so that it does not dispatch any action
-            val decrSpawnTask = yieldSingle spawn childSagaDecr.withArgs(canceledDecr)
-            yieldSingle  cancel decrSpawnTask //immediately cancel child tasks so that it does not dispatch any action
-            yieldSingle delay  delayMs*2 //wait, to be sure that cancel actually blocked child task execution
+            val incrForkTask = yield_ fork childSagaIncr.withArgs(canceledIncr)
+            yield_ cancel incrForkTask //immediately cancel child tasks so that it does not dispatch any action
+            val decrSpawnTask = yield_ spawn childSagaDecr.withArgs(canceledDecr)
+            yield_ cancel decrSpawnTask //immediately cancel child tasks so that it does not dispatch any action
+            yield_ delay  delayMs*2 //wait, to be sure that cancel actually blocked child task execution
 
-            yieldSingle put(ActualAction.IncrementCounter(actualIncr))
-            yieldSingle put(ActualAction.DecrementCounter(actualDecr))
+            yield_ put(ActualAction.IncrementCounter(actualIncr))
+            yield_ put(ActualAction.DecrementCounter(actualDecr))
 
         }
         lock.await(100,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2)
-        Assertions.assertThat(state.incrCounter).isEqualTo(actualIncr)
-        Assertions.assertThat(state.decrCounter).isEqualTo(-actualDecr)
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(actualIncr)
+        assertThat(state.decrCounter).isEqualTo(-actualDecr)
     }
     @Test
     fun testSagaSpawnForkParentCancel() {
@@ -305,28 +305,78 @@ class SagaMiddleware2Test {
                 })
         sagaMiddleware.runSaga("main") {
             val childSagaIncr= sagaFn("childSagaIncr") { p1:Int->
-                yieldSingle delay delayMs
-                yieldSingle put ActualAction.SetIncrCounter(p1)
+                yield_ delay delayMs
+                yield_ put ActualAction.SetIncrCounter(p1)
             }
             val childSagaDecr= sagaFn("childSagaDecr") { p1:Int->
-                yieldSingle delay delayMs
-                yieldSingle put ActualAction.SetDecrCounter(p1)
+                yield_ delay delayMs
+                yield_ put ActualAction.SetDecrCounter(p1)
             }
-            val incrForkTask = yieldSingle fork childSagaIncr.withArgs(forkIncr)
-            val decrSpawnTask = yieldSingle spawn childSagaDecr.withArgs(spawnDecr)
+            val incrForkTask = yield_ fork childSagaIncr.withArgs(forkIncr)
+            val decrSpawnTask = yield_ spawn childSagaDecr.withArgs(spawnDecr)
             //immediately cancel main saga
-            yieldSingle.cancelSelf()
+            yield_.cancelSelf()
         }
         //give time to make sure that cancellation actually happened
         runBlocking { delay(delayMs*2) }
         lock.await(100,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(1)
+        assertThat(state.actionCounter).isEqualTo(1)
         //fork child Saga was cancelled by parent cancel!
-        Assertions.assertThat(state.incrCounter).isEqualTo(0)
+        assertThat(state.incrCounter).isEqualTo(0)
         //spawn child Saga was not cancelled by parent cancel!
-        Assertions.assertThat(state.decrCounter).isEqualTo(spawnDecr)
+        assertThat(state.decrCounter).isEqualTo(spawnDecr)
     }
+    fun TestSagaForkExceptionInParentTerminateChildren() {
+        TODO()
+    }
+    @Test
+    fun testSagaForkParentAutomaticallyWaitForChildCompletion() {
+        val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare2<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+
+        val forkIncr=333
+        val delayMs=500L
+
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==3) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        sagaMiddleware.runSaga("main") {
+            val childSagaIncr2= sagaFn("childSagaIncr2") { p1:Int->
+                yield_ delay delayMs
+                yield_ put ActualAction.IncrementCounter(p1)
+            }
+            //childSagaDecr execution time should be equal the sum of its execution time and childSagaIncr,
+            //because parent saga should automatically wait for children to complete
+            val childSagaIncr1= sagaFn("childSagaIncr1") { p1:Int->
+                yield_ delay delayMs
+                yield_ put ActualAction.IncrementCounter(p1)
+                val incr2Task = yield_ fork childSagaIncr2.withArgs(forkIncr)
+            }
+            val incr1Task = yield_ fork childSagaIncr1.withArgs(forkIncr)
+            val runtime=measureTimeMillis {
+                yield_ join incr1Task
+            }
+            yield_ put ActualAction.SetDecrCounter(runtime.toInt())
+
+        }
+        lock.await(100,TimeUnit.SECONDS)
+        val state=store.state
+        assertThat(state.actionCounter).isEqualTo(3)
+        val runtime = state.decrCounter
+        //the combined runtime of childSagaIncr1 and childSagaIncr2
+        assertThat(runtime).isGreaterThan(2*delayMs.toInt())
+        assertThat(state.incrCounter).isEqualTo(2*forkIncr)
+    }
+
     @Ignore
     @Test
     fun testSagaTakeEvery() {
@@ -334,12 +384,12 @@ class SagaMiddleware2Test {
         val sagaMiddleware = SagaMiddleWare2<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
-            yieldSingle takeEvery { a:SagaAction.Plus ->
+            yield_ takeEvery { a:SagaAction.Plus ->
                 ActualAction.IncrementCounter(a.value)
             }
         }
         sagaMiddleware.runSaga("decr") {
-            yieldSingle takeEvery { a:SagaAction.Minus ->
+            yield_ takeEvery { a:SagaAction.Minus ->
                 ActualAction.DecrementCounter(a.value)
             }
         }
@@ -357,9 +407,9 @@ class SagaMiddleware2Test {
         store.dispatch(SagaAction.Minus(321))
         lock.await(100,TimeUnit.SECONDS)
         val state=store.state
-        Assertions.assertThat(state.actionCounter).isEqualTo(2)
-        Assertions.assertThat(state.incrCounter).isEqualTo(123)
-        Assertions.assertThat(state.decrCounter).isEqualTo(-321)
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(123)
+        assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
 }

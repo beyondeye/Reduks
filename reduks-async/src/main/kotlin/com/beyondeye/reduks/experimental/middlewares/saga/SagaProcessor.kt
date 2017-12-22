@@ -70,7 +70,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      *
      *tasks: Array<[SagaTask]> - A Task is the object returned by a previous fork
      * Notes
-     *   It simply wraps the array of tasks in join effects, roughly becoming the equivalent of yield tasks.map(t => join(t)).
+     *   It simply wraps the array of tasks in join effects, roughly becoming the equivalent of yield_ tasks.map(t => join(t)).
      **/
     suspend infix fun join(tasks:List<SagaTask<Any>>):List<Any> {
        val res= _yieldSingle(OpCode.JoinTasks(tasks))
@@ -90,12 +90,12 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      *      the current Effect in the task and jump to the finally block (if defined).
      *      Inside the finally block, you can execute any cleanup logic or dispatch some action to keep the store
      *      in a consistent state (e.g. reset the state of a spinner to false when an ajax request is cancelled).
-     *      You can check inside the finally block if a Saga was cancelled by issuing a yield cancelled().
+     *      You can check inside the finally block if a Saga was cancelled by issuing a yield_ cancelled().
      *
      *      Cancellation propagates downward to child sagas. When cancelling a task, the middleware will also
      *      cancel the current Effect (where the task is currently blocked).
      *      If the current Effect is a call to another Saga, it will be also cancelled.
-     *      When cancelling a Saga, all attached forks (sagas forked using yield fork()) will be cancelled.
+     *      When cancelling a Saga, all attached forks (sagas forked using yield_ fork()) will be cancelled.
      *      This means that cancellation effectively affects the whole execution tree that belongs to the cancelled task.
      *
      *      cancel is a non-blocking Effect. i.e. the Saga executing it will resume immediately after performing the cancellation.
@@ -123,7 +123,7 @@ function* saga() {
   try {
     // ...
   } finally {
-    if (yield cancelled()) {
+    if (yield_ cancelled()) {
       // logic that should execute only on Cancellation
     }
     // logic that should execute in all situations (e.g. closing a channel)
@@ -138,7 +138,7 @@ function* saga() {
     }
 
     /**
-     * yield a command to execute a child Saga in a new context:  immediately return to execution
+     * yield_ a command to execute a child Saga in a new context:  immediately return to execution
      * a [SagaTask]. The new saga has an independent incoming actions channel from the parent saga
      *
      */
@@ -190,7 +190,7 @@ suspend inline fun <reified B> SagaYeldSingle<*>.take():B {
 //}
 
 class Saga2<S:Any>(sagaProcessor: SagaProcessor<S>) {
-    val yieldSingle= SagaYeldSingle(sagaProcessor)
+    @JvmField val yield_ = SagaYeldSingle(sagaProcessor)
 //    val yieldAll= SagaYeldAll(sagaProcessor)
     fun <R:Any> sagaFn(name: String, fn0: suspend Saga2<S>.() -> R) =
         SagaFn0(name, fn0)
