@@ -25,7 +25,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
 
     suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
     {
-        _yieldSingle( OpCode.TakeEvery<S,B>(process))
+        _yieldSingle(OpCode.TakeEvery<S, B>(process))
     }
 
     /**
@@ -35,7 +35,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * The parent saga and child saga share the same [SagaProcessor] and the same incoming actions channel.
      * In other words, incoming store actions processed in the child saga will be removed from the actions queue of parent saga
      */
-    suspend infix fun <S:Any,R:Any> call(childSaga: SagaFn<S,R>):R {
+    suspend infix fun <S:Any,R:Any> call(childSaga: SagaFn<S, R>):R {
         val res= _yieldSingle(OpCode.Call(childSaga))
         if(res is Throwable)
             throw res
@@ -57,7 +57,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * the cancellation will also propagate to the Saga executing the join effect.
      * Similarly, any potential callers of those joiners will be cancelled as well.
      */
-    suspend  infix fun<R:Any> join( task:SagaTask<R>):R {
+    suspend  infix fun<R:Any> join( task: SagaTask<R>):R {
         val res=_yieldSingle(OpCode.JoinTasks(listOf(task)))
         if(res is Exception) throw res
         @Suppress("UNCHECKED_CAST")
@@ -101,7 +101,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      *      cancel is a non-blocking Effect. i.e. the Saga executing it will resume immediately after performing the cancellation.
      */
 
-    suspend infix fun<R:Any> cancel( task:SagaTask<R>) {
+    suspend infix fun<R:Any> cancel( task: SagaTask<R>) {
         _yieldSingle(OpCode.CancelTasks(listOf(task)))
     }
     suspend infix fun cancel( tasks:List<SagaTask<Any>>) {
@@ -156,7 +156,7 @@ function* saga() {
      *  then no Task is returned, instead the parent will be aborted as soon as possible (since both parent and child executes
      *  in parallel, the parent will abort as soon as it takes notice of the child failure).
      */
-    suspend infix fun <S:Any,R:Any> fork(childSaga: SagaFn<S,R>):SagaTask<R> {
+    suspend infix fun <S:Any,R:Any> fork(childSaga: SagaFn<S, R>): SagaTask<R> {
         @Suppress("UNCHECKED_CAST")
         return _yieldSingle(OpCode.Fork(childSaga)) as SagaTask<R>
     }
@@ -166,7 +166,7 @@ function* saga() {
      * The parent will not wait for detached tasks to terminate before returning and all events which may affect the parent or the detached
      * task are completely independents (error, cancellation).
      */
-    suspend infix fun <S:Any,R:Any> spawn(childSaga: SagaFn<S,R>):SagaTask<R> {
+    suspend infix fun <S:Any,R:Any> spawn(childSaga: SagaFn<S, R>): SagaTask<R> {
         @Suppress("UNCHECKED_CAST")
         return _yieldSingle(OpCode.Spawn(childSaga))as SagaTask<R>
     }
@@ -198,20 +198,20 @@ class Saga2<S:Any>(sagaProcessor: SagaProcessor<S>) {
     fun <P1, R : Any> sagaFn(name: String, fn1: suspend Saga2<S>.(p1: P1) -> R) =
             SagaFn1(name, fn1)
     fun <P1,P2,R:Any> sagaFn(name:String, fn2:suspend Saga2<S>.(p1:P1, p2:P2)->R)=
-        SagaFn2(name,fn2)
+            SagaFn2(name, fn2)
     fun <P1,P2,P3,R:Any> sagaFn(name:String, fn3:suspend Saga2<S>.(p1:P1, p2:P2, p3:P3)->R)=
-        SagaFn3(name,fn3)
+            SagaFn3(name, fn3)
 }
 sealed class OpCode {
-    open class OpCodeWithResult:OpCode()
-    class Delay(val time: Long,val unit: TimeUnit = TimeUnit.MILLISECONDS):OpCodeWithResult()
+    open class OpCodeWithResult: OpCode()
+    class Delay(val time: Long,val unit: TimeUnit = TimeUnit.MILLISECONDS): OpCodeWithResult()
     class Put(val value:Any): OpCode()
     class Take<B>(val type:Class<B>): OpCodeWithResult()
     class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?): OpCode()
     class SagaFinished<R:Any>(val result: R, val isChildCall: Boolean): OpCode()
-    class Call<S:Any,R:Any>(val childSaga: SagaFn<S,R>) : OpCodeWithResult()
-    class Fork<S:Any,R:Any>(val childSaga: SagaFn<S,R>) : OpCodeWithResult()
-    class Spawn<S:Any,R:Any>(val childSaga: SagaFn<S,R>) : OpCodeWithResult()
+    class Call<S:Any,R:Any>(val childSaga: SagaFn<S, R>) : OpCodeWithResult()
+    class Fork<S:Any,R:Any>(val childSaga: SagaFn<S, R>) : OpCodeWithResult()
+    class Spawn<S:Any,R:Any>(val childSaga: SagaFn<S, R>) : OpCodeWithResult()
     class JoinTasks(val tasks:List<SagaTask<out Any>>): OpCodeWithResult()
     class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
@@ -220,7 +220,7 @@ sealed class OpCode {
 
 class SagaProcessor<S:Any>(
         val sagaName:String,
-        sagaMiddleWare:SagaMiddleWare2<S>,
+        sagaMiddleWare: SagaMiddleWare2<S>,
         private val dispatcherActor: SendChannel<Any> = actor {  }
 )
 {
@@ -270,24 +270,24 @@ class SagaProcessor<S:Any>(
                 }
                 is OpCode.Call<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
-                        val cs:SagaFn<S,Any> = a.childSaga as SagaFn<S,Any>
+                        val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_call_",cs.name)
-                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName,SagaProcessor.SAGATYPE_CHILD_CALL)
+                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_CHILD_CALL)
                     }
                 }
                 is OpCode.Fork<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
-                        val cs:SagaFn<S,Any> = a.childSaga as SagaFn<S,Any>
+                        val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_fork_",cs.name)
-                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName,SagaProcessor.SAGATYPE_CHILD_FORK)
+                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_CHILD_FORK)
                         outChannel.send(childTask)
                     }
                 }
                 is OpCode.Spawn<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
-                        val cs:SagaFn<S,Any> = a.childSaga as SagaFn<S,Any>
+                        val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_spawn_",cs.name)
-                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName,SagaProcessor.SAGATYPE_SPAWN)
+                        val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_SPAWN)
                         outChannel.send(childTask)
                     }
                 }

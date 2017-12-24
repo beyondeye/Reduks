@@ -43,7 +43,7 @@ interface SagaTask<R> {
 }
 
 
-class SagaTaskFromDeferred<R>(override val name:String,val d:Deferred<R>):SagaTask<R> {
+class SagaTaskFromDeferred<R>(override val name:String,val d:Deferred<R>): SagaTask<R> {
     override fun isRunning():Boolean = !d.isCompleted
 
     override fun isCancelled():Boolean =d.isCancelled

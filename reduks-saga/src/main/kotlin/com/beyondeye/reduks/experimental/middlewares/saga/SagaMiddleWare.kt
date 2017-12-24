@@ -52,7 +52,7 @@ inline fun <reified B> SagaScope<Any>.takeLatest(crossinline process: (B) -> Any
 }
 
 //TODO refactor common code between takeEvery and takeLatest and throttle
-inline fun <reified B> SagaScope<Any>.throttle(delayMs:Long,crossinline process: (B) -> Any?) = produce<Any>(coroutineContext,Channel.CONFLATED) {
+inline fun <reified B> SagaScope<Any>.throttle(delayMs:Long, crossinline process: (B) -> Any?) = produce<Any>(coroutineContext,Channel.CONFLATED) {
     val actionType=B::class.java
     for (a in inputActions) {
         if (a::class.java == actionType) {

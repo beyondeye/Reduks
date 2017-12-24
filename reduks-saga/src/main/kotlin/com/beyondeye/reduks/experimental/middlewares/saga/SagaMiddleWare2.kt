@@ -18,7 +18,7 @@ import kotlin.coroutines.experimental.CoroutineContext
 class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
-    private var sagaMap:Map<String, SagaData<S,Any>>
+    private var sagaMap:Map<String, SagaData<S, Any>>
     private val store:WeakReference<Store<S>>
     init {
         store=WeakReference(store_)
@@ -80,7 +80,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
             if(!existingSaga.isCompleted())
                 throw IllegalArgumentException("saga with name: $sagaName  already running: use replaceSaga() instead")
         }
-        _runSaga(SagaFn0(sagaName,sagafn),null,sagaName,SagaProcessor.SAGATYPE_SPAWN)
+        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaProcessor.SAGATYPE_SPAWN)
     }
     /**
      * replace an existing saga with the specified name. If a saga with the specified name exists and its is running, it wll be cancelled
@@ -89,15 +89,15 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
         if(sagaMap.containsKey(sagaName)) {
             stopSaga(sagaName)
         }
-        _runSaga(SagaFn0(sagaName,sagafn),null,sagaName,SagaProcessor.SAGATYPE_SPAWN)
+        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaProcessor.SAGATYPE_SPAWN)
     }
 
     /**
      * child saga type can be one of [SagaProcessor.SAGATYPE_CHILD_CALL],[SagaProcessor.SAGATYPE_CHILD_FORK],[SagaProcessor.SAGATYPE_SPAWN]
      */
-    internal fun <R:Any> _runSaga(sagafn:SagaFn<S,R>, parentSagaProcessor:SagaProcessor<S>?, sagaName: String, childType:Int):SagaTask<R> {
+    internal fun <R:Any> _runSaga(sagafn: SagaFn<S, R>, parentSagaProcessor: SagaProcessor<S>?, sagaName: String, childType:Int): SagaTask<R> {
 
-        if(childType!=SagaProcessor.SAGATYPE_SPAWN &&parentSagaProcessor==null)
+        if(childType!= SagaProcessor.SAGATYPE_SPAWN &&parentSagaProcessor==null)
             throw IllegalArgumentException("Only when spawning independent(top level) sagas parentSagaProcessor can be null!")
 
         val parentSagaCoroutineContext = parentSagaProcessor?.linkedSagaCoroutineContext ?: rootSagaCoroutineContext
@@ -108,7 +108,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
         }
         //-------
         var sagaInputActionsChannel: SendChannel<Any>?=null
-        var sagaProcessor:SagaProcessor<S>?=null
+        var sagaProcessor: SagaProcessor<S>?=null
         when(childType) {
             SagaProcessor.SAGATYPE_CHILD_CALL -> {
                 sagaInputActionsChannel = null //use parent saga action channel
@@ -164,7 +164,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
         addSagaData(sagaName, SagaData(sagaInputActionsChannel, sagaProcessor, sagaDeferred, parentSagaName))
         //we are ready to start now
         sagaDeferred.start()
-        return SagaTaskFromDeferred(sagafn.name,sagaDeferred)
+        return SagaTaskFromDeferred(sagafn.name, sagaDeferred)
     }
 
     private fun sagaProcessorJob(sagaName: String):Job? {
@@ -195,7 +195,7 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
             if(finishedSaga==null)
                 throw Exception("this must not happen")
             launch(rootSagaCoroutineContext) {
-                finishedSaga.sagaProcessor?.inChannel?.send(OpCode.SagaFinished(result,isChildCall))
+                finishedSaga.sagaProcessor?.inChannel?.send(OpCode.SagaFinished(result, isChildCall))
             }
             finishedSaga.copy(sagaJob = null,sagaJobResult = result)
         }
@@ -229,12 +229,12 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
         val childSagasNames = sagaMap.entries.filter { it.value.sagaParentName == sagaName }.map { it.key }
         return childSagasNames
     }
-    private fun getSagaChildren(sagaName: String): List<SagaData<S,Any>> {
+    private fun getSagaChildren(sagaName: String): List<SagaData<S, Any>> {
         val childSagas = sagaMap.entries.filter { it.value.sagaParentName == sagaName }.map { it.value }
         return childSagas
     }
 
-    private fun updateSagaData(sagaName:String,updatefn:(SagaData<S,Any>?)-> SagaData<S,Any>?) {
+    private fun updateSagaData(sagaName:String,updatefn:(SagaData<S, Any>?)-> SagaData<S, Any>?) {
         synchronized(this) {
             val curData= sagaMap[sagaName]
             val newSagaMap= sagaMap.toMutableMap()
@@ -244,15 +244,15 @@ class SagaMiddleWare2<S:Any>(store_:Store<S>,val rootSagaCoroutineContext:Corout
             sagaMap =newSagaMap
         }
     }
-    private fun addSagaData(sagaName:String,sagaData: SagaData<S,Any>) {
+    private fun addSagaData(sagaName:String,sagaData: SagaData<S, Any>) {
         synchronized(this) {
             val newSagaMap= sagaMap.toMutableMap()
             newSagaMap.put(sagaName,sagaData)
             sagaMap =newSagaMap
         }
     }
-    private fun deleteSagaData(sagaName:String): SagaData<S,Any>? {
-        var deletedSaga: SagaData<S,Any>?=null
+    private fun deleteSagaData(sagaName:String): SagaData<S, Any>? {
+        var deletedSaga: SagaData<S, Any>?=null
         synchronized(this) {
             val newSagaMap= sagaMap.toMutableMap()
             deletedSaga=newSagaMap.remove(sagaName)

@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.middlewares
+package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.ReducerFn
@@ -7,7 +7,6 @@ import com.beyondeye.reduks.experimental.middlewares.saga.SagaMiddleWare
 import com.beyondeye.reduks.experimental.middlewares.saga.takeEvery
 import com.beyondeye.reduks.experimental.middlewares.saga.takeLatest
 import com.beyondeye.reduks.experimental.middlewares.saga.throttle
-import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -21,15 +20,15 @@ class SagaMiddlewareTest {
     sealed class SagaAction {
         class Plus(val value:Int) : SagaAction()
         class Minus(val value:Int) : SagaAction()
-        class SetPlus(val value:Int):SagaAction()
-        class SetMinus(val value:Int):SagaAction()
+        class SetPlus(val value:Int): SagaAction()
+        class SetMinus(val value:Int): SagaAction()
     }
     sealed class ActualAction {
-        class IncrementCounter(val incrValue: Int):ActualAction()
-        class DecrementCounter(val decrValue: Int):ActualAction()
-        class SetIncrCounter(val incrValue: Int):ActualAction()
-        class SetDecrCounter(val decrValue: Int):ActualAction()
-        class EndAction:ActualAction()
+        class IncrementCounter(val incrValue: Int): ActualAction()
+        class DecrementCounter(val decrValue: Int): ActualAction()
+        class SetIncrCounter(val incrValue: Int): ActualAction()
+        class SetDecrCounter(val decrValue: Int): ActualAction()
+        class EndAction: ActualAction()
     }
     data class TestState(val incrCounter: Int = 0,val decrCounter: Int = 0, val actionCounter: Int = 0, val endActionReceived: Boolean = false)
 

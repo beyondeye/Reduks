@@ -1,0 +1,20 @@
+//disable warnings when using coroutines
+kotlin { experimental { coroutines 'enable' } }
+
+
+
+dependencies {
+    apiElements project(':reduks-core')
+    implementation project(':reduks-core')
+    implementation libraries.kotlinCoroutinesCore
+    apiElements libraries.kotlinCoroutinesCore //coroutines are part of the library api
+    testImplementation project(':reduks-core-async')
+   // implementation libraries.kotlinCoroutinesAndroid
+   // apiElements libraries.kotlinCoroutinesAndroid
+   // testImplementation libraries.robolectric
+
+//    apiElements libraries.kotlinCoroutinesAndroid //coroutines are part of the library api
+}
+
+apply from: '../maven-push-javalib.gradle'
+

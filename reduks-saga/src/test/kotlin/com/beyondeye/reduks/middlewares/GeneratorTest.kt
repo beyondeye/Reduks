@@ -1,5 +1,7 @@
-package com.beyondeye.reduks.experimental.generators
+package com.beyondeye.reduks.middlewares
 
+import com.beyondeye.reduks.experimental.middlewares.saga.generate
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -11,7 +13,8 @@ class GeneratorTest
    // tests inspired by https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/function*
    @Test
     fun testSimple() {
-        fun idMaker() = generate<Int, Unit> {
+//        fun idMaker() = generate<Int, Unit>(newSingleThreadContext("simple")) {
+            fun idMaker() = generate<Int, Unit> {
             var index = 0
             while (index < 3)
                 yield(index++)

@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.generators
+package com.beyondeye.reduks.experimental.middlewares.saga
 
 /**
  * this code is taken and adapted from
@@ -26,8 +26,10 @@ interface GeneratorBuilder<in T, R> {
     suspend fun yieldAll(generator: Generator<T, R>, param: R)
 }
 
-fun <T, R> generate(block: suspend GeneratorBuilder<T, R>.(R) -> Unit): Generator<T, R> {
-    val coroutine = GeneratorCoroutine<T, R>()
+fun <T, R> generate(
+        context: CoroutineContext = EmptyCoroutineContext, //DefaultDispatcher
+        block: suspend GeneratorBuilder<T, R>.(R) -> Unit): Generator<T, R> {
+    val coroutine = GeneratorCoroutine<T, R>(context)
     val initial = suspend<R> { result -> coroutine.block(result) }
     coroutine.nextStep = { param -> initial.startCoroutine(param, coroutine) }
     return coroutine
@@ -37,7 +39,7 @@ fun <T, R> generate(block: suspend GeneratorBuilder<T, R>.(R) -> Unit): Generato
 private fun <T> suspend(block: suspend (T) -> Unit): suspend (T) -> Unit = block
 
 // Generator coroutine implementation class
-internal class GeneratorCoroutine<T, R>: Generator<T, R>, GeneratorBuilder<T, R>, Continuation<Unit> {
+internal class GeneratorCoroutine<T, R>(override val context: CoroutineContext): Generator<T, R>, GeneratorBuilder<T, R>, Continuation<Unit> {
     lateinit var nextStep: (R) -> Unit
     private var lastValue: T? = null
     private var lastException: Throwable? = null
@@ -70,7 +72,7 @@ internal class GeneratorCoroutine<T, R>: Generator<T, R>, GeneratorBuilder<T, R>
 
     // Continuation<Unit> implementation
 
-    override val context: CoroutineContext get() = EmptyCoroutineContext
+//                override val context: CoroutineContext get() = EmptyCoroutineContext
     override fun resume(value: Unit) { lastValue = null }
     override fun resumeWithException(exception: Throwable) { lastException = exception }
 }

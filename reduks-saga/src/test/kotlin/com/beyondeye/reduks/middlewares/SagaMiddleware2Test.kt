@@ -1,10 +1,9 @@
-package com.beyondeye.reduks.experimental.middlewares
+package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
+import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.experimental.middlewares.saga.*
-import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlinx.coroutines.experimental.runBlocking
@@ -22,15 +21,15 @@ class SagaMiddleware2Test {
     sealed class SagaAction {
         class Plus(val value:Int) : SagaAction()
         class Minus(val value:Int) : SagaAction()
-        class SetPlus(val value:Int):SagaAction()
-        class SetMinus(val value:Int):SagaAction()
+        class SetPlus(val value:Int): SagaAction()
+        class SetMinus(val value:Int): SagaAction()
     }
     sealed class ActualAction {
-        class IncrementCounter(val incrValue: Int):ActualAction()
-        class DecrementCounter(val decrValue: Int):ActualAction()
-        class SetIncrCounter(val incrValue: Int):ActualAction()
-        class SetDecrCounter(val decrValue: Int):ActualAction()
-        class EndAction:ActualAction()
+        class IncrementCounter(val incrValue: Int): ActualAction()
+        class DecrementCounter(val decrValue: Int): ActualAction()
+        class SetIncrCounter(val incrValue: Int): ActualAction()
+        class SetDecrCounter(val decrValue: Int): ActualAction()
+        class EndAction: ActualAction()
     }
     data class TestState(val incrCounter: Int = 0,val decrCounter: Int = 0, val actionCounter: Int = 0, val endActionReceived: Boolean = false)
 
@@ -86,12 +85,12 @@ class SagaMiddleware2Test {
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
             //wait for SagaAction.Plus type of action
-            val a:SagaAction.Plus= yield_.take()
+            val a: SagaAction.Plus = yield_.take()
             yield_ put ActualAction.IncrementCounter(a.value)
         }
         sagaMiddleware.runSaga("decr") {
             //wait for SagaAction.Minus type of action
-            val a:SagaAction.Minus= yield_.take()
+            val a: SagaAction.Minus = yield_.take()
             yield_ put ActualAction.DecrementCounter(a.value)
         }
         val lock = CountDownLatch(1)
@@ -425,12 +424,12 @@ class SagaMiddleware2Test {
         val sagaMiddleware = SagaMiddleWare2<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
-            yield_ takeEvery { a:SagaAction.Plus ->
+            yield_ takeEvery { a: SagaAction.Plus ->
                 ActualAction.IncrementCounter(a.value)
             }
         }
         sagaMiddleware.runSaga("decr") {
-            yield_ takeEvery { a:SagaAction.Minus ->
+            yield_ takeEvery { a: SagaAction.Minus ->
                 ActualAction.DecrementCounter(a.value)
             }
         }
