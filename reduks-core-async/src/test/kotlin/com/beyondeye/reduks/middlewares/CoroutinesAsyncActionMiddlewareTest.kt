@@ -1,9 +1,10 @@
-package com.beyondeye.reduks.experimental.middlewares
+package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
-import com.beyondeye.reduks.middlewares.applyMiddleware
+import com.beyondeye.reduks.experimental.middlewares.AsyncAction
+import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
 import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -21,33 +22,33 @@ class CoroutinesAsyncActionMiddlewareTest {
     val actionDifficultError ="Sometimes difficult problems cannot be solved"
     val reducer = ReducerFn<TestState> { state, action ->
         var res: TestState? = null
-        AsyncAction.withPayload<Int>( action)
+        AsyncAction.withPayload<Int>(action)
                 ?.onCompleted { payload ->
                     res = TestState(
-                            actionCounter = state.actionCounter+1,
+                            actionCounter = state.actionCounter + 1,
                             lastAsyncActionMessage = actionDifficultTag,
                             lastAsyncActionError = null,
                             lastAsyncActionResult = payload
                     )
                 }?.onFailed { error ->
-                    res=TestState(
+                    res= TestState(
                             lastAsyncActionMessage = actionDifficultTag,
-                             lastAsyncActionError = error.message,
-                             lastAsyncActionResult = null)
+                            lastAsyncActionError = error.message,
+                            lastAsyncActionResult = null)
         }
-        AsyncAction.withPayload<String>( action)
+        AsyncAction.withPayload<String>(action)
                 ?.onCompleted { payload ->
                     res = TestState(
-                            actionCounter = state.actionCounter+1,
+                            actionCounter = state.actionCounter + 1,
                             lastAsyncActionMessage = actionDifficultTextTag,
                             lastAsyncActionError = null,
                             lastAsyncActionResultString = payload
                     )
                 }?.onFailed { error ->
-                    res=TestState(
-                        lastAsyncActionMessage = actionDifficultTextTag,
-                        lastAsyncActionError = error.message,
-                        lastAsyncActionResultString = null)
+                    res= TestState(
+                            lastAsyncActionMessage = actionDifficultTextTag,
+                            lastAsyncActionError = error.message,
+                            lastAsyncActionResultString = null)
         }
         if(action is IncrementCounterAction)
             res=state.copy(counter = state.counter + 1,actionCounter = state.actionCounter+1)
@@ -101,7 +102,7 @@ class CoroutinesAsyncActionMiddlewareTest {
                     }
                 }
         }) //on state change
-        val asyncAction = AsyncAction.start  { 2 + 2 }
+        val asyncAction = AsyncAction.start { 2 + 2 }
         store.dispatch(asyncAction)
         val asyncAction2 = AsyncAction.start { "2 + 2" }
         store.dispatch(asyncAction2)

@@ -6,20 +6,20 @@ import kotlinx.coroutines.experimental.async
 
 
 sealed class AsyncAction(val payloadTypename:String): Action {
-    class AsyncActionMatcher<PayloadType>(val action:AsyncAction) {
+    class AsyncActionMatcher<PayloadType>(val action: AsyncAction) {
         fun onStarted(body: () -> Unit): AsyncActionMatcher<PayloadType>? {
-            if(action is AsyncAction.Started<*>)
+            if(action is Started<*>)
                 body()
             return this
         }
         @Suppress("UNCHECKED_CAST")
-        inline fun  onCompleted(body: (value: PayloadType) -> Unit):  AsyncActionMatcher<PayloadType> {
-            if(action is AsyncAction.Completed<*>)
+        inline fun  onCompleted(body: (value: PayloadType) -> Unit): AsyncActionMatcher<PayloadType> {
+            if(action is Completed<*>)
                 body(action.payload as PayloadType)
             return this
         }
-        fun onFailed(body: (error: Throwable) -> Unit):  AsyncActionMatcher<PayloadType> {
-            if(action is AsyncAction.Failed)
+        fun onFailed(body: (error: Throwable) -> Unit): AsyncActionMatcher<PayloadType> {
+            if(action is Failed)
                 body(action.error)
             return this
         }
@@ -48,17 +48,17 @@ sealed class AsyncAction(val payloadTypename:String): Action {
     class Completed<PayloadType>(payloadTypename:String, val payload: PayloadType): AsyncAction(payloadTypename)
     class Failed(payloadTypename:String, val error:Throwable): AsyncAction(payloadTypename)
     companion object {
-        inline fun <reified PayloadType:Any > withPayload(action: Any):AsyncActionMatcher<PayloadType>? {
+        inline fun <reified PayloadType:Any > withPayload(action: Any): AsyncActionMatcher<PayloadType>? {
             if(action !is AsyncAction) return null
             val expectedname=PayloadType::class.java.canonicalName //use Payload type name from java reflection to identify async action
             if (action.payloadTypename !=expectedname) return null
             return AsyncActionMatcher<PayloadType>(action)
         }
-        inline fun <reified  PayloadType:Any> start( promise: Deferred<PayloadType>):AsyncAction {
-            return Started<PayloadType>(PayloadType::class.java.canonicalName,promise)
+        inline fun <reified  PayloadType:Any> start( promise: Deferred<PayloadType>): AsyncAction {
+            return Started<PayloadType>(PayloadType::class.java.canonicalName, promise)
         }
-        inline fun <reified  PayloadType:Any> start(noinline  body: () -> PayloadType):AsyncAction {
-            return Started<PayloadType>(PayloadType::class.java.canonicalName,body)
+        inline fun <reified  PayloadType:Any> start(noinline  body: () -> PayloadType): AsyncAction {
+            return Started<PayloadType>(PayloadType::class.java.canonicalName, body)
         }
     }
 }
