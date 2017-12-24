@@ -19,7 +19,7 @@ buildscript {
 //        mavenCentral()
     }
     rootProject.ext.versions = [
-            kotlin: '1.2.0',
+            kotlin: '1.2.10',
             dokka: '0.9.15'
     ]
 
@@ -51,7 +51,7 @@ allprojects {
 }
 
 
-configure(subprojects.findAll{it.name =='reduks-core' || it.name =='reduks-pcollections'|| it.name =='reduks-bus'}) {
+configure(subprojects.findAll{it.name =='reduks-core' ||it.name =='reduks-core-async' || it.name =='reduks-pcollections'|| it.name =='reduks-bus'}) {
 
     apply plugin: 'kotlin'
     apply plugin: 'org.jetbrains.dokka'

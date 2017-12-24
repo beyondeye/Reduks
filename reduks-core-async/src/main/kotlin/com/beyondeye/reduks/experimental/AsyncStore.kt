@@ -10,7 +10,6 @@ import kotlinx.coroutines.experimental.channels.actor
 import kotlinx.coroutines.experimental.launch
 //import kotlinx.coroutines.experimental.newSingleThreadContext
 import kotlin.coroutines.experimental.CoroutineContext
-import kotlinx.coroutines.experimental.android.UI
 
 
 /**
@@ -23,10 +22,11 @@ import kotlinx.coroutines.experimental.android.UI
  */
 //
 class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
-                    subscribeContext: CoroutineContext =UI,
+                    subscribeContext: CoroutineContext,
                     reduceContext: CoroutineContext =DefaultDispatcher
                     ) : Store<S> {
-    class Creator<S>(val subscribeContext: CoroutineContext =UI,
+    class Creator<S>(
+                     val subscribeContext: CoroutineContext,
                      val reduceContext: CoroutineContext =DefaultDispatcher,
                      val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {

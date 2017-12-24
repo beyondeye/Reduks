@@ -4,9 +4,9 @@ kotlin { experimental { coroutines 'enable' } }
 
 
 dependencies {
-    implementation libraries.kotlinCoroutinesCore
-    apiElements libraries.kotlinCoroutinesCore //coroutines are part of the library api
-    implementation libraries.kotlinCoroutinesAndroid
+//    implementation libraries.kotlinCoroutinesCore
+//    apiElements libraries.kotlinCoroutinesCore //coroutines are part of the library api
+//    implementation libraries.kotlinCoroutinesAndroid
 //    apiElements libraries.kotlinCoroutinesAndroid //coroutines are part of the library api
 }
 

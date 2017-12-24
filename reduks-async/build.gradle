@@ -3,6 +3,7 @@ kotlin { experimental { coroutines 'enable' } }
 
 dependencies {
     api project(':reduks-android') //when including reduks-async dep, no need to include also reduks-core or reduks-android
+    api project(':reduks-core-async') //when including reduks-async dep, no need to include also reduks-core or reduks-android
     implementation libraries.kotlinCoroutinesAndroid
 
     // see for explanation of provided https://github.com/nebula-plugins/gradle-extra-configurations-plugin

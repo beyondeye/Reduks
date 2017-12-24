@@ -1,6 +1,7 @@
 package com.beyondeye.reduks
 
 import com.beyondeye.reduks.experimental.AsyncStore
+import kotlinx.coroutines.experimental.newSingleThreadContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -9,6 +10,7 @@ import java.util.concurrent.TimeUnit
 class AsyncStoreTest {
     data class TestState(val message: String = "initial state")
     data class TestAction(val type: String = "unknown")
+    private fun subscribeContext()=newSingleThreadContext("SubscribeThread")
     @Test
     fun when_an_action_is_fired_the_corresponding_reducer_should_be_called_and_update_the_state_of_the_application() {
         val reducer = ReducerFn<TestState> { state, action ->
@@ -22,7 +24,7 @@ class AsyncStoreTest {
         }
         val lock = CountDownLatch(1)
 
-        val store = AsyncStore(TestState(), reducer) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,subscribeContext()) //false: otherwise exception if not running on android
         store.subscribe(StoreSubscriberFn {
             lock.countDown()
         })
@@ -58,7 +60,7 @@ class AsyncStoreTest {
         }
 
         val lock = CountDownLatch(2)
-        val store = AsyncStore(TestState(), combineReducers(reducer1, reducer2)) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), combineReducers(reducer1, reducer2),subscribeContext()) //false: otherwise exception if not running on android
         store.subscribe(StoreSubscriberFn {
             lock.countDown()
         })
@@ -74,7 +76,7 @@ class AsyncStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() }) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },subscribeContext()) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
         val lock = CountDownLatch(2)
@@ -98,7 +100,7 @@ class AsyncStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() }) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },subscribeContext()) //false: otherwise exception if not running on android
         var subscriber1Called = false
         var subscriber2Called = false
 
@@ -137,8 +139,8 @@ class AsyncStoreTest {
         }
         val lock = CountDownLatch(1)
 
-        var actual: TestState = TestState()
-        val store = AsyncStore(TestState(), reducer) //false: otherwise exception if not running on android
+        var actual = TestState()
+        val store = AsyncStore(TestState(), reducer,subscribeContext()) //false: otherwise exception if not running on android
 
 
         store.subscribe(StoreSubscriberFn {
