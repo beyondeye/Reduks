@@ -12,7 +12,7 @@ class ReduksContextTest {
     fun testThatActionComposedWithInvalidContextReturnTheAction() {
         //.....given
         val action_without_context="the action"
-        val invalidActionContext=ReduksContext("")
+        val invalidActionContext= ReduksContext("")
         //.....when
         val actionWithContext=invalidActionContext..action_without_context
         //....then

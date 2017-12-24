@@ -2,7 +2,6 @@ package com.beyondeye.reduks.modules
 
 import org.assertj.core.api.Assertions.assertThat
 import com.beyondeye.reduks.*
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -59,9 +58,9 @@ class MultiReduksTest {
     var nStateChanges1 = 0
     var nStateChangeCalls1 = 0
     val ctx1 = ReduksContext("m1")
-    val ctx1Default=ReduksContext.default<TestState1>()
+    val ctx1Default= ReduksContext.default<TestState1>()
     val ctx2 = ReduksContext("m2")
-    val ctx2Default=ReduksContext.default<TestState2>()
+    val ctx2Default= ReduksContext.default<TestState2>()
     val mdef1 = ReduksModule.Def<TestState1>(
             ctx = ctx1,
             storeCreator = SimpleStore.Creator(),

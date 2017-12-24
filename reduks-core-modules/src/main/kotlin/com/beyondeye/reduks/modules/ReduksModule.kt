@@ -1,13 +1,12 @@
 package com.beyondeye.reduks.modules
 
 import com.beyondeye.reduks.*
-import com.beyondeye.reduks.middlewares.applyMiddleware
 
 /**
  * a builder function for [ReduksModule.Def] that set the context to the default context for the state
  */
 inline fun <reified S:Any> ModuleDef(
-        ctx: ReduksContext= ReduksContext.default<S>(),
+        ctx: ReduksContext = ReduksContext.default<S>(),
         storeCreator:StoreCreator<S>,
         initialState: S,
         startAction: Any=INIT(),

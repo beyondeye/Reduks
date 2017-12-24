@@ -42,7 +42,7 @@ open class ReduksContext(val moduleId:String) {
         /**
          * default ReduksContext for some state type is the state class simple name
          */
-        inline fun<reified S:Any> default() =ReduksContext(defaultModuleId<S>())
+        inline fun<reified S:Any> default() = ReduksContext(defaultModuleId<S>())
         /**
          * default ReduksContext for some state type is the state class simple name and
          * the action type for that context

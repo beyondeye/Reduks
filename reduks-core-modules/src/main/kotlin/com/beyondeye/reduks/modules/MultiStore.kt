@@ -6,7 +6,7 @@ import com.beyondeye.reduks.Store
  * Created by daely on 8/4/2016.
  * ctx= ReduksContext associated to this Store
  */
-abstract class MultiStore(@JvmField val ctx:ReduksContext) {
+abstract class MultiStore(@JvmField val ctx: ReduksContext) {
     /**
      *     map of all modules with  [ReduksContext] as index
      */

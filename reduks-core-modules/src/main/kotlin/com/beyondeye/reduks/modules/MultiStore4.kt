@@ -16,17 +16,17 @@ class MultiStore4<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(
     }
 
     internal class Factory<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(@JvmField val ctx1: ReduksContext,
-                                                          @JvmField val creator1:StoreCreator<S1>,
-                                                          @JvmField val sub1:StoreSubscriberBuilder<S1>?,
-                                                          @JvmField val ctx2: ReduksContext,
-                                                          @JvmField val creator2:StoreCreator<S2>,
-                                                          @JvmField val sub2:StoreSubscriberBuilder<S2>?,
-                                                          @JvmField val ctx3: ReduksContext,
-                                                          @JvmField val creator3:StoreCreator<S3>,
-                                                          @JvmField val sub3:StoreSubscriberBuilder<S3>?,
-                                                          @JvmField val ctx4: ReduksContext,
-                                                          @JvmField val creator4:StoreCreator<S4>,
-                                                          @JvmField val sub4:StoreSubscriberBuilder<S4>?
+                                                                   @JvmField val creator1:StoreCreator<S1>,
+                                                                   @JvmField val sub1:StoreSubscriberBuilder<S1>?,
+                                                                   @JvmField val ctx2: ReduksContext,
+                                                                   @JvmField val creator2:StoreCreator<S2>,
+                                                                   @JvmField val sub2:StoreSubscriberBuilder<S2>?,
+                                                                   @JvmField val ctx3: ReduksContext,
+                                                                   @JvmField val creator3:StoreCreator<S3>,
+                                                                   @JvmField val sub3:StoreSubscriberBuilder<S3>?,
+                                                                   @JvmField val ctx4: ReduksContext,
+                                                                   @JvmField val creator4:StoreCreator<S4>,
+                                                                   @JvmField val sub4:StoreSubscriberBuilder<S4>?
     ) : StoreCreator<MultiState4<S1, S2, S3, S4>> {
         override fun create(reducer: Reducer<MultiState4<S1, S2, S3, S4>>,
                             initialState: MultiState4<S1, S2, S3, S4>): Store<MultiState4<S1, S2, S3, S4>> {

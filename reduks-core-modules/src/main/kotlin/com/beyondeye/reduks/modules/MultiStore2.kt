@@ -7,10 +7,10 @@ import com.beyondeye.reduks.*
  * use @JvmField for avoiding generation of useless getter methods
  */
 class MultiStore2<S1:Any,S2:Any>(
-        ctx1:ReduksContext,
+        ctx1: ReduksContext,
         @JvmField val store1:Store<S1>,
         @JvmField val subscription1:StoreSubscription?,
-        ctx2:ReduksContext,
+        ctx2: ReduksContext,
         @JvmField val store2:Store<S2>,
         @JvmField val subscription2:StoreSubscription?) :Store<MultiState2<S1,S2>>,MultiStore(ReduksModule.multiContext(ctx1,ctx2))
 {
@@ -18,12 +18,12 @@ class MultiStore2<S1:Any,S2:Any>(
         throw UnsupportedOperationException("MultiStore does not support replacing reducer: replace the substate reducer instead")
     }
 
-    internal class Factory<S1:Any,S2:Any>(@JvmField val ctx1:ReduksContext,
-                                 @JvmField val creator1:StoreCreator<S1>,
-                                 @JvmField val sub1:StoreSubscriberBuilder<S1>?,
-                                 @JvmField val ctx2:ReduksContext,
-                                 @JvmField val creator2:StoreCreator<S2>,
-                                 @JvmField val sub2:StoreSubscriberBuilder<S2>?
+    internal class Factory<S1:Any,S2:Any>(@JvmField val ctx1: ReduksContext,
+                                          @JvmField val creator1:StoreCreator<S1>,
+                                          @JvmField val sub1:StoreSubscriberBuilder<S1>?,
+                                          @JvmField val ctx2: ReduksContext,
+                                          @JvmField val creator2:StoreCreator<S2>,
+                                          @JvmField val sub2:StoreSubscriberBuilder<S2>?
                                  ): StoreCreator< MultiState2<S1,S2> > {
         override fun create(reducer: Reducer<MultiState2<S1, S2>>,
                             initialState: MultiState2<S1, S2>): Store<MultiState2<S1, S2>> {

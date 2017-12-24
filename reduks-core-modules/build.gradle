@@ -1,0 +1,12 @@
+//disable warnings when using coroutines
+kotlin { experimental { coroutines 'enable' } }
+
+
+
+dependencies {
+    apiElements project(':reduks-core')
+    implementation project(':reduks-core')
+}
+
+apply from: '../maven-push-javalib.gradle'
+

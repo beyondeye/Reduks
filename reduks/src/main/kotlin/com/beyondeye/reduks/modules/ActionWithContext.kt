@@ -55,7 +55,7 @@ class ActionWithContextLambdaPattern(val match_ctx: ReduksContext, val matchfn: 
  *      ctx2match.matchA{ it is SomeActionType } -> //...do something
  *  }
  */
-fun ReduksContext.matchA(matchfn: (Any) -> Boolean) = ActionWithContextLambdaPattern(this,matchfn)
+fun ReduksContext.matchA(matchfn: (Any) -> Boolean) = ActionWithContextLambdaPattern(this, matchfn)
 
 /**
  * use this to match an [ActionWithContext] with embedded action of type T and context equal to
@@ -65,4 +65,4 @@ fun ReduksContext.matchA(matchfn: (Any) -> Boolean) = ActionWithContextLambdaPat
  * }
  *
  */
-inline fun <reified T>ReduksContext.isA() = ActionWithContextLambdaPattern(this){it -> it is T}
+inline fun <reified T> ReduksContext.isA() = ActionWithContextLambdaPattern(this) { it -> it is T }

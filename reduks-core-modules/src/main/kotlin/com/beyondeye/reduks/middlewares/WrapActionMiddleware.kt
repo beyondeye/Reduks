@@ -11,7 +11,7 @@ import com.beyondeye.reduks.modules.ReduksContext
 class WrapActionMiddleware<S>(val context: ReduksContext) : Middleware<S> {
     override fun dispatch(store: Store<S>, nextDispatcher: (Any)->Any, action: Any):Any {
         if(action !is ActionWithContext) {
-            return nextDispatcher(ActionWithContext(action,context))
+            return nextDispatcher(ActionWithContext(action, context))
         }
         return  nextDispatcher(action)
     }

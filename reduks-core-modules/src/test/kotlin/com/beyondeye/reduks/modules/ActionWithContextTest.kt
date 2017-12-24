@@ -12,9 +12,9 @@ class ActionWithContextTest {
         class ActionA
         class ActionB
         class ActionC
-        val ctx1=ReduksContext("1")
-        val ctx2=ReduksContext("2")
-        val ctx3=ReduksContext("3")
+        val ctx1= ReduksContext("1")
+        val ctx2= ReduksContext("2")
+        val ctx3= ReduksContext("3")
         fun getMatch(a:Any)= when(a) {
             ctx1.matchA { it is ActionA } -> "1a"
             ctx1.matchA { it is ActionB } -> "1b"
@@ -35,9 +35,9 @@ class ActionWithContextTest {
         class ActionA
         class ActionB
         class ActionC
-        val ctx1=ReduksContext("1")
-        val ctx2=ReduksContext("2")
-        val ctx3=ReduksContext("3")
+        val ctx1= ReduksContext("1")
+        val ctx2= ReduksContext("2")
+        val ctx3= ReduksContext("3")
         fun getMatch(a:Any)= when(a) {
             ctx1.isA<ActionA>() -> "1a"
             ctx1.isA<ActionB>() -> "1b"

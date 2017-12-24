@@ -1,5 +1,6 @@
 include ':reduks'
 include ':reduks-core-async'
+include ':reduks-core-modules'
 include ':reduks-android'
 include ':reduks-devtools'
 include ':reduks-rx'

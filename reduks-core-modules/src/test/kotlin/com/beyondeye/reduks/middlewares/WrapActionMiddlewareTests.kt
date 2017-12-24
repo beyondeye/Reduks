@@ -5,7 +5,6 @@ import com.beyondeye.reduks.SimpleStore
 import com.beyondeye.reduks.modules.ActionWithContext
 import com.beyondeye.reduks.modules.ReduksContext
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -43,7 +42,7 @@ class WrappedActionMiddlewareTests {
         val store = SimpleStore(TestState(), reducer)
         store.applyMiddleware(WrapActionMiddleware<TestState>(actionContext))
         //------WHEN
-        store.dispatch(ActionWithContext(TestAction(type = "1"),actionContext))
+        store.dispatch(ActionWithContext(TestAction(type = "1"), actionContext))
         //------THEN
         assertThat(store.state.lastActionType).isEqualTo("")
         assertThat(store.state.lastWrappedActionType).isEqualTo("1")
