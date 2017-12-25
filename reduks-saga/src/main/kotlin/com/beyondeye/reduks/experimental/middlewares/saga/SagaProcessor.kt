@@ -23,10 +23,6 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
         return _yieldSingle(OpCode.Delay(timeMsecs))
     }
 
-    suspend infix fun <B> takeEvery(process: Saga2<S>.(B) -> Any?)
-    {
-        _yieldSingle(OpCode.TakeEvery<S, B>(process))
-    }
 
     /**
      * yield a command to execute a child Saga in the same context of the current one (the parent saga): execution
@@ -178,36 +174,123 @@ function* saga() {
         return sagaProcessor.outChannel.receive()
     }
 }
+//-----------------------------------------------
+internal suspend fun <B> SagaYeldSingle<*>.takeOfType(type:Class<B>):B {
+    @Suppress("UNCHECKED_CAST")
+    return _yieldSingle(OpCode.Take<B>(type)) as B
+}
 suspend inline fun <reified B> SagaYeldSingle<*>.take():B {
     return _yieldSingle(OpCode.Take<B>(B::class.java)) as B
 }
-//class SagaYeldAll<S:Any>(private val sagaProcessor: SagaProcessor<S>){
-//    private suspend  fun yieldAll(inputChannel: ReceiveChannel<Any>) {
-//        for (a in inputChannel) {
-//            sagaProcessor.inChannel.send(a)
-//        }
-//    }
-//}
+//-----------------------------------------------
+suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeEvery(noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
+    takeEvery(SagaFn1(B::class.java.simpleName,handlerSaga))
+}
+suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeEvery(handlerSaga: SagaFn1<S, B, Unit>)
+{
+    _yieldSingle(OpCode.TakeEvery<S, B>(B::class.java,handlerSaga))
+}
+//-----------------------------------------------
+suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeLatest(noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
+    takeLatest(SagaFn1(B::class.java.simpleName,handlerSaga))
+}
 
-class Saga2<S:Any>(sagaProcessor: SagaProcessor<S>) {
+suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeLatest(handlerSaga: SagaFn1<S, B, Unit>)
+{
+    _yieldSingle(OpCode.TakeLatest<S, B>(B::class.java,handlerSaga))
+}
+//-----------------------------------------------
+suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
+    throttle(delayMs,SagaFn1(B::class.java.simpleName,handlerSaga))
+}
+
+suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,handlerSaga:SagaFn1<S, B, Unit>)
+{
+    _yieldSingle(OpCode.Throttle<S, B>(B::class.java,delayMs,handlerSaga))
+}
+//-----------------------------------------------
+class Saga<S:Any>(sagaProcessor: SagaProcessor<S>) {
     @JvmField val yield_ = SagaYeldSingle(sagaProcessor)
 //    val yieldAll= SagaYeldAll(sagaProcessor)
-    fun <R:Any> sagaFn(name: String, fn0: suspend Saga2<S>.() -> R) =
+    fun <R:Any> sagaFn(name: String, fn0: suspend Saga<S>.() -> R) =
         SagaFn0(name, fn0)
 
-    fun <P1, R : Any> sagaFn(name: String, fn1: suspend Saga2<S>.(p1: P1) -> R) =
+    fun <P1, R : Any> sagaFn(name: String, fn1: suspend Saga<S>.(p1: P1) -> R) =
             SagaFn1(name, fn1)
-    fun <P1,P2,R:Any> sagaFn(name:String, fn2:suspend Saga2<S>.(p1:P1, p2:P2)->R)=
+    fun <P1,P2,R:Any> sagaFn(name:String, fn2:suspend Saga<S>.(p1:P1, p2:P2)->R)=
             SagaFn2(name, fn2)
-    fun <P1,P2,P3,R:Any> sagaFn(name:String, fn3:suspend Saga2<S>.(p1:P1, p2:P2, p3:P3)->R)=
+    fun <P1,P2,P3,R:Any> sagaFn(name:String, fn3:suspend Saga<S>.(p1:P1, p2:P2, p3:P3)->R)=
             SagaFn3(name, fn3)
 }
 sealed class OpCode {
     open class OpCodeWithResult: OpCode()
+    abstract class TakeOpCode<S:Any>:OpCode() {
+        abstract val sagaLabel:String
+        abstract fun filterSaga(filterSagaName:String):SagaFn0<S,Unit>
+    }
     class Delay(val time: Long,val unit: TimeUnit = TimeUnit.MILLISECONDS): OpCodeWithResult()
     class Put(val value:Any): OpCode()
     class Take<B>(val type:Class<B>): OpCodeWithResult()
-    class TakeEvery<S:Any,B>(val process: Saga2<S>.(B) -> Any?): OpCode()
+    /**
+     * Run  a child saga on each action dispatched to the Store that matches pattern.
+     * takeEvery allows concurrent actions to be handled.
+     * when a matching action is dispatched, a new handler task is started even
+     * if a previous one is still pending (for example, the user clicks on a Load User button 2
+     * consecutive times at a rapid rate, the 2nd click will dispatch a new action while the
+     * previous task fired on the first one hasn't yet terminated)
+     * takeEvery doesn't handle out of order responses from tasks. There is no guarantee that the tasks
+     * will terminate in the same order they were started. To handle out of order responses,
+     * you may consider [TakeLatest] below.
+     */
+    class TakeEvery<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    {
+        override val sagaLabel="_tkevery_"
+        //todo implement in an optimized way, not based on basic effects
+        override  fun filterSaga(filterSagaName:String)= SagaFn0<S,Unit>(filterSagaName) {
+            while (true) {
+                val action: B = yield_.takeOfType(type)
+                yield_ fork handlerSaga.withArgs(action)
+            }
+        }
+    }
+
+    /**
+     * Run a child saga on each action dispatched to the Store that matches pattern.
+     * And automatically cancels any previous saga task started previous if it's still running.
+     */
+    class TakeLatest<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    {
+        override val sagaLabel="_tklatest_"
+        override fun filterSaga(filterSagaName:String)= SagaFn0<S,Unit>(filterSagaName) {
+            //todo implement in an optimized way, not based on basic effects
+            var prevtask:SagaTask<Unit>?=null
+            while (true) {
+                val action: B = yield_.takeOfType(type)
+                prevtask?.cancel() //if task already completed, this is a non-op
+                prevtask=yield_ fork handlerSaga.withArgs(action)
+            }
+        }
+    }
+
+    /**
+     * Run a child saga on an action dispatched to the Store that matches pattern.
+     * After creating a child task it's still accepting incoming actions into the underlaying buffer, keeping at most 1
+     * (the most recent one), but in the same time holding up with creating new task for ms milliseconds
+     * (hence its name - throttle). Purpose of this is to ignore incoming actions for a given period of time
+     * while processing a task.
+     */
+    class Throttle<S:Any,B>(val type:Class<B>,val delayMs:Long,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    {
+        override val sagaLabel="_throttle_"
+        override fun filterSaga(filterSagaName:String)= SagaFn0<S,Unit>(filterSagaName) {
+            //todo implement in an optimized way, not based on basic effects
+            while (true) {
+                val action: B = yield_.takeOfType(type)
+                yield_ fork handlerSaga.withArgs(action)
+                yield_ delay delayMs
+            }
+        }
+    }
     class SagaFinished<R:Any>(val result: R, val isChildCall: Boolean): OpCode()
     class Call<S:Any,R:Any>(val childSaga: SagaFn<S, R>) : OpCodeWithResult()
     class Fork<S:Any,R:Any>(val childSaga: SagaFn<S, R>) : OpCodeWithResult()
@@ -215,12 +298,15 @@ sealed class OpCode {
     class JoinTasks(val tasks:List<SagaTask<out Any>>): OpCodeWithResult()
     class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
+    class Select :OpCodeWithResult()
+    class Race :OpCodeWithResult()
+    class All:OpCodeWithResult()
 //    class Cancelled:OpCode()
 }
 
 class SagaProcessor<S:Any>(
         val sagaName:String,
-        sagaMiddleWare: SagaMiddleWare2<S>,
+        sagaMiddleWare: SagaMiddleWare<S>,
         private val dispatcherActor: SendChannel<Any> = actor {  }
 )
 {
@@ -270,6 +356,7 @@ class SagaProcessor<S:Any>(
                 }
                 is OpCode.Call<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
+                        @Suppress("UNCHECKED_CAST")
                         val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_call_",cs.name)
                         val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_CHILD_CALL)
@@ -277,6 +364,7 @@ class SagaProcessor<S:Any>(
                 }
                 is OpCode.Fork<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
+                        @Suppress("UNCHECKED_CAST")
                         val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_fork_",cs.name)
                         val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_CHILD_FORK)
@@ -285,6 +373,7 @@ class SagaProcessor<S:Any>(
                 }
                 is OpCode.Spawn<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
+                        @Suppress("UNCHECKED_CAST")
                         val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_spawn_",cs.name)
                         val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_SPAWN)
@@ -320,6 +409,22 @@ class SagaProcessor<S:Any>(
 //                    val res= sm?.get()?.isCancelled(sagaName) ?:false
 //                    outChannel.send(res)
 //                }
+                //TODO: refactor common code between TakeEvery/TakeLatest/Throttle
+                //OpCode.TakeEvery<*,*>
+                //OpCode.TakeLatest<*,*>
+                //OpCode.Throttle<*,*>
+                is OpCode.TakeOpCode<*> -> {
+                    sm.get()?.let { sagaMiddleware ->
+                        val filterSagaName = buildChildSagaName(a.sagaLabel, "")
+                        @Suppress("UNCHECKED_CAST")
+                        val fs = a.filterSaga(filterSagaName) as SagaFn0<S,Unit>
+                        val childTask = sagaMiddleware._runSaga<Unit>(
+                                fs,
+                                this,
+                                filterSagaName,
+                                SAGATYPE_CHILD_FORK)
+                    }
+                }
                 else ->  {
                     print("unsupported saga operation: ${a::class.java}")
                 }
