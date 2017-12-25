@@ -456,15 +456,26 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
         val sagaMiddleware = SagaMiddleWare<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
-        sagaMiddleware.runSaga("incr") {
-            yield_ takeEvery { a: SagaAction.Plus ->
-                yield_ put ActualAction.IncrementCounter(a.value)
+        sagaMiddleware.runSaga("main") {
+            val incr=sagaFn<Any>("setup_incr_filter") {
+                yield_ takeEvery { a: SagaAction.Plus ->
+                    yield_ put ActualAction.IncrementCounter(a.value)
+                }
             }
-        }
-        sagaMiddleware.runSaga("decr") {
-            yield_ takeEvery { a: SagaAction.Minus ->
-                yield_ put ActualAction.DecrementCounter(a.value)
+            val j1= yield_ fork  incr
+            val decr=sagaFn<Any>("setup_decr_filter") {
+                yield_ takeEvery { a: SagaAction.Minus ->
+                    yield_ put ActualAction.DecrementCounter(a.value)
+                }
             }
+            val j2= yield_ fork  decr
+            //wait for setup up of takeEvery filter sagas
+//            yield_ join listOf(j1,j2)
+            //We should not get here!!! because child tasks of
+            yield_ delay 10*1000 //wait to make sure that incr and decr sagas started
+            yield_ put SagaAction.Plus(123)
+            yield_ put SagaAction.Minus(321)
+
         }
         val lock = CountDownLatch(1)
 
@@ -476,11 +487,7 @@ class SagaMiddlewareTest {
                         }
                     }
                 })
-        sagaMiddleware.runSaga("incoming_actions") {
-            yield_ delay 100*1000 //wait to make sure that incr and decr sagas started
-            yield_ put SagaAction.Plus(123)
-            yield_ put SagaAction.Minus(321)
-        }
+
         lock.await(1000,TimeUnit.SECONDS)
         val state=store.state
         assertThat(state.actionCounter).isEqualTo(2)

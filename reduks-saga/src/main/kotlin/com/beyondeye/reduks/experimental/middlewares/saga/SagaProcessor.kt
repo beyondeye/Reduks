@@ -216,6 +216,7 @@ suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,han
 class Saga<S:Any>(sagaProcessor: SagaProcessor<S>) {
     @JvmField val yield_ = SagaYeldSingle(sagaProcessor)
 //    val yieldAll= SagaYeldAll(sagaProcessor)
+
     fun <R:Any> sagaFn(name: String, fn0: suspend Saga<S>.() -> R) =
         SagaFn0(name, fn0)
 
@@ -228,7 +229,7 @@ class Saga<S:Any>(sagaProcessor: SagaProcessor<S>) {
 }
 sealed class OpCode {
     open class OpCodeWithResult: OpCode()
-    abstract class TakeOpCode<S:Any>:OpCode() {
+    abstract class FilterOpCode<S:Any>:OpCode() {
         abstract val sagaLabel:String
         abstract fun filterSaga(filterSagaName:String):SagaFn0<S,Unit>
     }
@@ -246,7 +247,7 @@ sealed class OpCode {
      * will terminate in the same order they were started. To handle out of order responses,
      * you may consider [TakeLatest] below.
      */
-    class TakeEvery<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    class TakeEvery<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): FilterOpCode<S>()
     {
         override val sagaLabel="_tkevery_"
         //todo implement in an optimized way, not based on basic effects
@@ -262,7 +263,7 @@ sealed class OpCode {
      * Run a child saga on each action dispatched to the Store that matches pattern.
      * And automatically cancels any previous saga task started previous if it's still running.
      */
-    class TakeLatest<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    class TakeLatest<S:Any,B>(val type:Class<B>,val handlerSaga: SagaFn1<S, B, Unit>): FilterOpCode<S>()
     {
         override val sagaLabel="_tklatest_"
         override fun filterSaga(filterSagaName:String)= SagaFn0<S,Unit>(filterSagaName) {
@@ -283,7 +284,7 @@ sealed class OpCode {
      * (hence its name - throttle). Purpose of this is to ignore incoming actions for a given period of time
      * while processing a task.
      */
-    class Throttle<S:Any,B>(val type:Class<B>,val delayMs:Long,val handlerSaga: SagaFn1<S, B, Unit>): TakeOpCode<S>()
+    class Throttle<S:Any,B>(val type:Class<B>,val delayMs:Long,val handlerSaga: SagaFn1<S, B, Unit>): FilterOpCode<S>()
     {
         override val sagaLabel="_throttle_"
         override fun filterSaga(filterSagaName:String)= SagaFn0<S,Unit>(filterSagaName) {
@@ -334,6 +335,9 @@ class SagaProcessor<S:Any>(
         catch (e:CancellationException) {
             sm.get()?.updataSagaDataAfterProcessorFinished(sagaName)
         }
+//        catch (e:Exception) {
+//            print(e.message)
+//        }
         finally{
 
         }
@@ -425,7 +429,7 @@ class SagaProcessor<S:Any>(
                 //OpCode.TakeEvery<*,*>
                 //OpCode.TakeLatest<*,*>
                 //OpCode.Throttle<*,*>
-                is OpCode.TakeOpCode<*> -> {
+                is OpCode.FilterOpCode<*> -> {
                     sm.get()?.let { sagaMiddleware ->
                         val filterSagaName = buildChildSagaName(a.sagaLabel, "")
                         @Suppress("UNCHECKED_CAST")
