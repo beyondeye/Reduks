@@ -456,6 +456,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
         val sagaMiddleware = SagaMiddleWare<TestState>(store)
         store.applyMiddleware(sagaMiddleware)
+        val initialDelaySecs:Double=0.1
         sagaMiddleware.runSaga("main") {
             val incr=sagaFn<Any>("setup_incr_filter") {
                 yield_ takeEvery { a: SagaAction.Plus ->
@@ -472,7 +473,7 @@ class SagaMiddlewareTest {
             //wait for setup up of takeEvery filter sagas
 //            yield_ join listOf(j1,j2)
             //We should not get here!!! because child tasks of
-            yield_ delay 10*1000 //wait to make sure that incr and decr sagas started
+            yield_ delay (initialDelaySecs*1000).toLong() //wait to make sure that incr and decr sagas started
             yield_ put SagaAction.Plus(123)
             yield_ put SagaAction.Minus(321)
 
@@ -488,7 +489,7 @@ class SagaMiddlewareTest {
                     }
                 })
 
-        lock.await(1000,TimeUnit.SECONDS)
+        lock.await((initialDelaySecs+10).toLong(),TimeUnit.SECONDS)
         val state=store.state
         assertThat(state.actionCounter).isEqualTo(2)
         assertThat(state.incrCounter).isEqualTo(123)

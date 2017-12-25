@@ -21,6 +21,8 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * yield a command to delay saga executing for the specified time.
      */
     suspend infix fun delay(timeMsecs: Long):Any {
+        if(timeMsecs<=0)
+            return Unit
         return _yieldSingle(OpCode.Delay(timeMsecs))
     }
     suspend infix  fun<O> select(selector:Selector<S,O>):O {
