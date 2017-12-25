@@ -1,5 +1,6 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
+import com.beyondeye.reduks.Selector
 import kotlinx.coroutines.experimental.cancel
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
@@ -22,7 +23,10 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     suspend infix fun delay(timeMsecs: Long):Any {
         return _yieldSingle(OpCode.Delay(timeMsecs))
     }
-
+    suspend infix  fun<O> select(selector:Selector<S,O>):O {
+        @Suppress("UNCHECKED_CAST")
+        return _yieldSingle(OpCode.Select(selector)) as O
+    }
 
     /**
      * yield a command to execute a child Saga in the same context of the current one (the parent saga): execution
@@ -298,7 +302,7 @@ sealed class OpCode {
     class JoinTasks(val tasks:List<SagaTask<out Any>>): OpCodeWithResult()
     class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
-    class Select :OpCodeWithResult()
+    class Select<S,O>(val selector: Selector<S,O>) :OpCodeWithResult()
     class Race :OpCodeWithResult()
     class All:OpCodeWithResult()
 //    class Cancelled:OpCode()
@@ -353,6 +357,14 @@ class SagaProcessor<S:Any>(
                         }
                     }
 //                    }
+                }
+                is OpCode.Select<*,*> -> {
+                    sm.get()?.store?.get()?.let { store ->
+                        @Suppress("UNCHECKED_CAST")
+                        val selector=a.selector as Selector<S,Any>
+                        val res= selector(store.state)
+                        outChannel.send(res)
+                    }
                 }
                 is OpCode.Call<*, *> -> {
                     sm.get()?.let { sagaMiddleware->

@@ -1,6 +1,7 @@
 package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.ReducerFn
+import com.beyondeye.reduks.SelectorBuilder
 import com.beyondeye.reduks.StoreSubscriberFn
 import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduks.experimental.middlewares.saga.*
@@ -114,6 +115,39 @@ class SagaMiddlewareTest {
         assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
+    @Test
+    fun testSagaSelect() {
+        val store = AsyncStore(TestState(incrCounter = 0,decrCounter = 0), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga("select") {
+            val selb=SelectorBuilder<TestState>()
+            val selIncr = selb.withSingleField { incrCounter }
+            val selDecr = selb.withSingleField { decrCounter }
+            val initialIncrValue= yield_ select selIncr
+            val initialDecrValue= yield_ select selDecr
+            yield_ put ActualAction.SetIncrCounter(initialIncrValue-10)
+            yield_ put ActualAction.SetDecrCounter(initialDecrValue+10)
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==2) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        //dispatch a SagaAction that will be translated to an actual action that the reducer can handle
+        lock.await(50,TimeUnit.SECONDS)
+        val state=store.state
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(-10)
+        assertThat(state.decrCounter).isEqualTo(+10)
+//        store.dispatch(EndAction())
+    }
+
     @Test
     fun testSagaDelay() {
         val store = AsyncStore(TestState(), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
@@ -442,9 +476,12 @@ class SagaMiddlewareTest {
                         }
                     }
                 })
-        store.dispatch(SagaAction.Plus(123))
-        store.dispatch(SagaAction.Minus(321))
-        lock.await(100,TimeUnit.SECONDS)
+        sagaMiddleware.runSaga("incoming_actions") {
+            yield_ delay 100*1000 //wait to make sure that incr and decr sagas started
+            yield_ put SagaAction.Plus(123)
+            yield_ put SagaAction.Minus(321)
+        }
+        lock.await(1000,TimeUnit.SECONDS)
         val state=store.state
         assertThat(state.actionCounter).isEqualTo(2)
         assertThat(state.incrCounter).isEqualTo(123)

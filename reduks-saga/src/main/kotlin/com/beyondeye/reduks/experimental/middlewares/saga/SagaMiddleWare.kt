@@ -19,7 +19,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, val rootSagaCoroutineContext:Corout
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
     private var sagaMap:Map<String, SagaData<S, Any>>
-    private val store:WeakReference<Store<S>>
+    internal val store:WeakReference<Store<S>>
     init {
         store=WeakReference(store_)
         sagaMap = mapOf()
