@@ -3,6 +3,7 @@ package com.beyondeye.reduks.experimental.activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.beyondeye.reduks.*
+import com.beyondeye.reduks.bus.BusStore
 import com.beyondeye.reduks.experimental.AsyncStore
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity
@@ -33,7 +34,10 @@ abstract class AsyncReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
         super.onStart()
     }
     override fun onDestroy() {
-        (reduks.store as AsyncStore).stopActors()
+        var store=reduks.store
+        if(store is BusStore)
+            store = store.wrappedStore
+        (store as? AsyncStore)?.stopActors()
         super.onDestroy()
     }
     override fun onSaveInstanceState(outState: Bundle?) {
