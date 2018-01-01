@@ -30,7 +30,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
                      val reduceContext: CoroutineContext =DefaultDispatcher,
                      val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
-            val res = AsyncStore<S>(initialState, reducer,reduceContext,subscribeContext)
+            val res = AsyncStore<S>(initialState, reducer,subscribeContext,reduceContext)
             return if (!withStandardMiddleware)
                 res
             else
@@ -48,7 +48,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
     }
     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
     // then subscribers will be notified sequentially of state changes in the correct
-    private fun startSubscriberNotifierActor(c: CoroutineContext = DefaultDispatcher) = actor<S>(c) {
+    private fun startSubscriberNotifierActor(c: CoroutineContext) = actor<S>(c) {
         for(updatedState in channel) { //iterate over incoming state updates
             notifySubscribers()
         }
