@@ -2,6 +2,7 @@ package com.beyondeye.reduks.experimental
 
 //import android.util.Log
 import com.beyondeye.reduks.*
+import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.experimental.DefaultDispatcher
@@ -34,7 +35,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
             return if (!withStandardMiddleware)
                 res
             else
-                res.applyMiddleware(ThunkMiddleware())
+                res.applyMiddleware(ThunkMiddleware(),AsyncActionMiddleWare())
         }
     }
     override var state:S=initialState
