@@ -32,7 +32,7 @@ ext.versions = [
         rxAndroid2           : '2.0.1',
 
         //dario libs
-        kjsonpatch           : '0.3.2',
+        kjsonpatch           : '0.3.20',
 
         // Others.
         kovenant             : '3.3.0',

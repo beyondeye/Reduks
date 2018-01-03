@@ -39,6 +39,7 @@ allprojects {
        jcenter() //for coroutines
 //       mavenCentral()
        google()
+       maven { url "https://jitpack.io" }
    }
     configurations {
         javadocDeps
