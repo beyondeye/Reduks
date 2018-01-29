@@ -5,7 +5,15 @@ package com.beyondeye.reduks
  * see also "Computing Derived Data" in redux documentation http://redux.js.org/docs/recipes/ComputingDerivedData.html
  * Created by Dario Elyasy  on 3/18/2016.
  */
-private val defaultEqualityCheck = { a: Any, b: Any -> a === b }
+/**
+ * equality check by reference
+ */
+private val byRefEqualityCheck = { a: Any, b: Any -> a === b }
+
+/**
+ * equality check by value: for primitive type
+ */
+private val byValEqualityCheck = { a: Any, b: Any -> a == b }
 
 /**
  * a class for keeping a non null object reference even when actual reference is null
@@ -24,8 +32,9 @@ inline fun <T : Any> Array<out T>.every(transform: (Int, T) -> Boolean): Boolean
 }
 
 
+
 // {a:Any,b:Any -> a===b}
-fun <T> defaultMemoize(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: Any) -> Boolean = defaultEqualityCheck) = object : Memoizer<T> {
+fun <T> defaultMemoizer(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: Any) -> Boolean = byRefEqualityCheck) = object : Memoizer<T> {
     var lastArgs: Array<out Any>? = null
     var lastResult: T? = null
     override fun memoize(vararg inputArgs: Any): T {
@@ -38,6 +47,25 @@ fun <T> defaultMemoize(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: A
         return lastResult!!
     }
 }
+
+/**
+ * specialization for the case of single input (a little bit faster)
+ */
+fun <T> singleInputMemoizer(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: Any) -> Boolean = byRefEqualityCheck)=object:Memoizer<T> {
+    var lastArg:Any?=null
+    var lastResult:T?=null
+    override fun memoize(vararg inputArgs: Any): T {
+        val arg=inputArgs[0]
+        if (lastArg != null &&
+                equalityCheck(arg,lastArg!!)){
+            return lastResult!!
+        }
+        lastArg = arg
+        lastResult = func(inputArgs)
+        return lastResult!!
+    }
+}
+
 
 interface SelectorInput<S, I> {
     operator fun invoke(state: S): I
@@ -101,7 +129,7 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
      * 'lazy' because computeandcount is abstract. Cannot reference to it before it is initialized in concrete selectors
      * 'open' because we can provide a custom memoizer if needed
      */
-    open val memoizer by lazy { defaultMemoize(computeAndCount) }  //
+    open val memoizer by lazy { defaultMemoizer(computeAndCount) }  //
 
 }
 
@@ -230,7 +258,8 @@ class SelectorBuilder<S> {
     fun<I0 : Any> withSelector(si: SelectorInput<S, I0>) = SelectorForP1<S, I0>(si)
 
     /**
-     * special single input selector that should be used when you just want to retrieve a single field
+     * special single input selector that should be used when you just want to retrieve a single field:
+     * Warning: Don't use this with primitive type fields, use [withSingleFieldByValue] instead!!!
      */
     fun <I : Any> withSingleField(fn: S.() -> I) = object : AbstractSelector<S, I>() {
         override val computeAndCount = fun(i: Array<out Any>): I {
@@ -244,9 +273,33 @@ class SelectorBuilder<S> {
                     fn(state)
             )
         }
+        override val memoizer: Memoizer<I> by lazy {
+            singleInputMemoizer(computeAndCount, byRefEqualityCheck)
+        }
     }
-    operator fun<I:Any> invoke(fn: S.() -> I):AbstractSelector<S, I> {
-        return withSingleField(fn)
-    }
+    /**
+     * special single input selector that should be used when you just want to retrieve a single field that
+     * is a primitive type like Int, Float, Double, etc..., because it compares memoized values, instead of references
+     */
+    fun <I : Any> withSingleFieldByValue(fn: S.() -> I) = object : AbstractSelector<S, I>() {
+        override val computeAndCount = fun(i: Array<out Any>): I {
+            ++_recomputations
+            @Suppress("UNCHECKED_CAST")
+            return i[0] as I
+        }
 
+        override operator fun invoke(state: S): I {
+            return memoizer.memoize(
+                    fn(state)
+            )
+        }
+
+        override val memoizer: Memoizer<I> by lazy {
+            singleInputMemoizer(computeAndCount, byValEqualityCheck)
+        }
+
+        operator fun <I : Any> invoke(fn: S.() -> I): AbstractSelector<S, I> {
+            return withSingleField(fn)
+        }
+    }
 }

@@ -26,6 +26,7 @@ class ReselectTest {
     }
 
     data class StateAB(val a: Int, val b: Int)
+    data class StateABFloat(val a: Float, val b: Float)
 
     @Test
     fun basicSelectorWithMultipleKeysTest() {
@@ -98,7 +99,36 @@ class ReselectTest {
         assertThat(selector(state2)).isEqualTo(2)
         assertThat(selector.recomputations).isEqualTo(4)
     }
+    @Test
+    fun primitiveFieldTest() {
+        val selA = SelectorBuilder<StateABFloat>()
+                .withSingleField {  a }
+        val selAByValue = SelectorBuilder<StateABFloat>()
+                .withSingleFieldByValue {  a }
 
+        val state1 = StateABFloat(a = 1.0f,b=11.0f)
+
+        val a1=selA(state1)
+        assertThat(a1).isEqualTo(1.0f)
+        assertThat(selA.recomputations).isEqualTo(1)
+        //-----
+        val a1_v=selAByValue(state1)
+        assertThat(a1_v).isEqualTo(1.0f)
+        assertThat(selAByValue.recomputations).isEqualTo(1)
+
+        val state2= state1.copy(b=22.0f)
+        val a2=selA(state2)
+        //although we did not change a, (we changed b),
+        //we recomputed because default memoization is by reference, not by value
+        assertThat(a2).isEqualTo(1.0f)
+        assertThat(selA.recomputations).isEqualTo(2)
+        //----------------------------
+        //now use memoization by value
+        val a2_b=selAByValue(state2)
+        assertThat(a2_b).isEqualTo(1.0f)
+        //NO recomputations!!!
+        assertThat(selAByValue.recomputations).isEqualTo(1)
+    }
     @Test
     fun isChangedTest() {
         val selector = SelectorBuilder<StateA>()
