@@ -15,7 +15,11 @@ import kotlin.coroutines.experimental.CoroutineContext
  *
  * Created by daely on 12/15/2017.
  */
-class SagaMiddleWare<S:Any>(store_:Store<S>, val rootSagaCoroutineContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
+class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
+    /**
+     * root coroutine context used to create all coroutines used to run and handle sagas
+     */
+    val rootSagaCoroutineContext= newCoroutineContext(rootCoroutineContext)
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
     private var sagaMap:Map<String, SagaData<S, Any>>
@@ -225,6 +229,16 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, val rootSagaCoroutineContext:Corout
         }
     }
 
+    /**
+     * completely stop all sagas and the saga middleware itself:
+     * warning: after running [stopAll] the SagaMiddleware cannot be used any more
+     * The result is `true` if the saga middleware was
+     * cancelled as a result of this invocation and `false` if if it was already
+     * cancelled or completed. See [Job.cancel] for details.
+     */
+    fun stopAll(): Boolean {
+        return rootSagaCoroutineContext.cancel()
+    }
     private fun getSagaChildrenNames(sagaName: String): List<String> {
         val childSagasNames = sagaMap.entries.filter { it.value.sagaParentName == sagaName }.map { it.key }
         return childSagasNames
