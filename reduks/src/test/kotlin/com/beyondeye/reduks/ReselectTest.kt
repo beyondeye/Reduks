@@ -43,6 +43,31 @@ class ReselectTest {
         assertThat(selector(state2)).isEqualTo(5)
         assertThat(selector.recomputations).isEqualTo(2)
     }
+    data class StateABCFloat(val a:Float,val b:Float,val c:Float)
+    @Test
+    fun basicSelectorWithMultipleKeysByValueTest() {
+        val selector = SelectorBuilder<StateABCFloat>()
+                .withField { a }
+                .withField { b }
+                .compute { aa: Float, bb: Float -> aa + bb }
+        val selectorByValue = SelectorBuilder<StateABCFloat>()
+                .withFieldByValue { a }
+                .withFieldByValue { b }
+                .compute { aa: Float, bb: Float -> aa + bb }
+        val state1 = StateABCFloat(a = 2.0f, b = 3.0f,c=0.0f)
+        assertThat(selector(state1)).isEqualTo(5f)
+        assertThat(selectorByValue(state1)).isEqualTo(5f)
+        assertThat(selector.recomputations).isEqualTo(1)
+        assertThat(selectorByValue.recomputations).isEqualTo(1)
+        //a state with equal a,b fields by value
+        val state2 = state1.copy(c=-1.0f)
+        assertThat(selectorByValue(state2)).isEqualTo(5f)
+        assertThat(selector(state2)).isEqualTo(5f)
+        //regular selector (with argument by compared by reference) is recomputed, because the state is a different object
+        assertThat(selector.recomputations).isEqualTo(2)
+        //selector with arguments compared by value IS NOT RECOMPUTED, because input arguments, when compared by value are the same
+        assertThat(selectorByValue.recomputations).isEqualTo(1)
+    }
 
     data class StateSubStateA(val sub: StateA)
 

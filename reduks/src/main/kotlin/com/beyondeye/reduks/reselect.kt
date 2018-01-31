@@ -1,5 +1,6 @@
 package com.beyondeye.reduks
 
+private typealias  EqualityCheckFn = (a:Any,b:Any)->Boolean
 /**
  * A rewrite for kotlin of https://github.com/reactjs/reselect library for redux (https://github.com/reactjs/redux)
  * see also "Computing Derived Data" in redux documentation http://redux.js.org/docs/recipes/ComputingDerivedData.html
@@ -8,12 +9,12 @@ package com.beyondeye.reduks
 /**
  * equality check by reference
  */
-private val byRefEqualityCheck = { a: Any, b: Any -> a === b }
+val byRefEqualityCheck:EqualityCheckFn = { a: Any, b: Any -> a === b }
 
 /**
  * equality check by value: for primitive type
  */
-private val byValEqualityCheck = { a: Any, b: Any -> a == b }
+val byValEqualityCheck:EqualityCheckFn = { a: Any, b: Any -> a == b }
 
 /**
  * a class for keeping a non null object reference even when actual reference is null
@@ -23,45 +24,51 @@ private val byValEqualityCheck = { a: Any, b: Any -> a == b }
 class Opt<T>(@JvmField val it:T?)
 
 interface Memoizer<T> {
-    fun memoize(vararg inputArgs: Any): T
+    fun memoize(state: Any, vararg inputs: SelectorInput<Any, Any>): T
 }
-
-inline fun <T : Any> Array<out T>.every(transform: (Int, T) -> Boolean): Boolean {
-    forEachIndexed { i, t -> if (!transform(i, t)) return false }
-    return true
-}
-
-
 
 // {a:Any,b:Any -> a===b}
-fun <T> defaultMemoizer(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: Any) -> Boolean = byRefEqualityCheck) = object : Memoizer<T> {
+fun <T> computationMemoizer(computeFn: (Array<out Any>) -> T) = object : Memoizer<T> {
     var lastArgs: Array<out Any>? = null
     var lastResult: T? = null
-    override fun memoize(vararg inputArgs: Any): T {
-        if (lastArgs != null &&
-                lastArgs!!.size == inputArgs.size && inputArgs.every { index, value -> equalityCheck(value, lastArgs!![index]) }) {
-            return lastResult!!
+    override fun memoize(state:Any,vararg inputs: SelectorInput<Any,Any>): T {
+        val nInputs=inputs.size
+        val args=Array<Any>(nInputs) { inputs[it].invoke(state) }
+        if(lastArgs!=null && lastArgs!!.size==inputs.size) {
+            var bMatchedArgs=true
+            for(i in 0 until nInputs) {
+                if(!inputs[i].equalityCheck(args[i],lastArgs!![i])) {
+                    bMatchedArgs=false
+                    break
+                }
+            }
+            if(bMatchedArgs) {
+                return lastResult!!
+            }
         }
-        lastArgs = inputArgs
-        lastResult = func(inputArgs)
+        lastArgs = args
+        lastResult = computeFn(args)
         return lastResult!!
     }
 }
 
+
+
 /**
  * specialization for the case of single input (a little bit faster)
  */
-fun <T> singleInputMemoizer(func: (Array<out Any>) -> T, equalityCheck: (a: Any, b: Any) -> Boolean = byRefEqualityCheck)=object:Memoizer<T> {
+fun <T> singleInputMemoizer(func: (Array<out Any>) -> T)=object:Memoizer<T> {
     var lastArg:Any?=null
     var lastResult:T?=null
-    override fun memoize(vararg inputArgs: Any): T {
-        val arg=inputArgs[0]
+    override fun memoize(state: Any, vararg inputs: SelectorInput<Any, Any>): T {
+        val input=inputs[0]
+        val arg=input.invoke(state)
         if (lastArg != null &&
-                equalityCheck(arg,lastArg!!)){
+                input.equalityCheck(arg,lastArg!!)){
             return lastResult!!
         }
         lastArg = arg
-        lastResult = func(inputArgs)
+        lastResult = func(arrayOf(arg))
         return lastResult!!
     }
 }
@@ -69,12 +76,13 @@ fun <T> singleInputMemoizer(func: (Array<out Any>) -> T, equalityCheck: (a: Any,
 
 interface SelectorInput<S, I> {
     operator fun invoke(state: S): I
+    val equalityCheck:EqualityCheckFn
 }
 
 /**
  * a selector function is a function that map a field in state object to the input for the selector compute function
  */
-class InputField<S, I>(val fn: S.() -> I) : SelectorInput<S, I> {
+class InputField<S, I>(val fn: S.() -> I,override val equalityCheck: EqualityCheckFn) : SelectorInput<S, I> {
     override operator fun invoke(state: S): I = state.fn()
 }
 
@@ -129,18 +137,20 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
      * 'lazy' because computeandcount is abstract. Cannot reference to it before it is initialized in concrete selectors
      * 'open' because we can provide a custom memoizer if needed
      */
-    open val memoizer by lazy { defaultMemoizer(computeAndCount) }  //
+    open val memoizer by lazy { computationMemoizer(computeAndCount) }
 
 }
 
 //use @JvmField annotation for avoiding generation useless getter methods
-class SelectorForP5<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+class SelectorForP5<S:Any, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@JvmField val si0: SelectorInput<S, I0>,
                                                                          @JvmField val si1: SelectorInput<S, I1>,
                                                                          @JvmField val si2: SelectorInput<S, I2>,
                                                                          @JvmField val si3: SelectorInput<S, I3>,
                                                                          @JvmField val si4: SelectorInput<S, I4>
 ) {
-    fun<O> compute(computeFun: (I0, I1, I2, I3, I4) -> O) = object : AbstractSelector<S, O>() {
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3, I4) -> O) = object : AbstractSelector<S, O>() {
+        override val equalityCheck: EqualityCheckFn
+            get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -148,26 +158,31 @@ class SelectorForP5<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@JvmFie
         }
 
         override operator fun invoke(state: S): O {
+            @Suppress("UNCHECKED_CAST")
             return memoizer.memoize(
-                    si0(state),
-                    si1(state),
-                    si2(state),
-                    si3(state),
-                    si4(state)
+                   state,
+                    si0 as SelectorInput<Any, Any>,
+                    si1 as SelectorInput<Any, Any>,
+                    si2 as SelectorInput<Any, Any>,
+                    si3 as SelectorInput<Any, Any>,
+                    si4 as SelectorInput<Any, Any>
             )
         }
     }
 }
 
 //use @JvmField annotation for avoiding generation useless getter methods
-class SelectorForP4<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+class SelectorForP4<S:Any, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(@JvmField val si0: SelectorInput<S, I0>,
                                                                @JvmField val si1: SelectorInput<S, I1>,
                                                                @JvmField val si2: SelectorInput<S, I2>,
                                                                @JvmField val si3: SelectorInput<S, I3>
 ) {
-    fun<I4 : Any> withField(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn))
+    fun<I4 : Any> withField(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn, byRefEqualityCheck))
+    fun<I4 : Any> withFieldByValue(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn, byValEqualityCheck))
     fun<I4 : Any> withSelector(si: SelectorInput<S, I4>) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, si)
-    fun<O> compute(computeFun: (I0, I1, I2, I3) -> O) = object : AbstractSelector<S, O>() {
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3) -> O) = object : AbstractSelector<S, O>() {
+        override val equalityCheck: EqualityCheckFn
+            get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -175,24 +190,29 @@ class SelectorForP4<S, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(@JvmField val si0
         }
 
         override operator fun invoke(state: S): O {
+            @Suppress("UNCHECKED_CAST")
             return memoizer.memoize(
-                    si0(state),
-                    si1(state),
-                    si2(state),
-                    si3(state)
+                    state,
+                    si0 as SelectorInput<Any, Any>,
+                    si1 as SelectorInput<Any, Any>,
+                    si2 as SelectorInput<Any, Any>,
+                    si3 as SelectorInput<Any, Any>
             )
         }
     }
 }
 
 //use @JvmField annotation for avoiding generation useless getter methods
-class SelectorForP3<S, I0 : Any, I1 : Any, I2 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+class SelectorForP3<S:Any, I0 : Any, I1 : Any, I2 : Any>(@JvmField val si0: SelectorInput<S, I0>,
                                                      @JvmField val si1: SelectorInput<S, I1>,
                                                      @JvmField val si2: SelectorInput<S, I2>
 ) {
-    fun<I3 : Any> withField(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn))
+    fun<I3 : Any> withField(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn, byRefEqualityCheck))
+    fun<I3 : Any> withFieldByValue(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn, byValEqualityCheck))
     fun<I3 : Any> withSelector(si: SelectorInput<S, I3>) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, si)
-    fun<O> compute(computeFun: (I0, I1, I2) -> O) = object : AbstractSelector<S, O>() {
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2) -> O) = object : AbstractSelector<S, O>() {
+        override val equalityCheck: EqualityCheckFn
+            get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -200,21 +220,26 @@ class SelectorForP3<S, I0 : Any, I1 : Any, I2 : Any>(@JvmField val si0: Selector
         }
 
         override operator fun invoke(state: S): O {
+            @Suppress("UNCHECKED_CAST")
             return memoizer.memoize(
-                    si0(state),
-                    si1(state),
-                    si2(state)
+                    state,
+                    si0 as SelectorInput<Any, Any>,
+                    si1 as SelectorInput<Any, Any>,
+                    si2 as SelectorInput<Any, Any>
             )
         }
     }
 }
 
 //use @JvmField annotation for avoiding generation useless getter methods
-class SelectorForP2<S, I0 : Any, I1 : Any>(@JvmField val si0: SelectorInput<S, I0>,
+class SelectorForP2<S:Any, I0 : Any, I1 : Any>(@JvmField val si0: SelectorInput<S, I0>,
                                            @JvmField val si1: SelectorInput<S, I1>) {
-    fun<I2 : Any> withField(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn))
+    fun<I2 : Any> withField(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn, byRefEqualityCheck))
+    fun<I2 : Any> withFieldByValue(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn, byValEqualityCheck))
     fun<I2 : Any> withSelector(si: SelectorInput<S, I2>) = SelectorForP3<S, I0, I1, I2>(si0, si1, si)
-    fun<O> compute(computeFun: (I0, I1) -> O) = object : AbstractSelector<S, O>() {
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1) -> O) = object : AbstractSelector<S, O>() {
+        override val equalityCheck: EqualityCheckFn
+            get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -222,19 +247,24 @@ class SelectorForP2<S, I0 : Any, I1 : Any>(@JvmField val si0: SelectorInput<S, I
         }
 
         override operator fun invoke(state: S): O {
+            @Suppress("UNCHECKED_CAST")
             return memoizer.memoize(
-                    si0(state),
-                    si1(state)
+                    state,
+                    si0 as SelectorInput<Any, Any>,
+                    si1 as SelectorInput<Any, Any>
             )
         }
     }
 }
 
 //use @JvmField annotation for avoiding generation useless getter methods
-class SelectorForP1<S, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
-    fun<I1 : Any> withField(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn))
+class SelectorForP1<S:Any, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
+    fun<I1 : Any> withField(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn, byRefEqualityCheck))
+    fun<I1 : Any> withFieldByValue(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn, byValEqualityCheck))
     fun<I1 : Any> withSelector(si: SelectorInput<S, I1>) = SelectorForP2<S, I0, I1>(si0, si)
-    fun<O> compute(computeFun: (I0) -> O) = object : AbstractSelector<S, O>() {
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0) -> O) = object : AbstractSelector<S, O>() {
+        override val equalityCheck: EqualityCheckFn
+            get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -242,8 +272,10 @@ class SelectorForP1<S, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
         }
 
         override operator fun invoke(state: S): O {
+            @Suppress("UNCHECKED_CAST")
             return memoizer.memoize(
-                    si0(state)
+                    state,
+                    si0 as SelectorInput<Any, Any>
             )
         }
     }
@@ -253,8 +285,9 @@ class SelectorForP1<S, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
  * wrapper class for Selector factory methods , that basically is used only to capture
  * type information for the state parameter
  */
-class SelectorBuilder<S> {
-    fun<I0 : Any> withField(fn: S.() -> I0) = SelectorForP1<S, I0>(InputField(fn))
+class SelectorBuilder<S:Any> {
+    fun<I0 : Any> withField(fn: S.() -> I0) = SelectorForP1<S, I0>(InputField(fn, byRefEqualityCheck))
+    fun<I0 : Any> withFieldByValue(fn: S.() -> I0) = SelectorForP1<S, I0>(InputField(fn, byValEqualityCheck))
     fun<I0 : Any> withSelector(si: SelectorInput<S, I0>) = SelectorForP1<S, I0>(si)
 
     /**
@@ -262,6 +295,8 @@ class SelectorBuilder<S> {
      * Warning: Don't use this with primitive type fields, use [withSingleFieldByValue] instead!!!
      */
     fun <I : Any> withSingleField(fn: S.() -> I) = object : AbstractSelector<S, I>() {
+        @Suppress("UNCHECKED_CAST")
+        private val inputField=InputField(fn, byRefEqualityCheck) as SelectorInput<Any, Any>
         override val computeAndCount = fun(i: Array<out Any>): I {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
@@ -269,12 +304,12 @@ class SelectorBuilder<S> {
         }
 
         override operator fun invoke(state: S): I {
-            return memoizer.memoize(
-                    fn(state)
-            )
+            return memoizer.memoize(state,inputField)
         }
+        override val equalityCheck: EqualityCheckFn
+            get() = byRefEqualityCheck
         override val memoizer: Memoizer<I> by lazy {
-            singleInputMemoizer(computeAndCount, byRefEqualityCheck)
+            singleInputMemoizer(computeAndCount)
         }
     }
     /**
@@ -282,20 +317,20 @@ class SelectorBuilder<S> {
      * is a primitive type like Int, Float, Double, etc..., because it compares memoized values, instead of references
      */
     fun <I : Any> withSingleFieldByValue(fn: S.() -> I) = object : AbstractSelector<S, I>() {
+        @Suppress("UNCHECKED_CAST")
+        private val inputField=InputField(fn, byValEqualityCheck) as SelectorInput<Any, Any>
         override val computeAndCount = fun(i: Array<out Any>): I {
             ++_recomputations
             @Suppress("UNCHECKED_CAST")
             return i[0] as I
         }
-
         override operator fun invoke(state: S): I {
-            return memoizer.memoize(
-                    fn(state)
-            )
+            return memoizer.memoize(state,inputField)
         }
-
+        override val equalityCheck: EqualityCheckFn
+            get() = byValEqualityCheck
         override val memoizer: Memoizer<I> by lazy {
-            singleInputMemoizer(computeAndCount, byValEqualityCheck)
+            singleInputMemoizer(computeAndCount)
         }
 
         operator fun <I : Any> invoke(fn: S.() -> I): AbstractSelector<S, I> {
