@@ -24,6 +24,7 @@ class ActionRestoreState<S>(val restoredState:S): Action {
             }
         }
         fun<S> restoreReduksState(reduks: Reduks<S>, savedInstanceState: Bundle?) {
+            @Suppress("UNCHECKED_CAST")
             val restoredState:S? = when(reduks.store.state) {
                 is Parcelable ->savedInstanceState?.getParcelable<Parcelable>(REDUKS_STATE) as? S
                 is Serializable -> savedInstanceState?.getSerializable(REDUKS_STATE) as? S
