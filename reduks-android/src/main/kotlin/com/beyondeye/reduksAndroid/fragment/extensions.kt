@@ -96,7 +96,7 @@ fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriberB
     fsa?.reduks?.subscribe(tag!!,storeSubscriberBuilder)
 }
 /**
- * TO be called in Fragment OnViewCreated, for detaching the bus data handler/reduks subscriber associated to this fragment
+ * TO be called in Fragment OnViewCreated, for adding a reduks subscriber specific for this fragment
  */
 fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriber:StoreSubscriber<S>) {
     if(setFragmentStatusActive) reduks?.setFragmentStatus(tag, FragmentStatus.fragmentStatusActive)
@@ -108,7 +108,7 @@ fun <S>Fragment.reduksSubscribe(setFragmentStatusActive:Boolean,storeSubscriber:
 }
 
 /**
- * TO be called in Fragment OnDestroyView
+ * TO be called in Fragment OnDestroyView, for detaching the bus data handler/reduks subscriber associated to this fragment
  */
 fun Fragment.reduksUnsubscribe(setFragmentStatusInactive:Boolean) {
     if(setFragmentStatusInactive) reduks?.setFragmentStatus(tag, FragmentStatus.fragmentStatusInactive)
