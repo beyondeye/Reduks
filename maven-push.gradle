@@ -60,22 +60,36 @@ afterEvaluate { project ->
 
 
 
-    // build a jar with javadoc
-    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    task dokkaJar(type: Jar, dependsOn: dokka) {
         classifier = 'javadoc'
-        from androidJavadocs.destinationDir
+        from dokka.outputDirectory
     }
-
-    // build a jar with source files
-    task androidSourcesJar(type: Jar) {
+    task sourcesJar(type: Jar) {
         classifier = 'sources'
-        from android.sourceSets.main.java.sourceFiles
+        from android.sourceSets.main.java.source
     }
 
     artifacts {
-        archives androidSourcesJar
-        archives androidJavadocsJar
+        archives dokkaJar
+        archives sourcesJar
     }
+
+    // build a jar with javadoc
+//    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+//        classifier = 'javadoc'
+//        from androidJavadocs.destinationDir
+//    }
+
+    // build a jar with source files
+//    task androidSourcesJar(type: Jar) {
+//        classifier = 'sources'
+//        from android.sourceSets.main.java.sourceFiles
+//    }
+
+//    artifacts {
+//        archives androidSourcesJar
+//        archives androidJavadocsJar
+//    }
 
     task copyToS3(type: Exec) {
         commandLine 'aws', 's3', 'cp', '--recursive', getOutputDir(), getDestUrl()

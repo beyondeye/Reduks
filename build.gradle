@@ -119,7 +119,7 @@ configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-and
     }
     dokka {
         outputFormat = 'html'
-        outputDirectory = "$buildDir/javadoc"
+        outputDirectory = "$buildDir/documentation"
     }
     dependencies {
         implementation libraries.kotlinStdLib
