@@ -93,6 +93,11 @@ class InputField<S, I>(val fn: S.() -> I,override val equalityCheck: EqualityChe
 interface Selector<S, O> : SelectorInput<S, O> {
     val recomputations: Long
     fun isChanged(): Boolean
+    /**
+     * by calling this method, you will force the next call to [getIfChangedIn] to succeed,
+     * as if the actual value of the selector was changed, but no actual recomputation is performed
+     */
+    fun signalChanged()
     fun resetChanged()
     fun getIfChangedIn(state: S): O? {
         val res = invoke(state)
@@ -125,6 +130,12 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
     @JvmField protected var _recomputations = 0L
     override val recomputations: Long get() = _recomputations
 
+    /**
+     * see documentation to [Selector.signalChanged]
+     */
+    override fun signalChanged() {
+        ++_recomputations
+    }
 
     override fun isChanged(): Boolean = _recomputations != recomputationsLastChanged
     override fun resetChanged() {

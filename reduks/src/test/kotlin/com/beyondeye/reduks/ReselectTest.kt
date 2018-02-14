@@ -24,7 +24,16 @@ class ReselectTest {
         assertThat(selector(state.copy(a = 1))).isEqualTo(1)
         assertThat(selector.recomputations).isEqualTo(2)
     }
-
+    @Test
+    fun signalChangedTest() {
+        val selector = SelectorBuilder<StateA>().withSingleField { a }
+        val state = StateA(0)
+        assertThat(selector(state)).isEqualTo(0)
+        assertThat(selector(state)).isEqualTo(0)
+        assertThat(selector.recomputations).isEqualTo(1)
+        selector.signalChanged()
+        assertThat(selector.recomputations).isEqualTo(2)
+    }
     data class StateAB(val a: Int, val b: Int)
     data class StateABFloat(val a: Float, val b: Float)
 
