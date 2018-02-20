@@ -111,6 +111,16 @@ interface Selector<S, O> : SelectorInput<S, O> {
     fun onChangeIn(state: S, blockfn: (O) -> Unit) {
         getIfChangedIn(state)?.let(blockfn)
     }
+
+    /**
+     * same as regular [onChangeIn] but don't activate selector unless [condition] is true
+     * Note that the selector is not run at all if [condition] is false. Therefore
+     * the selector will be triggered by changes that happened and where ignored, as soon as
+     * [condition] become true
+     */
+    fun onChangeIn(state: S, condition:Boolean,blockfn: (O) -> Unit) {
+        if(condition) getIfChangedIn(state)?.let(blockfn)
+    }
 }
 
 /**

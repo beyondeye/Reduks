@@ -268,9 +268,28 @@ class ReselectTest {
         assertThat(secondChangedA).isNull()
 
     }
+    @Test
+    fun onChangeConditionalTest() {
+        val sel_a = SelectorBuilder<StateA>().withSingleField { a }
+        val state = StateA(a = 0)
+        assertThat(sel_a(state)).isEqualTo(0)
+        val changedState = state.copy(a = 1)
+        var firstChangedA: Int? = null
+        //this first time the selector is not run, because condition is false
+        sel_a.onChangeIn(changedState,false) {
+            firstChangedA = it
+        }
+        var secondChangedA: Int? = null
+        //this second time the selector is run, because condition is true
+        sel_a.onChangeIn(changedState,true) {
+            secondChangedA = it
+        }
+        assertThat(firstChangedA).isNull()
+        assertThat(secondChangedA).isEqualTo(1)
+    }
 
     @Test
-    fun WhenChangedTest() {
+    fun whenChangedTest() {
         val sel_a = SelectorBuilder<StateA>().withSingleField { a }
         val state = StateA(a = 0)
         assertThat(sel_a(state)).isEqualTo(0)
