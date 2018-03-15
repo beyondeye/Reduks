@@ -43,12 +43,12 @@ abstract class KovenantReduksActivity<S>: ReduksActivity<S>, AppCompatActivity()
         super.onDestroy()
     }
     override fun onSaveInstanceState(outState: Bundle?) {
-        ActionRestoreState.saveReduksState(reduks,outState)
+        ActionRestoreState.saveReduksState(this,reduks,outState)
         super.onSaveInstanceState(outState)
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        ActionRestoreState.restoreReduksState(reduks,savedInstanceState)
+        ActionRestoreState.restoreReduksState(this,reduks,savedInstanceState)
     }
 
 }

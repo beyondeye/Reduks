@@ -70,7 +70,9 @@ ext.libraries = [
         rxBinding               : "com.jakewharton.rxbinding:rxbinding:$versions.rxBinding",
 
         //Android Architecture components
+        archExtensions              : "android.arch.lifecycle:extensions:$versions.archLibs",
         archViewModel               : "android.arch.lifecycle:viewmodel:$versions.archLibs",
+        archLivedata                : "android.arch.lifecycle:livedata:$versions.archLibs",
         archLifecycleRunTime        : "android.arch.lifecycle:runtime:$versions.archLibs",
         archLifecycleCompiler       : "android.arch.lifecycle:compiler:$versions.archLibs",
 

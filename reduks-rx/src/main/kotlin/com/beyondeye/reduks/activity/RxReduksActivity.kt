@@ -54,12 +54,12 @@ abstract class RxReduksActivity<S>:  ReduksActivity<S>, AppCompatActivity() {
     abstract  fun getActivityRxStoreSubscriber(store: Store<S>): RxStoreSubscriber<S>
 
     override fun onSaveInstanceState(outState: Bundle?) {
-        ActionRestoreState.saveReduksState(reduks,outState)
+        ActionRestoreState.saveReduksState(this,reduks,outState)
         super.onSaveInstanceState(outState)
     }
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
-        ActionRestoreState.restoreReduksState(reduks,savedInstanceState)
+        ActionRestoreState.restoreReduksState(this,reduks,savedInstanceState)
     }
 
 }
