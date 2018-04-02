@@ -1,3 +1,4 @@
+apply plugin: "kotlin"
 apply plugin: "application"
 
 sourceSets {
@@ -10,7 +11,9 @@ FileTree mdFiles = fileTree(project.rootDir) {
     include '**/*.md'
     exclude '**/build/**'
 }
-
+dependencies {
+    compile libraries.kotlinStdLib
+}
 mainClassName = "KnitKt"
 
 run.dependsOn rootProject.getTasksByName("dokka", true)
