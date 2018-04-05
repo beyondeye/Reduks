@@ -10,7 +10,7 @@ For the full documentation see [here](https://beyondeye.gitbooks.io/reduks/conte
 # Reduks modules in brief
 Here is a bird-eye view of Reduks modules and features
 ## reduks-core
-Reduks core implement all basic standard ReduxJS components and interfaces:
+Reduks core implements all basic standard ReduxJS components and interfaces:
 - Store, Store Creator,  Store Subscriber
 - Middlewares, Store Enhancers
 - Thunk  Middleware, Standard Action
