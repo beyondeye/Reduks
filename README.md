@@ -1,11 +1,36 @@
-[![Kotlin 1.1.2-3](https://img.shields.io/badge/Kotlin-1.1.2-3-blue.svg)](http://kotlinlang.org)
+[![Kotlin 1.2.21](https://img.shields.io/badge/Kotlin-1.1.21-blue.svg)](http://kotlinlang.org)
 [![](https://jitpack.io/v/beyondeye/reduks.svg)](https://jitpack.io/#beyondeye/reduks)
-[![Build Status](https://travis-ci.org/beyondeye/Reduks.svg?branch=master)](https://travis-ci.org/beyondeye/Reduks)
 [![Slack channel](https://img.shields.io/badge/Chat-Slack-green.svg)](https://kotlinlang.slack.com/messages/reduks/)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Reduks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/4245)
-## IMPORTANT NOTICE: THIS README FILE IS HEAVILY OUTDATE, THE UPDATED DOCUMENTATION FOR REDUKS 3.x is still in the works ##
 
-# Reduks: a port of Reduxjs for Kotlin+Android
+# Browse the Docs!
+For the full documentation see [here](https://beyondeye.gitbooks.io/reduks/content), or take a look at the [summary](SUMMARY.MD).
+
+
+# Reduks modules in brief
+Here is a bird-eye view of Reduks modules and features
+## reduks-core
+Reduks core implement all basic standard ReduxJS components and interfaces:
+- Store, Store Creator,  Store Subscriber
+- Middlewares, Store Enhancers
+- Thunk  Middleware, Standard Action
+
+reduks-core also contains a basic implementation of the Store interface, called SimpleStore, whose behavior is the most similar to the Store in the original ReduxJS implementation
+In addition to all standard ReduxJS stuff,reduks-core  also contains several extensions
+- Store Subscriber Builder and reselect library: this is one most important components of reduks
+- Basic support for Reduks Modules (reduks substates): reduks modules is the reduks way to support modular UI components
+
+dependencies for gradle for reduks-core
+```groovy
+// First, add JitPack to your repositories
+repositories {
+    ...
+    maven { url "https://jitpack.io" }
+}
+
+// main reduks package
+compile 'com.github.beyondeye.reduks:reduks-core:<Reduks_Version>'
+```
 
 Some notable features:
 
