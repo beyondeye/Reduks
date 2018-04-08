@@ -19,7 +19,7 @@ buildscript {
 //        mavenCentral()
     }
     rootProject.ext.versions = [
-            kotlin: '1.2.10',
+            kotlin: '1.2.30',
             dokka: '0.9.15'
     ]
 
@@ -84,7 +84,21 @@ configure(subprojects.findAll{it.name =='reduks-core' ||it.name =='reduks-core-a
         testImplementation libraries.assertJ
         testImplementation libraries.rxJava
     }
+}
+configure(subprojects.findAll{it.name =='reduks-pcollections'}) {
 
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    group = 'com.github.beyondeye.reduks' //required by jitpack
+
+
+    sourceCompatibility =sourceCompatibility_
+    targetCompatibility =targetCompatibility_
+
+    dependencies {
+        testImplementation libraries.junit
+        testImplementation libraries.assertJ
+    }
 }
 configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-async' || it.name =='reduks-logger' || it.name =='reduks-rx'}) {
 
