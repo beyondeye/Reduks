@@ -1,6 +1,7 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
 import com.beyondeye.reduks.Selector
+import com.beyondeye.reduks.SelectorBuilder
 import kotlinx.coroutines.experimental.cancel
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
@@ -11,6 +12,16 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.CancellationException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
+
+/**
+ * extension function for yelding a state field: create a state selector on the fly, so you don't need to create it
+ * by yourself if you just want to call yield_ selectField{<FieldName>}, instead of building a selector and calling
+ * yield select <Selector>
+ */
+inline suspend infix fun <reified S:Any,I:Any> SagaYeldSingle<S>.selectField(noinline fieldSelector: S.() -> I):I {
+    val selValue= SelectorBuilder<S>().withSingleField(fieldSelector)
+    return this.select(selValue)
+}
 
 class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
     suspend infix fun put(value:Any) {

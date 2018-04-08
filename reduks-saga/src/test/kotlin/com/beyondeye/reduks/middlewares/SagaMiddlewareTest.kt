@@ -115,6 +115,7 @@ class SagaMiddlewareTest {
         assertThat(state.decrCounter).isEqualTo(-321)
 //        store.dispatch(EndAction())
     }
+
     @Test
     fun testSagaSelect() {
         val store = AsyncStore(TestState(incrCounter = 0,decrCounter = 0), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
@@ -126,6 +127,35 @@ class SagaMiddlewareTest {
             val selDecr = selb.withSingleField { decrCounter }
             val initialIncrValue= yield_ select selIncr
             val initialDecrValue= yield_ select selDecr
+            yield_ put ActualAction.SetIncrCounter(initialIncrValue-10)
+            yield_ put ActualAction.SetDecrCounter(initialDecrValue+10)
+        }
+        val lock = CountDownLatch(1)
+
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==2) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        //dispatch a SagaAction that will be translated to an actual action that the reducer can handle
+        lock.await(50,TimeUnit.SECONDS)
+        val state=store.state
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(-10)
+        assertThat(state.decrCounter).isEqualTo(+10)
+//        store.dispatch(EndAction())
+    }
+    @Test
+    fun testSagaSelectField() {
+        val store = AsyncStore(TestState(incrCounter = 0,decrCounter = 0), reducer, subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare<TestState>(store)
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga("select") {
+            val initialIncrValue= yield_ selectField {incrCounter}
+            val initialDecrValue= yield_ selectField {decrCounter}
             yield_ put ActualAction.SetIncrCounter(initialIncrValue-10)
             yield_ put ActualAction.SetDecrCounter(initialDecrValue+10)
         }
