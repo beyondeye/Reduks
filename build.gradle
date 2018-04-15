@@ -12,26 +12,7 @@ ext {
 }
 
 
-buildscript {
-    repositories {
-        jcenter()
-        google()
-//        mavenCentral()
-    }
-    rootProject.ext.versions = [
-            kotlin: '1.2.30',
-            dokka: '0.9.15'
-    ]
 
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:3.1.0'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
-        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
-        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$rootProject.versions.dokka"
-    }
-}
 
 
 allprojects {
@@ -151,7 +132,26 @@ configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-and
         }
     }
 }
+buildscript {
+    repositories {
+        jcenter()
+        google()
+//        mavenCentral()
+    }
+    rootProject.ext.versions = [
+            kotlin: '1.2.21',
+            dokka: '0.9.15'
+    ]
 
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
+        classpath 'com.android.tools.build:gradle:3.1.0'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
+        classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$rootProject.versions.dokka"
+    }
+}
 
 task clean(type: Delete) {
     delete rootProject.buildDir
