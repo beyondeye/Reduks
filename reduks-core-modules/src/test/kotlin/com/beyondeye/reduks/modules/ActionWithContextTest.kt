@@ -22,13 +22,13 @@ class ActionWithContextTest {
             ctx2.matchA { it is ActionB } -> "2b"
             else -> ""
         }
-        assertEquals("1a",getMatch(ctx1..ActionA()))
-        assertEquals("1b",getMatch(ctx1..ActionB()))
-        assertEquals("2a",getMatch(ctx2..ActionA()))
-        assertEquals("2b",getMatch(ctx2..ActionB()))
-        assertEquals("",getMatch(ctx1..ActionC()))
-        assertEquals("",getMatch(ctx3..ActionA()))
-        assertEquals("",getMatch(ctx3..ActionB()))
+        assertEquals("1a",getMatch(ctx1/ActionA()))
+        assertEquals("1b",getMatch(ctx1/ActionB()))
+        assertEquals("2a",getMatch(ctx2/ActionA()))
+        assertEquals("2b",getMatch(ctx2/ActionB()))
+        assertEquals("",getMatch(ctx1/ActionC()))
+        assertEquals("",getMatch(ctx3/ActionA()))
+        assertEquals("",getMatch(ctx3/ActionB()))
     }
     @Test
     fun testActionWithContextIsAMatcher() {
@@ -45,12 +45,12 @@ class ActionWithContextTest {
             ctx2.isA<ActionB>() -> "2b"
             else -> ""
         }
-        assertEquals("1a",getMatch(ctx1..ActionA()))
-        assertEquals("1b",getMatch(ctx1..ActionB()))
-        assertEquals("2a",getMatch(ctx2..ActionA()))
-        assertEquals("2b",getMatch(ctx2..ActionB()))
-        assertEquals("",getMatch(ctx1..ActionC()))
-        assertEquals("",getMatch(ctx3..ActionA()))
-        assertEquals("",getMatch(ctx3..ActionB()))
+        assertEquals("1a",getMatch(ctx1/ActionA()))
+        assertEquals("1b",getMatch(ctx1/ActionB()))
+        assertEquals("2a",getMatch(ctx2/ActionA()))
+        assertEquals("2b",getMatch(ctx2/ActionB()))
+        assertEquals("",getMatch(ctx1/ActionC()))
+        assertEquals("",getMatch(ctx3/ActionA()))
+        assertEquals("",getMatch(ctx3/ActionB()))
     }
 }

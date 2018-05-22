@@ -76,7 +76,7 @@ class ReduksModule<State>(moduleDef: ReduksModule.Def<State>) : Reduks<State> {
     companion object {
         //calculate context for multiple modules
         fun multiContext(vararg ctxs: ReduksContext): ReduksContext {
-            val res = ctxs.reduce { prevCtx, ctx -> prevCtx + ctx }
+            val res = ctxs.reduce { prevCtx, ctx -> prevCtx.joinedWith(ctx) }
             if (ctxs.toSet().size < ctxs.size)
                 throw IllegalArgumentException("Invalid MultiContext: when combining multiple modules, each module MUST have a distinct context!: $res")
             return res

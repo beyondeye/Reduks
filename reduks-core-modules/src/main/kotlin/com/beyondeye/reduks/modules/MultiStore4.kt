@@ -45,10 +45,10 @@ class MultiStore4<S1 : Any, S2 : Any, S3 : Any, S4 : Any>(
     }
 
     override val storeMap = mapOf(
-            ctx1.toString() to store1,
-            ctx2.toString() to store2,
-            ctx3.toString() to store3,
-            ctx4.toString() to store4)
+            ctx1.moduleId to store1,
+            ctx2.moduleId to store2,
+            ctx3.moduleId to store3,
+            ctx4.moduleId to store4)
     override val state: MultiState4<S1, S2, S3, S4> get() = MultiState4(store1.state, store2.state, store3.state, store4.state)
     override var dispatch = dispatchWrappedAction
     //call back the multi subscriber each time any component state change

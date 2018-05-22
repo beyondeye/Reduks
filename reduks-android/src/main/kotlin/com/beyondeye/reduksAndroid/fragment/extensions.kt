@@ -120,7 +120,7 @@ fun Fragment.reduksUnsubscribe(setFragmentStatusInactive:Boolean) {
 }
 
 inline fun <reified BusDataType:Any> ReduksActivity<out Any>.reduksAddBusDataHandler(noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription? =
-        reduks.AddBusDataHandler(reduks.ctx.toString(),true,null,fn)
+        reduks.AddBusDataHandler(reduks.ctx.moduleId,true,null,fn)
 
 /**
  * use fragment tag as subscription tag and clear busdata after handling
