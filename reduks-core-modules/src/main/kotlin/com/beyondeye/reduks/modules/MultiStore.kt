@@ -1,5 +1,6 @@
 package com.beyondeye.reduks.modules
 
+import com.beyondeye.reduks.SagaAction
 import com.beyondeye.reduks.Store
 
 /**
@@ -11,14 +12,20 @@ abstract class MultiStore(@JvmField val ctx: ReduksContext) {
      *     map of all modules with  [ReduksContext] as index
      */
     abstract val storeMap:Map<String, Store<out Any>>
-    @JvmField internal var dispatchWrappedAction: (Any) -> Any = { action ->
+    @JvmField
+    internal var dispatchWrappedAction: (Any) -> Any = { action ->
 
-        when(action) {
+        when (action) {
             is ActionWithContext -> {
                 dispatchToSubstore(action)
             }
             is MultiActionWithContext -> {
-                action.actionList.forEach { if(it!=null) dispatchToSubstore(it) }
+                action.actionList.forEach { if (it != null) dispatchToSubstore(it) }
+            }
+        /**
+         *nothing to do: see documentation of [SagaAction]
+         */
+            is SagaAction -> {
             }
             else -> throw IllegalArgumentException("Action missing context $action")
         }
