@@ -1,10 +1,12 @@
 package com.beyondeye.reduks.modules
 
+import java.io.Serializable
+
 /**
  * context for an action, attached to an action when using Reduks modules
  * Created by daely on 7/31/2016.
  */
-open class ReduksContext(val moduleId:String,val modulePath:List<String>?=null) {
+open class ReduksContext(val moduleId:String,val modulePath:List<String>?=null):Serializable {
     /**
      * check if the context is valid
      */
