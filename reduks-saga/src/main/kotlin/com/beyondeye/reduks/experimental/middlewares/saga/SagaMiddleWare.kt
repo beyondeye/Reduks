@@ -6,6 +6,7 @@ import kotlinx.coroutines.experimental.channels.*
 import java.lang.ref.WeakReference
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.experimental.coroutineContext
 
 /**
  * a port of saga middleware
@@ -134,7 +135,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
         val sagaDeferred = async(newSagaParentCoroutineContext, start = CoroutineStart.LAZY) {
             val isChildCall = (childType == SagaProcessor.SAGATYPE_CHILD_CALL)
             if(!isChildCall) //if child call, don't reassign linked coroutine context, because we are reusing the parent saga processor
-                sagaProcessor.linkedSagaCoroutineContext=coroutineContext
+                sagaProcessor.linkedSagaCoroutineContext= coroutineContext
             val sagaResult = try {
                 val res=sagafn.invoke(newSaga)
                 //a parent coroutine will automatically wait for its children to complete execution, but
