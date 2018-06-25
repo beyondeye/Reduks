@@ -139,13 +139,13 @@ buildscript {
 //        mavenCentral()
     }
     rootProject.ext.versions = [
-            kotlin: '1.2.41',
+            kotlin: '1.2.50',
             dokka: '0.9.15'
     ]
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:3.1.0'
+        classpath 'com.android.tools.build:gradle:3.1.3'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
