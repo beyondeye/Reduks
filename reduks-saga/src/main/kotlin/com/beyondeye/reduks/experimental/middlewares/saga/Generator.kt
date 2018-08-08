@@ -20,7 +20,8 @@ interface Generator<out T, in R> {
     fun next(param: R): T? // returns `null` when generator is over
 }
 
-@RestrictsSuspension
+//*DARIO* commented because it started giving compilation errors from kotlin 1.2.60
+//@RestrictsSuspension
 interface GeneratorBuilder<in T, R> {
     suspend fun yield(value: T): R
     suspend fun yieldAll(generator: Generator<T, R>, param: R)
