@@ -48,7 +48,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
         reducerActor = startReducerActor(subscriberNotifierActor,reduceContext)
     }
     //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
-    // then subscribers will be notified sequentially of state changes in the correct
+    // then subscribers will be notified sequentially of state changes in the correct order
     private fun startSubscriberNotifierActor(c: CoroutineContext) = actor<S>(c) {
         for(updatedState in channel) { //iterate over incoming state updates
             notifySubscribers()
