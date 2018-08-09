@@ -56,3 +56,8 @@ fun <S> Store<S>.dispatch_a(action: Action) = dispatch(action)
  */
 fun <S> Store<S>.dispatch_sa(action: StandardAction) = dispatch(action)
 
+
+/**
+ * extension method for obtained encapsulated [DispatcherFn] reference to the store [dispatch] method
+ */
+fun <S> Store<S>.getDispatcherFn()=DispatcherFn(this.dispatch)

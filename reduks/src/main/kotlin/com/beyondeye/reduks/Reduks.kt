@@ -51,4 +51,4 @@ fun <S>Reduks<S>.unsubscribeAll() {
     storeSubscriptionsByTag.clear()
 }
 
-
+fun <S>Reduks<S>.getDispatcherFn():DispatcherFn=store.getDispatcherFn()
