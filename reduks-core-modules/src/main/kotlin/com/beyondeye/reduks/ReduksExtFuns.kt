@@ -16,7 +16,7 @@ inline fun<reified SB:Any> Reduks<*>.subState(subctx: ReduksContext?=null):SB?  
 /**
  * see [Store.subDispatcher]
  */
-inline fun<reified SB:Any> Reduks<*>.subDispatcher(subctx: ReduksContext?=null):((Any)->Any)?  =store.subDispatcher<SB>(subctx)
+inline fun<reified SB:Any> Reduks<*>.subDispatcher(subctx: ReduksContext?=null):DispatcherFn?  =store.subDispatcher<SB>(subctx)
 
 
 
@@ -51,6 +51,6 @@ inline fun<reified SB:Any> Store<*>.subState(subctx: ReduksContext?=null):SB?  =
  * @return null if either the a substore with the specified context was not found or it was found but it has a
  * different substate type than required
  */
-inline fun<reified SB:Any> Store<*>.subDispatcher(subctx: ReduksContext?=null):((Any)->Any)?  =
-    if(this is MultiStore)  subStore_<SB>(subctx)?.dispatch else null
+inline fun<reified SB:Any> Store<*>.subDispatcher(subctx: ReduksContext?=null):DispatcherFn?  =
+    if(this is MultiStore)  subStore_<SB>(subctx)?.getDispatcherFn() else null
 
