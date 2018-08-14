@@ -59,5 +59,6 @@ fun <S> Store<S>.dispatch_sa(action: StandardAction) = dispatch(action)
 
 /**
  * extension method for obtained encapsulated [DispatcherFn] reference to the store [dispatch] method
+ *  if [isWeakRef] true then get a [DispatcherFn_weakref] instance
  */
 fun <S> Store<S>.getDispatcherFn(isWeakRef:Boolean=false)=DispatcherFn.instance(this.dispatch,isWeakRef)
