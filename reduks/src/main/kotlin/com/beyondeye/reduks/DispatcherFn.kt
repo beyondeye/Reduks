@@ -13,11 +13,7 @@ interface DispatcherFn {
     operator fun invoke(action: Any): Any?
 
     companion object {
-        /**
-         * TODO: note that the weak reference feature has been disabled for now
-         * because it caused problems: for some reason it becomes immediately null: need to check better why
-         */
-        fun instance(fn: (action: Any) -> Any, isWeakRef: Boolean=false) = if (isWeakRef) DispatcherFn_weakref(fn) else DispatcherFn_ref(fn)
+        fun instance(fn: (action: Any) -> Any, isWeakRef: Boolean) = if (isWeakRef) DispatcherFn_weakref(fn) else DispatcherFn_ref(fn)
     }
 }
 
