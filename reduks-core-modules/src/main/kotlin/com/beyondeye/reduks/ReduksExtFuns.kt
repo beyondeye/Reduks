@@ -15,9 +15,9 @@ inline fun<reified SB:Any> Reduks<*>.subStore(subctx: ReduksContext?=null):Store
 inline fun<reified SB:Any> Reduks<*>.subState(subctx: ReduksContext?=null):SB?  =store.subState(subctx)
 /**
  * see [Store.subDispatcher]
- * if [isWeakRef] true then get a [DispatcherFn_weakref] instance
+ * if [isWeakRef] true then get a keep a weak reference of the dispatcher instead of a normal reference
  */
-inline fun<reified SB:Any> Reduks<*>.subDispatcher(subctx: ReduksContext?=null,isWeakRef:Boolean=false):DispatcherFn?  =store.subDispatcher<SB>(subctx,isWeakRef)
+inline fun<reified SB:Any> Reduks<*>.subDispatcher(subctx: ReduksContext?=null,isWeakRef:Boolean=true):DispatcherFn?  =store.subDispatcher<SB>(subctx,isWeakRef)
 
 
 
@@ -48,7 +48,7 @@ inline fun<reified SB:Any> Store<*>.subState(subctx: ReduksContext?=null):SB?  =
  * try to retrieve a substore dispatcher: if input param subctx is null then
  * then use as context the  default substore ReduksContext for the specified state type SB
  * see [MultiStore.subStore_]
- * if [isWeakRef] true then get a [DispatcherFn_weakref] instance
+ * if [isWeakRef] true then get a keep a weak reference of the dispatcher instead of a normal reference
  * WARNING: when using the default context these methods use reflection
  * @return null if either the a substore with the specified context was not found or it was found but it has a
  * different substate type than required

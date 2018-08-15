@@ -2,21 +2,7 @@ package com.beyondeye.reduks
 
 import java.lang.ref.WeakReference
 
-interface DispatcherFn {
-    val fn: ((action: Any) -> Any)?
-    /**
-     * just an alias for [invoke] so that we can use [DispatcherFn] as it was
-     * the source [Reduks] object
-     */
-    fun dispatch(action: Any): Any?
-
-    operator fun invoke(action: Any): Any?
-
-    companion object {
-        fun instance(fn: (action: Any) -> Any, isWeakRef: Boolean) = if (isWeakRef) DispatcherFn_weakref(fn) else DispatcherFn_ref(fn)
-    }
-}
-
+typealias dispatcherfn_=(action:Any)->Any
 /**
  * class that hold a weak reference to a dispatcher function,
  * it is useful in android when we want to allow to dispatch actions
@@ -24,30 +10,22 @@ interface DispatcherFn {
  * while avoiding potential memory leaks, and also encapsulating the
  * data type of a dispatcher function.
  */
-class DispatcherFn_weakref(fn_:(action:Any)->Any) : DispatcherFn {
-    val fnw=WeakReference(fn_)
-    override val fn: ((action: Any) -> Any)?
-        get() = fnw.get()
-
-    override fun dispatch(action:Any):Any?=invoke(action)
-    override operator fun  invoke(action:Any):Any? {
-        return fnw.get()?.run {invoke(action) }
+class DispatcherFn(fn:dispatcherfn_, isWeakRef: Boolean) {
+    val fn_: dispatcherfn_?
+    val fnw:WeakReference<dispatcherfn_>?
+    init {
+        if(isWeakRef) {
+            fnw= WeakReference(fn)
+            fn_=null
+        } else
+        {
+            fnw=null
+            fn_=fn
+        }
     }
-}
-
-
-/**
- * another implementation of [DispatcherFn] that keep a regular reference (not weak reference) to
- * the dispatcher
- */
-class DispatcherFn_ref(fn_:(action:Any)->Any) : DispatcherFn {
-    override val fn: ((action: Any) -> Any)?=fn_
-    /**
-     * just an alias for [invoke] so that we can use [DispatcherFn] as it was
-     * the source [Reduks] object
-     */
-    override fun dispatch(action:Any):Any?=invoke(action)
-    override operator fun  invoke(action:Any):Any? {
-        return fn.invoke(action)
+    val fn: dispatcherfn_? get() {
+        return fnw?.get() ?: fn_
     }
+    fun dispatch(action:Any):Any?=fn?.invoke(action)
+    operator fun  invoke(action:Any):Any? =fn?.invoke(action)
 }
