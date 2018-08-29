@@ -12,6 +12,9 @@ class BusStore<S: StateWithBusData>(val wrappedStore: Store<S>, reducer: Reducer
     init {
         wrappedStore.replaceReducer(combineReducers(reducer, busDataReducer()))
     }
+
+    override var errorLogFn get()=wrappedStore.errorLogFn
+    set(value) { wrappedStore.errorLogFn=value  }
     override val state: S get() = wrappedStore.state
     override var dispatch: (Any) -> Any
         get() = wrappedStore.dispatch

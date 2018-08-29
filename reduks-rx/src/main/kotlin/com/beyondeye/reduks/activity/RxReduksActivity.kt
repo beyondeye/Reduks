@@ -27,6 +27,7 @@ abstract class RxReduksActivity<S>:  ReduksActivity<S>, AppCompatActivity() {
         reduks=initReduks()
 
         if(!isGetActivityRxStoreSubscriberCalled) throw IllegalArgumentException("It seems that you have overridden getActivityStoreSubscriber(): you should override getActivityRxStoreSubscriber() instead!! ")
+        reduks.store.errorLogFn= ReduksActivity.defaultReduksInternalLogger
     }
 
     override fun <T> storeCreator(): StoreCreator<T> = RxStore.Creator<T>(allActivitySubscriptions)

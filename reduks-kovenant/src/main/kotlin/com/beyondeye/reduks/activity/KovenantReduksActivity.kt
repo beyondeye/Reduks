@@ -21,6 +21,7 @@ abstract class KovenantReduksActivity<S>: ReduksActivity<S>, AppCompatActivity()
         // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)
         //startKovenant() //(before  initReduks()!!)
         reduks=initReduks()
+        reduks.store.errorLogFn= ReduksActivity.defaultReduksInternalLogger
     }
 
     override fun <T> storeCreator(): StoreCreator<T> = KovenantStore.Creator<T>()

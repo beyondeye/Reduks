@@ -9,6 +9,7 @@ import com.beyondeye.reduks.experimental.middlewares.saga.SagaMiddleWare
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity
+import com.beyondeye.reduksAndroid.activity.ReduksActivity.Companion.defaultReduksInternalLogger
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 
@@ -38,6 +39,7 @@ abstract class AsyncReduksActivity<S:Any>(
             sagaMiddleware = SagaMiddleWare(reduks.store)
             reduks.store.applyMiddleware(sagaMiddleware!!)
         }
+        reduks.store.errorLogFn=defaultReduksInternalLogger
     }
 
     override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(reduceContext = CommonPool,subscribeContext = UI)

@@ -24,6 +24,13 @@ interface Store<S> {
      */
     fun replaceReducer(reducer: Reducer<S>)
 
+    /**
+     * logger method used by the Store to report internal errors, like exception when running reducers or
+     * when notifying subscribers
+     */
+    var errorLogFn:((String)->Unit)?
+
+
 }
 
 

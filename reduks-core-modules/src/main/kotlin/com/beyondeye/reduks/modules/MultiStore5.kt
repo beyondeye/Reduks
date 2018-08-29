@@ -12,6 +12,17 @@ class MultiStore5<S1 : Any, S2 : Any, S3 : Any, S4 : Any, S5 : Any>(
         ctx3: ReduksContext, @JvmField val store3: Store<S3>, @JvmField val subscription3:StoreSubscription?,
         ctx4: ReduksContext, @JvmField val store4: Store<S4>, @JvmField val subscription4:StoreSubscription?,
         ctx5: ReduksContext, @JvmField val store5: Store<S5>, @JvmField val subscription5:StoreSubscription?) : Store<MultiState5<S1, S2, S3, S4, S5>>, MultiStore( ReduksModule.multiContext(ctx1, ctx2, ctx3, ctx4, ctx5)) {
+
+    override var errorLogFn: ((String) -> Unit)?
+        get() = store1.errorLogFn
+        set(value) {
+            store1.errorLogFn=value
+            store2.errorLogFn=value
+            store3.errorLogFn=value
+            store4.errorLogFn=value
+            store5.errorLogFn=value
+        }
+
     override fun replaceReducer(reducer: Reducer<MultiState5<S1, S2, S3, S4, S5>>) {
         throw UnsupportedOperationException("MultiStore does not support replacing reducer: replace the substate reducer instead")
     }

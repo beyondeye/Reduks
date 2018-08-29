@@ -28,6 +28,8 @@ class KovenantStore<S>(initialState: S, private var reducer: Reducer<S>, val obs
         }
     }
 
+    //TODO: actually I have not added yet support to reporting internal errors in KovenantStore, because I am planning to removing it from reduks in the next major version
+    override var errorLogFn: ((String) -> Unit)?=null
     val observeContext =
             if (!observeOnUiThread) {
                 Kovenant.context

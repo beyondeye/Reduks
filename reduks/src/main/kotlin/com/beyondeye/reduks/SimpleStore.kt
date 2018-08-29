@@ -17,16 +17,26 @@ class SimpleStore<S>(initialState: S, private var reducer: Reducer<S>) : Store<S
                 res.applyMiddleware(ThunkMiddleware())
         }
     }
+
+    override var errorLogFn: ((String) -> Unit)?=null
     override var state: S = initialState
     private val subscribers = mutableListOf<StoreSubscriber<S>>()
     private val mainDispatcher = object : Middleware<S> {
-        override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
-            try {
-                synchronized(this) {
+        override fun dispatch(store: Store<S>, nextDispatcher: (Any) -> Any, action: Any): Any {
+            synchronized(this) {
+                try {
                     state = reducer.reduce(store.state, action)
+                } catch (e: Throwable) {
+                    ReduksInternalLogUtils.reportErrorInReducer(this@SimpleStore, e)
                 }
-            } finally {
-                subscribers.forEach { it.onStateChange() }
+
+                subscribers.forEach {
+                    try {
+                        it.onStateChange()
+                    } catch (e:Throwable) {
+                        ReduksInternalLogUtils.reportErrorInSubscriber(this@SimpleStore,e)
+                    }
+                }
             }
             return action
         }

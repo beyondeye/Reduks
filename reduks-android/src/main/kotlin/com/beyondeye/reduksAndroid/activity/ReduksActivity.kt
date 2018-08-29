@@ -1,5 +1,6 @@
 package com.beyondeye.reduksAndroid.activity
 
+import android.util.Log
 import com.beyondeye.reduks.Reduks
 import com.beyondeye.reduks.StoreCreator
 
@@ -21,4 +22,8 @@ interface  ReduksActivity<S> {
      * override fun initReduks(storeCreator:StoreCreator<S>) = initReduksSingleModule(storeCreator)
      */
     fun initReduks(): Reduks<S>
+    companion object {
+        const val reduksTag="*REDUKS*"
+        val defaultReduksInternalLogger:(String)->Unit = {msg -> Log.w(reduksTag,msg)}
+    }
 }

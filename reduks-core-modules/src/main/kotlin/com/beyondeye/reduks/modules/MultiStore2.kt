@@ -14,6 +14,12 @@ class MultiStore2<S1:Any,S2:Any>(
         @JvmField val store2:Store<S2>,
         @JvmField val subscription2:StoreSubscription?) :Store<MultiState2<S1,S2>>,MultiStore(ReduksModule.multiContext(ctx1,ctx2))
 {
+    override var errorLogFn: ((String) -> Unit)?
+        get() = store1.errorLogFn
+        set(value) {
+            store1.errorLogFn=value
+            store2.errorLogFn=value
+        }
     override fun replaceReducer(reducer: Reducer<MultiState2<S1, S2>>) {
         throw UnsupportedOperationException("MultiStore does not support replacing reducer: replace the substate reducer instead")
     }

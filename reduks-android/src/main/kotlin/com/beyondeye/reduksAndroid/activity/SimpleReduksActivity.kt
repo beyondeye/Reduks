@@ -21,9 +21,8 @@ abstract class SimpleReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
     lateinit override var reduks: Reduks<S>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure Kovenant with standard dispatchers for android (See http://kovenant.komponents.nl/android/config/)
-        //startKovenant() //(before  initReduks()!!)
         reduks=initReduks()
+        reduks.store.errorLogFn= ReduksActivity.defaultReduksInternalLogger
     }
 
     override fun <T> storeCreator(): StoreCreator<T> = SimpleStore.Creator<T>()

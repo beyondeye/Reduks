@@ -22,7 +22,11 @@ class RxStore<S>(
         this.reducer=reducer
         dispatch(INIT())
     }
-    class Creator<S>( val allRxSubscriptions: CompositeSubscription?=null, val withStandardMiddlewares:Boolean=true) : StoreCreator<S> {
+
+    //TODO: actually I have not added yet support to reporting internal errors in RxStore, because I am planning to remove RxStore from reduks in the next major version
+    override var errorLogFn: ((String) -> Unit)?=null
+
+    class Creator<S>(val allRxSubscriptions: CompositeSubscription?=null, val withStandardMiddlewares:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
             val res = RxStore<S>(initialState, reducer, allRxSubscriptions)
             return if (!withStandardMiddlewares)

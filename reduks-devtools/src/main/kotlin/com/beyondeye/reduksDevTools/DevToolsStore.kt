@@ -14,6 +14,9 @@ constructor(initialState: S, reducer: Reducer<S>, vararg middlewares: Middleware
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> = DevToolsStore<S>(initialState,reducer)
     }
     private val devToolsStore: SimpleStore<DevToolsState<S>>
+    override var errorLogFn: ((String) -> Unit)?
+        get() = devToolsStore.errorLogFn
+        set(value) { devToolsStore.errorLogFn=value }
 
     init {
         val devToolsState = DevToolsState(
