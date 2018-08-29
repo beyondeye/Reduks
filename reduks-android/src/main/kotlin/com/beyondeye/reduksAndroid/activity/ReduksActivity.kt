@@ -24,6 +24,6 @@ interface  ReduksActivity<S> {
     fun initReduks(): Reduks<S>
     companion object {
         const val reduksTag="*REDUKS*"
-        val defaultReduksInternalLogger:(String)->Unit = {msg -> Log.w(reduksTag,msg)}
+        val defaultReduksInternalLogger:(String)->Unit = {msg -> Log.e(reduksTag,msg)}
     }
 }
