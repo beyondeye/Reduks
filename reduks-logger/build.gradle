@@ -1,7 +1,49 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'com.github.dcendents.android-maven'
+group = GROUP_MAVEN_PUSH //required by jitpack
+
+android {
+    compileSdkVersion versions.compileSdk
+//        buildToolsVersion androidBuildToolsVersion
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode = 1
+        versionName VERSION_NAME
+    }
+
+    compileOptions {
+        sourceCompatibility sourceCompatibility_
+        targetCompatibility targetCompatibility_
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/documentation"
+}
+
 repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
+    //implementation libraries.kotlinStdLib
+    //api libraries.kotlinStdLib
+
+    testImplementation libraries.junit
+    testImplementation libraries.assertJ
+    testImplementation libraries.robolectric
+    //testImplementation libraries.equalsverifier
+
     implementation project(':reduks-core') //reduks-core dep not exposed to consumer: consumer need to to include reduks-core dep explicitely
     implementation libraries.gson
     implementation libraries.kjsonpatch

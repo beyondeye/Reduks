@@ -1,4 +1,14 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+group = GROUP_MAVEN_PUSH //required by jitpack
+
+
+sourceCompatibility =sourceCompatibility_
+targetCompatibility =targetCompatibility_
+
 dependencies {
+    testImplementation libraries.junit
+    testImplementation libraries.assertJ
 }
 
 apply from: '../maven-push-javalib.gradle'

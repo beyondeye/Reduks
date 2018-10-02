@@ -97,6 +97,7 @@ class CoroutinesAsyncActionMiddlewareTest {
                         Assertions.assertThat(lastAsyncActionError).isNull()
                         Assertions.assertThat(lastAsyncActionResultString).isEqualTo("2 + 2")
                     }
+                    //TODO this throws an exception: also the exception is not shown when running tests: rewrite test (take advantage of the fact that now, after action dispatch, getting the state will block until reducer is run
                     if(endActionReceived) {
                         Assertions.assertThat(actionCounter).isEqualTo(2)
                     }

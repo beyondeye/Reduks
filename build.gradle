@@ -11,10 +11,6 @@ ext {
     targetCompatibility_ = 1.6 //I want this library to be linkable from android projects
 }
 
-
-
-
-
 allprojects {
    repositories {
        jcenter() //for coroutines
@@ -25,15 +21,16 @@ allprojects {
     configurations {
         javadocDeps
     }
-    // Workaround to prevent Gradle from stealing focus from other apps during tests run/etc.
-    // https://gist.github.com/artem-zinnatullin/4c250e04636e25797165
-    tasks.withType(JavaForkOptions) {
-        jvmArgs '-Djava.awt.headless=true'
+
+    //Test Logging
+    tasks.withType(Test) {
+        testLogging {
+            events "started", "passed", "skipped", "failed"
+        }
     }
 }
-
-
-configure(subprojects.findAll{it.name =='reduks-core' ||it.name =='reduks-core-async' ||it.name =='reduks-saga'||it.name =='reduks-core-modules' || it.name =='reduks-pcollections'|| it.name =='reduks-bus'}) {
+//generic configuration for kotlin subprojects (not used any more: now each subprojects contains its configuration)
+configure(subprojects.findAll{it.name =='some-kotlin-module' ||it.name =='some-other-kotlin-module'}) {
 
     apply plugin: 'kotlin'
     apply plugin: 'org.jetbrains.dokka'
@@ -66,7 +63,9 @@ configure(subprojects.findAll{it.name =='reduks-core' ||it.name =='reduks-core-a
         testImplementation libraries.rxJava
     }
 }
-configure(subprojects.findAll{it.name =='reduks-pcollections'}) {
+
+//generic configuration for pure java subprojects (not used any more: now each subproject contains its configuration)
+configure(subprojects.findAll{it.name =='some-pure-java-module'}) {
 
     apply plugin: 'java'
     apply plugin: 'maven'
@@ -81,7 +80,9 @@ configure(subprojects.findAll{it.name =='reduks-pcollections'}) {
         testImplementation libraries.assertJ
     }
 }
-configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-android' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-async' || it.name =='reduks-logger' || it.name =='reduks-rx'}) {
+
+//generic configuration for android kotlin subprojects (not used any more: now each subproject contains its configuration)
+configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-devtools' || it.name =='reduks-kovenant' || it.name =='reduks-rx'}) {
 
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
@@ -125,12 +126,6 @@ configure(subprojects.findAll{it.name =='code_fragments' ||it.name =='reduks-and
         testImplementation libraries.robolectric
         testImplementation libraries.equalsverifier
     }
-    //Test Logging
-    tasks.withType(Test) {
-        testLogging {
-            events "started", "passed", "skipped", "failed"
-        }
-    }
 }
 buildscript {
     repositories {
@@ -145,8 +140,8 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:3.1.4'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
+        classpath 'com.android.tools.build:gradle:3.2.0'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$rootProject.versions.dokka"
@@ -159,5 +154,5 @@ task clean(type: Delete) {
 
 //task for updating gradle
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+    gradleVersion = '4.6'
 }
