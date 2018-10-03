@@ -30,6 +30,6 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "com.github.beyondeye.reduks:reduks-core:$reduks_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "com.github.beyondeye.reduks:reduks-core:$reduks_version"
 }
