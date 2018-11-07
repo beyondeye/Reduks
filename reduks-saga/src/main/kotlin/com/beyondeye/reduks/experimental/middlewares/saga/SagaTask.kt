@@ -1,6 +1,6 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.Deferred
 
 /**
  * Created by daely on 12/20/2017.
@@ -33,7 +33,7 @@ interface SagaTask<R> {
     *    resolved with task's return value
     *    rejected with task's thrown error
      */
-    fun done():Deferred<R>
+    fun done(): Deferred<R>
 
     /**
      * Cancels the task (If it is still running)
