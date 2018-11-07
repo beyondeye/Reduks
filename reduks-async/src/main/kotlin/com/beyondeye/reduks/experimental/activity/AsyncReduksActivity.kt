@@ -10,8 +10,7 @@ import com.beyondeye.reduks.middlewares.applyMiddleware
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity
 import com.beyondeye.reduksAndroid.activity.ReduksActivity.Companion.defaultReduksInternalLogger
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
 
 /**
  * An activity base class for avoiding writing boilerplate code for initializing reduks and handling save and restoring reduks state
@@ -20,6 +19,7 @@ import kotlinx.coroutines.experimental.android.UI
  * Created by daely on 6/13/2016.
  */
 abstract class AsyncReduksActivity<S:Any>(
+        val activity_cscope: CoroutineScope=GlobalScope,
         /**
          * if true, then create activate sagaMiddleware,  and automatically stop it on activity destroy
          */
@@ -36,13 +36,13 @@ abstract class AsyncReduksActivity<S:Any>(
         super.onCreate(savedInstanceState)
         reduks=initReduks()
         if(withSagaMiddleWare) {
-            sagaMiddleware = SagaMiddleWare(reduks.store)
+            sagaMiddleware = SagaMiddleWare(reduks.store,activity_cscope)
             reduks.store.applyMiddleware(sagaMiddleware!!)
         }
         reduks.store.errorLogFn=defaultReduksInternalLogger
     }
 
-    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(reduceContext = CommonPool,subscribeContext = UI)
+    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(cscope=activity_cscope,reduceContext = Dispatchers.Default,subscribeContext = Dispatchers.Main)
 
     //override for making this function visible to inheritors
     override fun onStop() {
