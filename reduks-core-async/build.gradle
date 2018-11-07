@@ -4,7 +4,7 @@ apply plugin: 'maven'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 //disable warnings when using coroutines
-kotlin { experimental { coroutines 'enable' } }
+//kotlin { experimental { coroutines 'enable' } }
 
 compileKotlin {
 //        sourceCompatibility = JavaVersion.VERSION_1_8
