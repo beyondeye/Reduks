@@ -4,9 +4,9 @@ import com.beyondeye.reduks.*
 import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.*
 //import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Store that use kotlin coroutine channels for notifying asynchronously to store subscribers about
@@ -18,15 +18,17 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 //
 class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
+                    val cscope: CoroutineScope,
                     subscribeContext: CoroutineContext,
-                    val reduceContext: CoroutineContext =DefaultDispatcher
+                    val reduceContext: CoroutineContext =Dispatchers.Default
                     ) : Store<S> {
     class Creator<S>(
-                     val subscribeContext: CoroutineContext,
-                     val reduceContext: CoroutineContext =DefaultDispatcher,
-                     val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
+            val cscope: CoroutineScope,
+            val subscribeContext: CoroutineContext,
+            val reduceContext: CoroutineContext =Dispatchers.Default,
+            val withStandardMiddleware:Boolean=true) : StoreCreator<S> {
         override fun create(reducer: Reducer<S>, initialState: S): Store<S> {
-            val res = AsyncStore<S>(initialState, reducer,subscribeContext,reduceContext)
+            val res = AsyncStore<S>(initialState, reducer,cscope,subscribeContext,reduceContext)
             return if (!withStandardMiddleware)
                 res
             else
@@ -35,7 +37,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
     }
 
     override var errorLogFn: ((String) -> Unit)?=null
-    private var deferredState: Deferred<S> = async { initialState }
+    private var deferredState: Deferred<S> = cscope.async { initialState }
     override val state:S
         get() = runBlocking(reduceContext) {
             deferredState.await()
@@ -54,7 +56,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
             //get a reference of current deferred so that we make sure that all reduce action are actually executed in the correct order
             val curDeferredState = deferredState
             //update deferredState with result of async job of running the reducer
-            deferredState = async(reduceContext) {
+            deferredState = cscope.async(reduceContext) {
                 val startState = curDeferredState.await()
                 val newState = try {
                     reducer.reduce(startState, action) //return newState
@@ -67,7 +69,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
             //after creating the new deferredState, handle notification of subscribers once this new
             //deferredState is resolved
             val nextDeferredState=deferredState
-            launch(reduceContext) {
+            cscope.launch(reduceContext) {
                 nextDeferredState.await()
                 //NOTE THAT IF THE ObserveContext is a single thread(the ui thread)
                 // then subscribers will be notified sequentially of state changes in the correct order

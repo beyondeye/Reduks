@@ -3,7 +3,8 @@ package com.beyondeye.reduks.middlewares
 import com.beyondeye.reduks.MiddlewareFn
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.experimental.AsyncStore
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.newSingleThreadContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import rx.Observable
@@ -33,7 +34,7 @@ class AsyncStoreMiddlewareTest {
             next(action)
         }
 
-        val store = AsyncStore(TestState(), reducer,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer, GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare)
 
         store.dispatch(TestAction(type = "hey hey!"))
@@ -73,7 +74,7 @@ class AsyncStoreMiddlewareTest {
         }
 
 
-        val store = AsyncStore(TestState(),reducer,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(),reducer,GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "hey hey!"))
@@ -126,7 +127,7 @@ class AsyncStoreMiddlewareTest {
             }
         }
 
-        val store = AsyncStore(TestState(), reducer,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
         store.applyMiddleware(fetchMiddleware, loggerMiddleware)
 
         store.dispatch(TestAction(type = "CALL_API"))
@@ -169,7 +170,7 @@ class AsyncStoreMiddlewareTest {
             state
         }
 
-        val store = AsyncStore(TestState(), reducer,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
         store.applyMiddleware(middleWare1, middleWare2)
 
         store.dispatch(TestAction(type = "around!"))
