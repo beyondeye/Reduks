@@ -1,8 +1,8 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.channels.SendChannel
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.SendChannel
 
 /**
  * Created by daely on 12/19/2017.
@@ -19,7 +19,7 @@ internal data class SagaData<S:Any,R:Any>(
         )
 {
 //    fun sagaProcessorCoroutine():AbstractCoroutine<Any> =inputActionsChannel as AbstractCoroutine<Any>
-    fun sagaProcessorJob():Job  =inputActionsChannel as Job
+    fun sagaProcessorJob(): Job =inputActionsChannel as Job
     fun isCancelled() = sagaJob == null || sagaJob.isCancelled
     fun isCompleted() = sagaJob == null || sagaJob.isCompleted
     suspend fun await():R {
