@@ -2,16 +2,15 @@ package com.beyondeye.reduks.experimental.middlewares.saga
 
 import com.beyondeye.reduks.Selector
 import com.beyondeye.reduks.SelectorBuilder
-import kotlinx.coroutines.experimental.cancel
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.channels.SendChannel
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.delay
 import java.lang.ref.WeakReference
 import java.util.concurrent.CancellationException
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.experimental.CoroutineContext
 
 /**
  * extension function for yelding a state field: create a state selector on the fly, so you don't need to create it
@@ -23,7 +22,7 @@ inline suspend infix fun <reified S:Any,I:Any> SagaYeldSingle<S>.selectField(noi
     return this.select(selValue)
 }
 
-class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
+class SagaYeldSingle<S:Any>(private val sagaCmdProcessor: SagaCmdProcessor<S>){
     suspend infix fun put(value:Any) {
         _yieldSingle(OpCode.Put(value))
     }
@@ -45,7 +44,7 @@ class SagaYeldSingle<S:Any>(private val sagaProcessor: SagaProcessor<S>){
      * yield a command to execute a child Saga in the same context of the current one (the parent saga): execution
      * of the parent saga is suspended until child saga completion. Exceptions in child saga execution
      * will bubble up to parent.
-     * The parent saga and child saga share the same [SagaProcessor] and the same incoming actions channel.
+     * The parent saga and child saga share the same [SagaCmdProcessor] and the same incoming actions channel.
      * In other words, incoming store actions processed in the child saga will be removed from the actions queue of parent saga
      */
     suspend infix fun <S:Any,R:Any> call(childSaga: SagaFn<S, R>):R {
@@ -186,9 +185,9 @@ function* saga() {
 
     //-----------------------------------------------
     suspend fun _yieldSingle(opcode: OpCode):Any {
-        sagaProcessor.inChannel.send(opcode)
+        sagaCmdProcessor.inChannel.send(opcode)
         if(opcode !is OpCode.OpCodeWithResult) return Unit
-        return sagaProcessor.outChannel.receive()
+        return sagaCmdProcessor.outChannel.receive()
     }
 }
 //-----------------------------------------------
@@ -226,9 +225,9 @@ suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,han
     _yieldSingle(OpCode.Throttle<S, B>(B::class.java,delayMs,handlerSaga))
 }
 //-----------------------------------------------
-class Saga<S:Any>(sagaProcessor: SagaProcessor<S>) {
-    @JvmField val yield_ = SagaYeldSingle(sagaProcessor)
-//    val yieldAll= SagaYeldAll(sagaProcessor)
+class Saga<S:Any>(sagaCmdProcessor: SagaCmdProcessor<S>) {
+    @JvmField val yield_ = SagaYeldSingle(sagaCmdProcessor)
+//    val yieldAll= SagaYeldAll(sagaCmdProcessor)
 
     fun <R:Any> sagaFn(name: String, fn0: suspend Saga<S>.() -> R) =
         SagaFn0(name, fn0)
@@ -246,7 +245,7 @@ sealed class OpCode {
         abstract val sagaLabel:String
         abstract fun filterSaga(filterSagaName:String):SagaFn0<S,Unit>
     }
-    class Delay(val time: Long,val unit: TimeUnit = TimeUnit.MILLISECONDS): OpCodeWithResult()
+    class Delay(val timeMsecs: Long): OpCodeWithResult()
     class Put(val value:Any): OpCode()
     class Take<B>(val type:Class<B>): OpCodeWithResult()
     /**
@@ -322,19 +321,27 @@ sealed class OpCode {
 //    class Cancelled:OpCode()
 }
 
-class SagaProcessor<S:Any>(
+class SagaCmdProcessor<S:Any>(
         val sagaName:String,
         sagaMiddleWare: SagaMiddleWare<S>,
-        private val dispatcherActor: SendChannel<Any> = actor {  }
+
+        internal val linkedSagaParentScope: CoroutineScope,
+        private val dispatcherActor: SendChannel<Any> = linkedSagaParentScope.actor {  }
 )
 {
-    internal var linkedSagaCoroutineContext: CoroutineContext?=null
+    /**
+     * this is needed when we want to execute the OpCode.CancelSelf,
+     * this is job associated of the sagafn that is executed by the saga
+     * that is started in [SagaMiddleWare._runSaga]
+     */
+    internal var linkedSagaJob: Job?=null
     private var childCounter:Long=0
     private val sm=WeakReference(sagaMiddleWare)
 
 
     /**
      * channel for communication between Saga and Saga processor
+     * (RENDEZVOUS channel)
      */
     val inChannel : Channel<Any> = Channel()
     val outChannel : Channel<Any> = Channel()
@@ -352,7 +359,7 @@ class SagaProcessor<S:Any>(
 //            print(e.message)
 //        }
         finally{
-
+            val a=1
         }
     }
 
@@ -360,7 +367,7 @@ class SagaProcessor<S:Any>(
         for(a in inChannel) {
             when(a) {
                 is OpCode.Delay -> {
-                    delay(a.time,a.unit)
+                    delay(a.timeMsecs)
                     outChannel.send(Unit)
                 }
                 is OpCode.Put ->
@@ -389,6 +396,8 @@ class SagaProcessor<S:Any>(
                         val cs: SagaFn<S, Any> = a.childSaga as SagaFn<S, Any>
                         val childSagaName=buildChildSagaName("_call_",cs.name)
                         val childTask=sagaMiddleware._runSaga(cs,this,childSagaName, SAGATYPE_CHILD_CALL)
+                        //NOTE that here we are not sending the childTask to the outChannel (like in Fork, Spawn)
+                        // this way, the main saga will be blocked waiting (yield) until the child saga complete and finally send its result to the outChannel
                     }
                 }
                 is OpCode.Fork<*, *> -> {
@@ -412,10 +421,15 @@ class SagaProcessor<S:Any>(
                 is OpCode.SagaFinished<*> -> {
                     //add handling of result (if not unit) than need to back to parent saga (resolve task) promise
                     //also handling sending exception
-                    outChannel.send(a.result) //if this is saga call that finished, don't stop processor!!
-                    if(!a.isChildCall) {
+                    if(a.isChildCall) {
+                        //end of saga that was started with yield_ Call: return the result to the main saga as result of yield_ Call
+                        outChannel.send(a.result) //if this is saga call that finished, don't stop processor!!
+                    } else
+                    {
+                        //End of saga that was started with Spawn or Fork: no result need to be returned to the main saga:
+                        //the main saga can monitor the child saga with the SagaTask that was returned on its start
                         sm.get()?.updataSagaDataAfterProcessorFinished(sagaName)
-                        return
+                        return //EXIT Command processor loop that basically kill the coroutine of the actor that is handling the sagaprocessor
                     }
                 }
                 is OpCode.JoinTasks -> {
@@ -432,7 +446,7 @@ class SagaProcessor<S:Any>(
                     a.tasks.forEach { it.cancel() }
                 }
                 is OpCode.CancelSelf -> {
-                    linkedSagaCoroutineContext?.cancel()
+                    linkedSagaJob?.cancel()
                 }
 //                is OpCode.Cancelled -> {
 //                    val res= sm?.get()?.isCancelled(sagaName) ?:false

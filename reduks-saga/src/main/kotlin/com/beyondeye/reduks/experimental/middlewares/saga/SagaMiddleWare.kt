@@ -1,12 +1,11 @@
 package com.beyondeye.reduks.experimental.middlewares.saga
 
 import com.beyondeye.reduks.*
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.channels.*
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import java.lang.ref.WeakReference
 import java.util.concurrent.CancellationException
-import kotlin.coroutines.experimental.CoroutineContext
-import kotlin.coroutines.experimental.coroutineContext
 
 /**
  * a port of saga middleware
@@ -14,22 +13,27 @@ import kotlin.coroutines.experimental.coroutineContext
  * https://github.com/redux-saga/redux-saga/
  * https://redux-saga.js.org/
  *
+ * NOTE: [root_scope] is assumed be a [supervisorScope] so that if some its children fails, it is not automatically cancelled, see coroutine docs
  * Created by daely on 12/15/2017.
  */
-class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineContext= DefaultDispatcher) : Middleware<S> {
-    /**
-     * root coroutine context used to create all coroutines used to run and handle sagas
-     */
-    val rootSagaCoroutineContext= newCoroutineContext(rootCoroutineContext)
+class SagaMiddleWare<S:Any>(store_:Store<S>, parent_scope: CoroutineScope, val sagaMiddlewareDispatcher:CoroutineDispatcher= Dispatchers.Default) : Middleware<S> {
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
     private var sagaMap:Map<String, SagaData<S, Any>>
+    private val sagaMiddlewareRootJob:Job get() = sagaMiddlewareRootScope.coroutineContext[Job]!!
+    private val sagaMiddlewareRootScope:CoroutineScope
     internal val store:WeakReference<Store<S>>
     init {
+        //create a supervisor root job that is a child of parent_scope job for all coroutines started by the saga middleware
+        //this is a job that IS NOT cancelled if one its children is cancelled
+        //see https://github.com/Kotlin/kotlinx.coroutines/blob/master/docs/exception-handling.md#supervision
+        val sagaMiddlewareRootJob=SupervisorJob(parent_scope.coroutineContext[Job])
+        //create a root scope for all coroutine launched by Saga middleware, using the specified sagaMiddlewareDispatcher
+        sagaMiddlewareRootScope=CoroutineScope(sagaMiddlewareDispatcher + sagaMiddlewareRootJob)
         store=WeakReference(store_)
         sagaMap = mapOf()
         //use an actor for dispatching so that we ensure we preserve action order
-        dispatcherActor = actor<Any>(rootSagaCoroutineContext) {
+        dispatcherActor = sagaMiddlewareRootScope.actor<Any> {
             for (a in channel) { //loop over incoming message
                 try { //don't let exception bubble up to sagas
                     store.get()?.dispatch?.invoke(a)
@@ -40,7 +44,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
         }
         //use an actor for distributing incoming actions so we ensure we preserve action order
         //define a channel with unlimited capacity, because we don't want the action dispatcher
-        incomingActionsDistributionActor = actor<Any>(rootSagaCoroutineContext,Channel.UNLIMITED) {
+        incomingActionsDistributionActor = sagaMiddlewareRootScope.actor<Any>(capacity = Channel.UNLIMITED) {
             for (a in channel) { // iterate over incoming actions
                 //distribute incoming actions to sagas
                 for (saga in sagaMap.values) {
@@ -53,7 +57,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
     override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
         val res=nextDispatcher(action) //hit the reducers before processing actions in saga middleware!
         //use actor here to make sure that actions are distributed in the right order
-        launch(rootSagaCoroutineContext) {
+        sagaMiddlewareRootScope.launch {
             incomingActionsDistributionActor.send(action)
         }
         return res
@@ -85,7 +89,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
             if(!existingSaga.isCompleted())
                 throw IllegalArgumentException("saga with name: $sagaName  already running: use replaceSaga() instead")
         }
-        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaProcessor.SAGATYPE_SPAWN)
+        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaCmdProcessor.SAGATYPE_SPAWN)
     }
     /**
      * replace an existing saga with the specified name. If a saga with the specified name exists and its is running, it wll be cancelled
@@ -94,53 +98,77 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
         if(sagaMap.containsKey(sagaName)) {
             stopSaga(sagaName)
         }
-        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaProcessor.SAGATYPE_SPAWN)
+        _runSaga(SagaFn0(sagaName, sagafn),null,sagaName, SagaCmdProcessor.SAGATYPE_SPAWN)
     }
 
     /**
-     * child saga type can be one of [SagaProcessor.SAGATYPE_CHILD_CALL],[SagaProcessor.SAGATYPE_CHILD_FORK],[SagaProcessor.SAGATYPE_SPAWN]
+     * child saga type can be one of [SagaCmdProcessor.SAGATYPE_CHILD_CALL],[SagaCmdProcessor.SAGATYPE_CHILD_FORK],[SagaCmdProcessor.SAGATYPE_SPAWN]
      */
-    internal fun <R:Any> _runSaga(sagafn: SagaFn<S, R>, parentSagaProcessor: SagaProcessor<S>?, sagaName: String, childType:Int): SagaTask<R> {
+    internal fun <R:Any> _runSaga(sagafn: SagaFn<S, R>, parentSagaCmdProcessor: SagaCmdProcessor<S>?, sagaName: String, childType:Int): SagaTask<R> {
 
-        if(childType!= SagaProcessor.SAGATYPE_SPAWN &&parentSagaProcessor==null)
-            throw IllegalArgumentException("Only when spawning independent(top level) sagas parentSagaProcessor can be null!")
+        if(childType!= SagaCmdProcessor.SAGATYPE_SPAWN &&parentSagaCmdProcessor==null)
+            throw IllegalArgumentException("Only when spawning independent(top level) sagas parentSagaCmdProcessor can be null!")
 
-        val parentSagaCoroutineContext = parentSagaProcessor?.linkedSagaCoroutineContext ?: rootSagaCoroutineContext
-        val newSagaParentCoroutineContext = when (childType) {
-            SagaProcessor.SAGATYPE_CHILD_CALL, SagaProcessor.SAGATYPE_CHILD_FORK -> parentSagaCoroutineContext
-            SagaProcessor.SAGATYPE_SPAWN -> rootSagaCoroutineContext
-            else -> rootSagaCoroutineContext
+
+        //
+//        val parentSagaRootJob:Job
+        val parentSagaScope:CoroutineScope
+        if(parentSagaCmdProcessor==null) {
+            parentSagaScope = sagaMiddlewareRootScope
+        } else {
+            parentSagaScope = CoroutineScope(parentSagaCmdProcessor.linkedSagaJob!!+sagaMiddlewareDispatcher)
         }
-        //-------
-        var sagaInputActionsChannel: SendChannel<Any>?=null
-        var sagaProcessor: SagaProcessor<S>?=null
+        val newSagaRootScope:CoroutineScope
+        var newSagaInputActionsChannel: SendChannel<Any>?=null
+        var newSagaCmdProcessor: SagaCmdProcessor<S>?=null
         when(childType) {
-            SagaProcessor.SAGATYPE_CHILD_CALL -> {
-                sagaInputActionsChannel = null //use parent saga action channel
-                sagaProcessor = parentSagaProcessor //use parent saga processor
+            /**
+             * see [SagaYeldSingle.call]
+             */
+            SagaCmdProcessor.SAGATYPE_CHILD_CALL-> {
+                newSagaRootScope = parentSagaScope
+                newSagaInputActionsChannel = null //use parent saga action channel
+                //if child call,  we are reusing the parent saga processor
+                newSagaCmdProcessor = parentSagaCmdProcessor //use parent saga processor
             }
-            SagaProcessor.SAGATYPE_CHILD_FORK, SagaProcessor.SAGATYPE_SPAWN -> {
-                sagaProcessor = SagaProcessor<S>(sagaName, this, dispatcherActor)
-                //define the saga processor receive channel, that is used to receive actions from dispatcher
-                //to have unlimited buffer, because we don't want to block the dispatcher
-                sagaInputActionsChannel = actor<Any>(rootSagaCoroutineContext, Channel.UNLIMITED) {
-                    sagaProcessor.start(this)
+            /**
+             * see [SagaYeldSingle.fork]
+             */
+            SagaCmdProcessor.SAGATYPE_CHILD_FORK -> {
+                newSagaRootScope = parentSagaScope
+                //------
+                newSagaCmdProcessor = SagaCmdProcessor<S>(sagaName, this, newSagaRootScope,dispatcherActor)
+                //define the saga processor receive channel, that is used to receive actions from dispatcher to have unlimited buffer, because we don't want to block the dispatcher
+                newSagaInputActionsChannel = newSagaRootScope.actor<Any>(capacity = Channel.UNLIMITED) {
+                    newSagaCmdProcessor!!.start(this)
                 }
             }
+            /**
+             * see [SagaYeldSingle.spawn]
+             */
+            SagaCmdProcessor.SAGATYPE_SPAWN -> {
+                newSagaRootScope = sagaMiddlewareRootScope
+                //------
+                newSagaCmdProcessor = SagaCmdProcessor<S>(sagaName, this, newSagaRootScope,dispatcherActor)
+                //define the saga processor receive channel, that is used to receive actions from dispatcher to have unlimited buffer, because we don't want to block the dispatcher
+                newSagaInputActionsChannel = newSagaRootScope.actor<Any>(capacity =  Channel.UNLIMITED) {
+                    newSagaCmdProcessor.start(this)
+                }
+            }
+            else -> throw NotImplementedError("This must not happen")
         }
 
-        val newSaga = Saga(sagaProcessor!!)
+        val newSaga = Saga(newSagaCmdProcessor!!)
         //start lazily, so that we have time to insert sagaData in sagaMap map
         //because otherwise stopSaga() at the end of the sagaJob will not work
-        val sagaDeferred = async(newSagaParentCoroutineContext, start = CoroutineStart.LAZY) {
-            val isChildCall = (childType == SagaProcessor.SAGATYPE_CHILD_CALL)
-            if(!isChildCall) //if child call, don't reassign linked coroutine context, because we are reusing the parent saga processor
-                sagaProcessor.linkedSagaCoroutineContext= coroutineContext
+        val sagaDeferred = newSagaRootScope.async( start = CoroutineStart.LAZY) {
+            val isChildCall = (childType == SagaCmdProcessor.SAGATYPE_CHILD_CALL)
             val sagaResult = try {
                 val res=sagafn.invoke(newSaga)
                 //a parent coroutine will automatically wait for its children to complete execution, but
-                //we want to handle this manually because we have coordinate with saga associated sagaProcessor
-                coroutineContext[Job]?.children?.forEach { it.join() }
+                //we want to handle this manually because we have to coordinate with saga associated sagaCmdProcessor
+                val job=coroutineContext[Job]
+                job?.children?.forEach { it.join() }
                 res
             } catch (e: Throwable) {
                 e
@@ -162,11 +190,17 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
                 @Suppress("UNCHECKED_CAST")
                 sagaResult as R
         }
-        val parentSagaName=when(childType) {
-            SagaProcessor.SAGATYPE_SPAWN -> "" //if spawn, don't return any result and don't register this saga as child
-            else -> parentSagaProcessor!!.sagaName
+        //if the new saga is not a child saga, it has its new associated SagaCmdProcessor, so we need to
+        //initialize the linkedSagaJob in the associated SagaCmdProcessor
+        if (childType != SagaCmdProcessor.SAGATYPE_CHILD_CALL) {
+            newSagaCmdProcessor.linkedSagaJob= sagaDeferred
         }
-        addSagaData(sagaName, SagaData(sagaInputActionsChannel, sagaProcessor, sagaDeferred, parentSagaName))
+
+        val parentSagaName=when(childType) {
+            SagaCmdProcessor.SAGATYPE_SPAWN -> "" //if spawn, don't return any result and don't register this saga as child
+            else -> parentSagaCmdProcessor!!.sagaName
+        }
+        addSagaData(sagaName, SagaData(newSagaInputActionsChannel, newSagaCmdProcessor, sagaDeferred, parentSagaName))
         //we are ready to start now
         sagaDeferred.start()
         return SagaTaskFromDeferred(sagafn.name, sagaDeferred)
@@ -199,8 +233,8 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
         updateSagaData(sagaName) { finishedSaga->
             if(finishedSaga==null)
                 throw Exception("this must not happen")
-            launch(rootSagaCoroutineContext) {
-                finishedSaga.sagaProcessor?.inChannel?.send(OpCode.SagaFinished(result, isChildCall))
+            sagaMiddlewareRootScope.launch {
+                finishedSaga.sagaCmdProcessor?.inChannel?.send(OpCode.SagaFinished(result, isChildCall))
             }
             finishedSaga.copy(sagaJob = null,sagaJobResult = result)
         }
@@ -209,7 +243,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
         updateSagaData(sagaName) { sagaData ->
             if(sagaData==null) return@updateSagaData null
             sagaData.inputActionsChannel?.close()
-            sagaData.copy(sagaProcessor = null,inputActionsChannel = null)
+            sagaData.copy(sagaCmdProcessor = null,inputActionsChannel = null)
         }
     }
     /**
@@ -221,7 +255,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
             if(!isCompleted()) {
                 sagaJob?.cancel()
                 inputActionsChannel?.close()
-                sagaProcessor?.stop()
+                sagaCmdProcessor?.stop()
             }
         }
         val childSagasNames = getSagaChildrenNames(sagaName)
@@ -237,8 +271,8 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, rootCoroutineContext:CoroutineConte
      * cancelled as a result of this invocation and `false` if if it was already
      * cancelled or completed. See [Job.cancel] for details.
      */
-    fun stopAll(): Boolean {
-        return rootSagaCoroutineContext.cancel()
+    fun stopAll() {
+        return sagaMiddlewareRootJob.cancel()
     }
     private fun getSagaChildrenNames(sagaName: String): List<String> {
         val childSagasNames = sagaMap.entries.filter { it.value.sagaParentName == sagaName }.map { it.key }

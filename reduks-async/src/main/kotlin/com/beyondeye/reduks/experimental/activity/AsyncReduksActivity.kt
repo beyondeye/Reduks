@@ -42,7 +42,7 @@ abstract class AsyncReduksActivity<S:Any>(
         reduks.store.errorLogFn=defaultReduksInternalLogger
     }
 
-    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(cscope=activity_cscope,reduceContext = Dispatchers.Default,subscribeContext = Dispatchers.Main)
+    override fun <T> storeCreator(): StoreCreator<T> = AsyncStore.Creator<T>(cscope=activity_cscope,reduceDispatcher = Dispatchers.Default,subscribeDispatcher = Dispatchers.Main)
 
     //override for making this function visible to inheritors
     override fun onStop() {

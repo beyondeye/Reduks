@@ -1,8 +1,10 @@
 package com.beyondeye.reduks.experimental.middlewares
 
 import com.beyondeye.reduks.*
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 
 sealed class AsyncAction(val payloadTypename:String): Action {
@@ -29,10 +31,11 @@ sealed class AsyncAction(val payloadTypename:String): Action {
      * it seems redundant to store both type name and define this class as template class
      * unfortunately this is required because of type erasure in java/kotlin generics
      */
-    class Started<PayloadType :Any>(payloadTypename:String, val promise: Deferred<PayloadType>): AsyncAction(payloadTypename) {
-        constructor(type:String,body: () -> PayloadType):this(type, async { body() })
+    class Started<PayloadType :Any>(payloadTypename:String, val promise: Deferred<PayloadType>):
+            AsyncAction(payloadTypename) {
+        constructor(type:String, cscope: CoroutineScope,body: () -> PayloadType):this(type, cscope.async { body() })
         suspend fun asCompleted() = Completed(payloadTypename, promise.await())
-        suspend fun asFailed() = Failed(payloadTypename, promise.getCompletionExceptionOrNull()!!)
+        fun asFailed() = Failed(payloadTypename, promise.getCompletionExceptionOrNull()!!)
         /**
          * block until we get back the result from the promise
          */
@@ -57,8 +60,8 @@ sealed class AsyncAction(val payloadTypename:String): Action {
         inline fun <reified  PayloadType:Any> start( promise: Deferred<PayloadType>): AsyncAction {
             return Started<PayloadType>(PayloadType::class.java.canonicalName, promise)
         }
-        inline fun <reified  PayloadType:Any> start(noinline  body: () -> PayloadType): AsyncAction {
-            return Started<PayloadType>(PayloadType::class.java.canonicalName, body)
+        inline fun <reified  PayloadType:Any> start(cscope: CoroutineScope,noinline  body: () -> PayloadType): AsyncAction {
+            return Started<PayloadType>(PayloadType::class.java.canonicalName,cscope, body)
         }
     }
 }
@@ -75,11 +78,11 @@ sealed class AsyncAction(val payloadTypename:String): Action {
  *
  * Created by daely on 5/17/2016.
  */
-class AsyncActionMiddleWare<S> : Middleware<S> {
+class AsyncActionMiddleWare<S>(val action_cscope: CoroutineScope=GlobalScope) : Middleware<S> {
     override fun dispatch(store: Store<S>, nextDispatcher:  (Any)->Any, action: Any):Any {
         if(action is AsyncAction.Started<*>) {
             //queue some async actions when the promise resolves
-            async {
+            action_cscope.async {
                 try {
                     action.promise.await()
                     store.dispatch(action.asCompleted())

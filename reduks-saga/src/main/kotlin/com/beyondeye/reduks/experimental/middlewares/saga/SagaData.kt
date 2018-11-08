@@ -9,10 +9,10 @@ import kotlinx.coroutines.channels.SendChannel
  */
 internal data class SagaData<S:Any,R:Any>(
         /**
-         * note: this is actually the actor coroutine of the SagaProcessor associated with the saga
+         * note: this is actually the actor coroutine of the SagaCmdProcessor associated with the saga
          */
         val inputActionsChannel: SendChannel<Any>?,
-        val sagaProcessor: SagaProcessor<S>?,
+        val sagaCmdProcessor: SagaCmdProcessor<S>?,
         val sagaJob: Deferred<R>?,
         val sagaParentName:String,
         val sagaJobResult:R?=null
@@ -20,8 +20,9 @@ internal data class SagaData<S:Any,R:Any>(
 {
 //    fun sagaProcessorCoroutine():AbstractCoroutine<Any> =inputActionsChannel as AbstractCoroutine<Any>
     fun sagaProcessorJob(): Job =inputActionsChannel as Job
-    fun isCancelled() = sagaJob == null || sagaJob.isCancelled
-    fun isCompleted() = sagaJob == null || sagaJob.isCompleted
+
+    fun isCancelled() = if (sagaJob == null) sagaJobResult == null else sagaJob.isCancelled
+    fun isCompleted() = if(sagaJob == null) sagaJobResult!=null else sagaJob.isCompleted
     suspend fun await():R {
         return sagaJobResult?:sagaJob?.await()!!
     }

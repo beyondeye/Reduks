@@ -5,7 +5,8 @@ import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
 import com.beyondeye.reduks.experimental.middlewares.AsyncAction
 import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
-import kotlinx.coroutines.experimental.newSingleThreadContext
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.newSingleThreadContext
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
@@ -58,7 +59,7 @@ class CoroutinesAsyncActionMiddlewareTest {
     }
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation() {
-        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //don't use android ui thread: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeDispatcher = newSingleThreadContext("SubscribeThread")) //don't use android ui thread: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -75,14 +76,14 @@ class CoroutinesAsyncActionMiddlewareTest {
                 }
             }
         }) //on state change
-        val asyncAction = AsyncAction.start { 2 + 2 }
+        val asyncAction = AsyncAction.start(GlobalScope) { 2 + 2 }
         store.dispatch(asyncAction)
         Thread.sleep(100) //wait for async action to be dispatched TODO: use thunk instead!!
         store.dispatch(EndAction())
     }
     @Test
     fun test_two_async_actions_with_different_payload_type() {
-        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeDispatcher = newSingleThreadContext("SubscribeThread")) //false: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!!
@@ -103,9 +104,9 @@ class CoroutinesAsyncActionMiddlewareTest {
                     }
                 }
         }) //on state change
-        val asyncAction = AsyncAction.start { 2 + 2 }
+        val asyncAction = AsyncAction.start(GlobalScope) { 2 + 2 }
         store.dispatch(asyncAction)
-        val asyncAction2 = AsyncAction.start { "2 + 2" }
+        val asyncAction2 = AsyncAction.start(GlobalScope) { "2 + 2" }
         store.dispatch(asyncAction2)
         Thread.sleep(100) ////need to wait, because otherwise the end action will be dispatched before we complete the two async actions
         store.dispatch(EndAction())
@@ -114,7 +115,7 @@ class CoroutinesAsyncActionMiddlewareTest {
     @Test
     fun test_an_async_action_for_a_very_difficult_and_computation_heavy_operation_that_fails() {
 
-        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeDispatcher = newSingleThreadContext("SubscribeThread")) //custom subscribeDispatcher not UI: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
         //subscribe before dispatch!
@@ -133,7 +134,7 @@ class CoroutinesAsyncActionMiddlewareTest {
                     }
                 }
         )
-        val asyncAction = AsyncAction.start<Int> {
+        val asyncAction = AsyncAction.start<Int>(GlobalScope) {
             throw Exception(actionDifficultError)
         }
         store.dispatch(asyncAction)
@@ -142,7 +143,7 @@ class CoroutinesAsyncActionMiddlewareTest {
     @Test
     fun test_that_normal_actions_pass_through_the_middleware() {
 
-        val store = AsyncStore(TestState(), reducer,subscribeContext = newSingleThreadContext("SubscribeThread")) //custom subscribeContext not UI: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeDispatcher = newSingleThreadContext("SubscribeThread")) //custom subscribeDispatcher not UI: otherwise exception if not running on android
         store.applyMiddleware(AsyncActionMiddleWare())
 
 
