@@ -1,4 +1,4 @@
-[![Kotlin 1.2.21](https://img.shields.io/badge/Kotlin-1.1.21-blue.svg)](http://kotlinlang.org)
+[![Kotlin 1.3.0](https://img.shields.io/badge/Kotlin-1.1.21-blue.svg)](http://kotlinlang.org)
 [![](https://jitpack.io/v/beyondeye/reduks.svg)](https://jitpack.io/#beyondeye/reduks)
 [![Slack channel](https://img.shields.io/badge/Chat-Slack-green.svg)](https://kotlinlang.slack.com/messages/reduks/)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Reduks-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/4245)
