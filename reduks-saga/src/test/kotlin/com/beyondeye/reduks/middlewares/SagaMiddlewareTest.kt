@@ -260,6 +260,10 @@ class SagaMiddlewareTest {
         assertThat(state.incrCounter).isEqualTo(totIncr)
         assertThat(state.decrCounter).isEqualTo(totDecr)
     }
+
+    /**
+     * rarely this test fails: check why
+     */
     @Test
     fun testSagaForkSpawnAndJoin() {
         val store = AsyncStore(TestState(), reducer,
