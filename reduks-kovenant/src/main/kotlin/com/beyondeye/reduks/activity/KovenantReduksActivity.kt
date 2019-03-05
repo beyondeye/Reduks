@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.beyondeye.reduks.*
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity

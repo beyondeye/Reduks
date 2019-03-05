@@ -1,6 +1,6 @@
 package com.beyondeye.reduksAndroid.fragment
 
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.bus.*
 import com.beyondeye.reduks.modules.MultiStore

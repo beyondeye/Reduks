@@ -1,7 +1,7 @@
 package com.beyondeye.reduks.experimental.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.bus.BusStore
 import com.beyondeye.reduks.experimental.AsyncStore

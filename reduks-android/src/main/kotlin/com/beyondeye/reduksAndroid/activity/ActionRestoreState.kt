@@ -1,10 +1,10 @@
 package com.beyondeye.reduksAndroid.activity
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import com.beyondeye.reduks.Action
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.Reduks
