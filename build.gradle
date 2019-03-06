@@ -3,7 +3,7 @@ apply from: 'buildsystem/dependencies.gradle'
 
 //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
 ext {
-    VERSION_NAME='3.1.0b1-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
+    VERSION_NAME='3.3.4-SNAPSHOT' //GLOBAL VERSION FOR REDUKS libs
     POM_NAME='Reduks: Reduxjs for Kotlin+Android'
     GROUP_MAVEN_PUSH= 'com.github.beyondeye.reduks' //used by maven-push: MAKE SURE THAT THIS MATCHES group DEFINED BELOW IN THIS FILE AND USED BY JITPACK
     //TODO: decide when to migrate to 1.8: see https://developer.android.com/studio/write/java8-support.html
