@@ -60,13 +60,17 @@ abstract class ReduksFragment<S: StateWithFragmentStatusData>:Fragment() {
      * for its defined [positionTag]
      */
      open fun isFragmentVisible(curState:S):Boolean {
-        return positionTag.isNotEmpty() && tag==reduks?.fragmentCurAtPos(positionTag)
+        requireFragmentTagNotNull(tag)
+        val fs=curState.fragmentStatus
+        val activeStatus=fs.getFragmentActiveStatus(tag!!)
+        if(activeStatus==null|| !activeStatus.isActive()) return false
+        return positionTag.isNotEmpty() && tag==fs.getFragmentCurAtPos(positionTag)
     }
 }
 
 /**
  * mark this fragment as the current fragment shown at the position defined by [ReduksFragment.positionTag]
  */
-fun <S: StateWithFragmentStatusData> ReduksFragment<S>.reduksSetFragmentVisible() {
+fun <S: StateWithFragmentStatusData> ReduksFragment<S>.reduksSetFragmentCurAtPos() {
     reduks?.setFragmentCurAtPos(tag,positionTag)
 }
