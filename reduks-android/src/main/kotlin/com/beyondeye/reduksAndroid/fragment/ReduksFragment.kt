@@ -33,7 +33,8 @@ abstract class ReduksFragment<S: StateWithFragmentStatusData>:Fragment() {
      * fields or methods in the parent activity. This is not a recommended practice but sometimes it is needed
      */
     @Suppress("UNCHECKED_CAST")
-    open val reduksActivity: ReduksActivity<S> = activity as ReduksActivity<S>
+    open val reduksActivity: ReduksActivity<S>
+        get() = activity as ReduksActivity<S>
 
     val curReduksState: S
         get() = reduksActivity.reduks.store.state
