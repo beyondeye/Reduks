@@ -31,13 +31,17 @@ abstract class ReduksFragment<S: StateWithFragmentStatusData>:Fragment() {
      * this property is defined as "open" so that you can override it in a specific fragment and
      * cast the activity to the actual activity that control this fragment in case you need access  specific
      * fields or methods in the parent activity. This is not a recommended practice but sometimes it is needed
+        this can be null if fragment not yet attached to an activity
      */
     @Suppress("UNCHECKED_CAST")
-    open val reduksActivity: ReduksActivity<S>
+    open val reduksActivity: ReduksActivity<S>?
         get() = activity as ReduksActivity<S>
 
-    val curReduksState: S
-        get() = reduksActivity.reduks.store.state
+    /**
+     * this can be null if fragment is not yet attached to a reduks activity
+     */
+    val curReduksState: S?
+        get() = reduksActivity?.reduks?.store?.state
 
     /**
      * automatically subscribe to reduks state updates once the fragment is created
