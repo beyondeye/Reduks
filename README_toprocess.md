@@ -69,37 +69,6 @@ Some notable features:
 
 
 <a name="gradledeps"></a>
-## dependencies for gradle
-```groovy
-// First, add JitPack to your repositories
-repositories {
-    ...
-    maven { url "https://jitpack.io" }
-}
-
-// main reduks package
-compile 'com.github.beyondeye.reduks:reduks-core:2.0.0b12'
-
-//rx-java based state store+ additional required dep for android support
-compile 'com.github.beyondeye.reduks:reduks-rx:2.0.0b12'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b12'
-
-//kovenant based state store and Async Action Middleware
-compile 'com.github.beyondeye.reduks:reduks-kovenant:2.0.0b12'
-compile 'com.github.beyondeye.reduks:reduks-android:2.0.0b12'
-
-
-//dev tools
-compile 'com.github.beyondeye.reduks:reduks-devtools:2.0.0b12'
-
-//immutable collections
-compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b12'
-
-//reduks bus
-compile 'com.github.beyondeye.reduks:reduks-pcollections:2.0.0b12'
-compile 'com.github.beyondeye.reduks:reduks-bus:2.0.0b12'
-
-```
 
 
 <a name="reduks_intro"></a>
