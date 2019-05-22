@@ -31,4 +31,14 @@ In the future, as the multiplatform support in Kotlin matures, Reduks will be fu
 For the full documentation see [here](https://beyondeye.gitbooks.io/reduks/content), or take a look at the [summary](SUMMARY.MD).
 
 ## License
-[Apache License 2.0](LICENSE)
+   Copyright 2019 by Dario Elyasy
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License [here](http://www.apache.org/licenses/LICENSE-2.0)
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
