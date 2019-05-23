@@ -11,6 +11,7 @@ dependencies {
     implementation project(':reduks-pcollections')
     implementation project(':reduks-saga')
 //    implementation project(':reduks-rx')
-    implementation "com.android.support:appcompat-v7:$support_version"
-    implementation "com.android.support:design:$support_version"
+    implementation libraries.supportAppCompat
+    implementation libraries.supportDesign
+//    implementation "com.android.support:design:$support_version"
 }

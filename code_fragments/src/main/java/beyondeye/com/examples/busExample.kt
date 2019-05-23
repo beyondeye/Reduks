@@ -1,7 +1,7 @@
 package beyondeye.com.examples
 
 import android.content.Context
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.bus.*
 import com.beyondeye.reduks.pcollections.PMap
@@ -56,7 +56,7 @@ class LoginFragment : Fragment() {
 class LoginDataDisplayFragment : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        reduks()?.addBusDataHandler(tag) { lfr:LoginFragmentResult? ->
+        reduks()?.addBusDataHandler(tag!!) { lfr:LoginFragmentResult? ->
             if(lfr!=null) {
                 print("login with username=${lfr.username} and password=${lfr.password} and ")
             }
@@ -65,6 +65,6 @@ class LoginDataDisplayFragment : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
-        reduks()?.removeBusDataHandlersWithTag(tag) //remove all bus data handler attached to this fragment tag
+        reduks()?.removeBusDataHandlers(tag!!) //remove all bus data handler attached to this fragment tag
     }
 }

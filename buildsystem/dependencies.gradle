@@ -38,6 +38,7 @@ ext.libraries = [
 
         //https://developer.android.com/jetpack/androidx/releases/appcompat
         supportAppCompat        : "androidx.appcompat:appcompat:1.0.2",
+        supportDesign           : "com.google.android.material:material:1.0.0",
         //https://developer.android.com/jetpack/androidx/releases/lifecycle
         archExtensions              : "androidx.lifecycle:lifecycle-extensions:2.0.0",
 
