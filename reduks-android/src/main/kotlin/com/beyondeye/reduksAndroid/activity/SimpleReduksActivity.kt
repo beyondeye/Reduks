@@ -36,10 +36,11 @@ abstract class SimpleReduksActivity<S>: ReduksActivity<S>, AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
     }
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         ActionRestoreState.saveReduksState(this,reduks,outState)
         super.onSaveInstanceState(outState)
     }
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         ActionRestoreState.restoreReduksState(this,reduks,savedInstanceState)

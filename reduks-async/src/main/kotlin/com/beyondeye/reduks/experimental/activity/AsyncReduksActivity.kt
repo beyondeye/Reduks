@@ -60,7 +60,7 @@ abstract class AsyncReduksActivity<S:Any>(
         (store as? AsyncStore)?.stopActors()
         super.onDestroy()
     }
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         ActionRestoreState.saveReduksState(this,reduks, outState)
         super.onSaveInstanceState(outState)
     }

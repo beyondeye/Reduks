@@ -17,9 +17,9 @@ ext.versions = [
         targetSdk            : 28,
         compileSdk           : 28,
 //        buildTools           : '26.0.2',
-        kotlin               : '1.3.50',
+        kotlin               : '1.3.61',
         //https://github.com/Kotlin/kotlinx.coroutines/releases
-        kotlin_coroutines    : '1.3.0',
+        kotlin_coroutines    : '1.3.3',
 
         // Reactive.
         rxJava               : '1.3.6',
@@ -37,13 +37,13 @@ ext.libraries = [
         // UI libs. see https://developer.android.com/jetpack/androidx/migrate for migrating to androidx
 
         //https://developer.android.com/jetpack/androidx/releases/appcompat
-        supportAppCompat        : "androidx.appcompat:appcompat:1.0.2",
+        supportAppCompat        : "androidx.appcompat:appcompat:1.1.0",
         supportDesign           : "com.google.android.material:material:1.0.0",
         //https://developer.android.com/jetpack/androidx/releases/lifecycle
-        archExtensions              : "androidx.lifecycle:lifecycle-extensions:2.0.0",
+        archExtensions              : "androidx.lifecycle:lifecycle-extensions:2.1.0",
 
         //dario libs
-        kjsonpatch             : "com.github.beyondeye:kjsonpatch:0.3.21",
+        kjsonpatch             : "com.github.beyondeye:kjsonpatch:0.3.22",
 
         // Reactive.
         rxJava                  : "io.reactivex:rxjava:$versions.rxJava",
@@ -51,7 +51,7 @@ ext.libraries = [
 
         // Others.
         //https://github.com/google/gson/releases
-        gson                    : "com.google.code.gson:gson:2.8.5",
+        gson                    : "com.google.code.gson:gson:2.8.6",
         kotlinStdLib            : "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin",
         kotlinCoroutinesCore    : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.kotlin_coroutines",
         kotlinCoroutinesAndroid : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.kotlin_coroutines",

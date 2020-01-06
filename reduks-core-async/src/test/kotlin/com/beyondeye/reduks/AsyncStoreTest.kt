@@ -25,7 +25,8 @@ class AsyncStoreTest {
         }
         val lock = CountDownLatch(1)
 
-        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //subscribeContext(): otherwise exception if not running on android
+        store.errorLogFn = { println(it) }
         store.subscribe(StoreSubscriberFn {
             lock.countDown()
         })
@@ -61,7 +62,8 @@ class AsyncStoreTest {
         }
 
         val lock = CountDownLatch(2)
-        val store = AsyncStore(TestState(), combineReducers(reducer1, reducer2),GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), combineReducers(reducer1, reducer2),GlobalScope,subscribeContext()) //subscribeContext(): otherwise exception if not running on android
+        store.errorLogFn = { println(it) }
         store.subscribe(StoreSubscriberFn {
             lock.countDown()
         })
@@ -77,7 +79,8 @@ class AsyncStoreTest {
 
     @Test
     fun subscribers_should_be_notified_when_the_state_changes() {
-        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },GlobalScope,subscribeContext()) //subscribeContext(): otherwise exception if not running on android
+        store.errorLogFn = { println(it) }
         var subscriber1Called = false
         var subscriber2Called = false
         val lock = CountDownLatch(2)
@@ -101,7 +104,8 @@ class AsyncStoreTest {
 
     @Test
     fun the_store_should_not_notify_unsubscribed_objects() {
-        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), ReducerFn<TestState> { state, action -> TestState() },GlobalScope,subscribeContext()) //subscribeContext(): otherwise exception if not running on android
+        store.errorLogFn = { println(it) }
         var subscriber1Called = false
         var subscriber2Called = false
 
@@ -141,7 +145,8 @@ class AsyncStoreTest {
         val lock = CountDownLatch(1)
 
         var actual = TestState()
-        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //false: otherwise exception if not running on android
+        val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeContext()) //subscribeContext(): otherwise exception if not running on android
+        store.errorLogFn = { println(it) }
 
 
         store.subscribe(StoreSubscriberFn {

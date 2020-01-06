@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'org.jetbrains.dokka' //make sure this is AFTER apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
@@ -30,6 +30,13 @@ android {
 dokka {
     outputFormat = 'html'
     outputDirectory = "$buildDir/documentation"
+    configuration {
+        //the following is needed for solving the following issue
+        //https://github.com/Kotlin/dokka/issues/213#issuecomment-528997962
+        noAndroidSdkLink = true
+        noJdkLink = true
+        noStdlibLink = true
+    }
 }
 
 

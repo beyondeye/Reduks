@@ -54,7 +54,7 @@ class LoginFragment : Fragment() {
 }
 
 class LoginDataDisplayFragment : Fragment() {
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         reduks()?.addBusDataHandler(tag!!) { lfr:LoginFragmentResult? ->
             if(lfr!=null) {

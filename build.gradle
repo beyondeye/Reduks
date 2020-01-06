@@ -86,7 +86,7 @@ configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-de
 
     apply plugin: 'com.android.library'
     apply plugin: 'kotlin-android'
-    apply plugin: 'org.jetbrains.dokka-android'
+    apply plugin: 'org.jetbrains.dokka' //make sure this is AFTER apply plugin: 'com.android.library'
     apply plugin: 'com.github.dcendents.android-maven'
     group = 'com.github.beyondeye.reduks' //required by jitpack
 
@@ -134,17 +134,16 @@ buildscript {
 //        mavenCentral()
     }
     rootProject.ext.versions = [
-            kotlin: '1.3.50',
-            dokka: '0.9.18'
+            kotlin: '1.3.61',
+            dokka: '0.10.0'
     ]
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:3.4.2'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.0"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
-        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$rootProject.versions.dokka"
     }
 }
 
