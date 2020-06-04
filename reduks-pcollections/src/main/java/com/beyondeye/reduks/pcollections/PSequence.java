@@ -27,7 +27,7 @@ public interface PSequence<E> extends PCollection<E>, List<E> {
    * @param i
    * @param e
    * @return a sequence consisting of the elements of this with e replacing the element at index i.
-   * @throws IndexOutOfBOundsException if i&lt;0 || i&gt;=this.size()
+   * throws IndexOutOfBOundsException if i&lt;0 || i&gt;=this.size()
    */
   public PSequence<E> with(int i, E e);
 
@@ -35,7 +35,7 @@ public interface PSequence<E> extends PCollection<E>, List<E> {
    * @param i
    * @param e non-null
    * @return a sequence consisting of the elements of this with e inserted at index i.
-   * @throws IndexOutOfBOundsException if i&lt;0 || i&gt;this.size()
+   * throws IndexOutOfBOundsException if i&lt;0 || i&gt;this.size()
    */
   public PSequence<E> plus(int i, E e);
 
@@ -43,7 +43,7 @@ public interface PSequence<E> extends PCollection<E>, List<E> {
    * @param i
    * @param list
    * @return a sequence consisting of the elements of this with list inserted at index i.
-   * @throws IndexOutOfBOundsException if i&lt;0 || i&gt;this.size()
+   * throws IndexOutOfBOundsException if i&lt;0 || i&gt;this.size()
    */
   public PSequence<E> plusAll(int i, Collection<? extends E> list);
 
@@ -57,7 +57,7 @@ public interface PSequence<E> extends PCollection<E>, List<E> {
   /**
    * @param i
    * @return a sequence consisting of the elements of this with the element at index i removed.
-   * @throws IndexOutOfBOundsException if i&lt;0 || i&gt;=this.size()
+   * throws IndexOutOfBOundsException if i&lt;0 || i&gt;=this.size()
    */
   public PSequence<E> minus(int i);
 
