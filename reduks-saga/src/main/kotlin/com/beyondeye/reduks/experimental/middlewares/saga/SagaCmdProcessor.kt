@@ -40,6 +40,10 @@ class SagaYeldSingle<S:Any>(private val sagaCmdProcessor: SagaCmdProcessor<S>){
         return _yieldSingle(OpCode.Select(selector)) as O
     }
 
+    suspend  fun curstate():S {
+        @Suppress("UNCHECKED_CAST")
+        return _yieldSingle(OpCode.CurState<S>()) as S
+    }
     /**
      * yield a command to execute a child Saga in the same context of the current one (the parent saga): execution
      * of the parent saga is suspended until child saga completion. Exceptions in child saga execution
@@ -316,6 +320,7 @@ sealed class OpCode {
     class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
     class Select<S,O>(val selector: Selector<S,O>) :OpCodeWithResult()
+    class CurState<S>:OpCodeWithResult()
     class Race :OpCodeWithResult()
     class All:OpCodeWithResult()
 //    class Cancelled:OpCode()
@@ -365,13 +370,7 @@ class SagaCmdProcessor<S:Any>(
 
     private suspend fun processingLoop(inputActions: ReceiveChannel<Any>) {
         for(a in inChannel) {
-            when(a) {
-                is OpCode.Delay -> {
-                    delay(a.timeMsecs)
-                    outChannel.send(Unit)
-                }
-                is OpCode.Put ->
-                    dispatcherActor.send(a.value)
+            when(a) { //note: the order of clauses in this when is with most common clauses, or clauses that need fastest execution at the beginning, although not sure that will change perfomance
                 is OpCode.Take<*> -> {
 //                    launch { //launch aynchronously, to avoid dead locks?
                     for(ia in inputActions) {
@@ -382,6 +381,12 @@ class SagaCmdProcessor<S:Any>(
                     }
 //                    }
                 }
+                is OpCode.CurState<*> -> {
+                    sm.get()?.store?.get()?.let { store ->
+                        outChannel.send(store.state)
+                    }
+
+                }
                 is OpCode.Select<*,*> -> {
                     sm.get()?.store?.get()?.let { store ->
                         @Suppress("UNCHECKED_CAST")
@@ -390,6 +395,8 @@ class SagaCmdProcessor<S:Any>(
                         outChannel.send(res)
                     }
                 }
+                is OpCode.Put ->
+                    dispatcherActor.send(a.value)
                 is OpCode.Call<*, *> -> {
                     sm.get()?.let { sagaMiddleware->
                         @Suppress("UNCHECKED_CAST")
@@ -467,6 +474,10 @@ class SagaCmdProcessor<S:Any>(
                                 filterSagaName,
                                 SAGATYPE_CHILD_FORK)
                     }
+                }
+                is OpCode.Delay -> {
+                    delay(a.timeMsecs)
+                    outChannel.send(Unit)
                 }
                 else ->  {
                     print("unsupported saga operation: ${a::class.java}")

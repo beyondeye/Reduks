@@ -186,7 +186,38 @@ class SagaMiddlewareTest {
         assertThat(state.decrCounter).isEqualTo(+10)
 //        store.dispatch(EndAction())
     }
+    @Test
+    fun testSagaCurState() {
+        val store = AsyncStore(TestState(incrCounter = 0,decrCounter = 0),
+                reducer, subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
+                cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
+        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        store.applyMiddleware(sagaMiddleware)
+        sagaMiddleware.runSaga("curstate") {
+            val curstate = yield_.curstate()
+            val initialIncrValue=curstate.incrCounter
+            val initialDecrValue=curstate.decrCounter
+            yield_ put ActualAction.SetIncrCounter(initialIncrValue-10)
+            yield_ put ActualAction.SetDecrCounter(initialDecrValue+10)
+        }
+        val lock = CountDownLatch(1)
 
+        store.subscribe(
+                StoreSubscriberFn {
+                    with(store.state) {
+                        if (actionCounter==2) {
+                            lock.countDown()
+                        }
+                    }
+                })
+        //dispatch a SagaAction that will be translated to an actual action that the reducer can handle
+        lock.await(50,TimeUnit.SECONDS)
+        val state=store.state
+        assertThat(state.actionCounter).isEqualTo(2)
+        assertThat(state.incrCounter).isEqualTo(-10)
+        assertThat(state.decrCounter).isEqualTo(+10)
+//        store.dispatch(EndAction())
+    }
     @Test
     fun testSagaDelay() {
         val store = AsyncStore(TestState(),
