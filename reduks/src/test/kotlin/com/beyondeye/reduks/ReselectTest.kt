@@ -295,7 +295,7 @@ class ReselectTest {
         val sel_sum_memoized = SelectorBuilder<State3>()
                 .withField { p1 }
                 .withField { p2 }.compute { p1, p2 ->p1+p2  }
-                .computeResultMemoizedByVal()
+                .triggerOnComputeOnlyIfChangedByVal()
 
 
         val state= State3(1.0,2.0,3.0)

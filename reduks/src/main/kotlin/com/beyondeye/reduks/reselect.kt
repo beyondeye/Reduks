@@ -167,16 +167,16 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
  * because a [ComputeResult] can be used as input when building a selector, using [SelectorBuilder.withSelector]
  */
 abstract class ComputeResult<S:Any,O>:AbstractSelector<S,O>() {
-    fun computeResultMemoizedByRef()=computeResultMemoized(byRefEqualityCheck)
-    fun computeResultMemoizedByVal()=computeResultMemoized(byValEqualityCheck)
+    fun triggerOnComputeOnlyIfChangedByRef()=triggerOnComputeOnlyIfChanged(byRefEqualityCheck)
+    fun triggerOnComputeOnlyIfChangedByVal()=triggerOnComputeOnlyIfChanged(byValEqualityCheck)
     /**
      * by default, a selector is considered changed if any of its inputs is changed, even though
      * the output calculated by compute is the same. If instead you want to trigger the selector
      * if some of the inputs is changed AND ALSO the output calculated is changed then use
-     * this method, or [computeResultMemoizedByRef] or [computeResultMemoizedByVal] if you want to override the way
+     * this method, or [triggerOnComputeOnlyIfChangedByRef] or [triggerOnComputeOnlyIfChangedByVal] if you want to override the way
      * you check if the result of the compute is changed
      */
-    fun computeResultMemoized(equalityCheckFn: EqualityCheckFn=this@ComputeResult.equalityCheck) = object : AbstractSelector<S, O>() {
+    fun triggerOnComputeOnlyIfChanged(equalityCheckFn: EqualityCheckFn=this@ComputeResult.equalityCheck) = object : AbstractSelector<S, O>() {
         @Suppress("UNCHECKED_CAST")
         private val computeSelector=this@ComputeResult as SelectorInput<Any, Any>
         override val computeAndCount = fun(i: Array<out Any>):O {
