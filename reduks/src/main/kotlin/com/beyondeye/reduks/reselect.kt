@@ -162,6 +162,52 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
 
 }
 
+/**
+ * this class is a base class for result of compute function. it derives from [AbstractSelector]
+ * because a [ComputeResult] can be used as input when building a selector, using [SelectorBuilder.withSelector]
+ */
+abstract class ComputeResult<S:Any,O>:AbstractSelector<S,O>() {
+    fun computeResultMemoizedByRef()=computeResultMemoized(byRefEqualityCheck)
+    fun computeResultMemoizedByVal()=computeResultMemoized(byValEqualityCheck)
+    /**
+     * by default, a selector is considered changed if any of its inputs is changed, even though
+     * the output calculated by compute is the same. If instead you want to trigger the selector
+     * if some of the inputs is changed AND ALSO the output calculated is changed then use
+     * this method, or [computeResultMemoizedByRef] or [computeResultMemoizedByVal] if you want to override the way
+     * you check if the result of the compute is changed
+     */
+    fun computeResultMemoized(equalityCheckFn: EqualityCheckFn=this@ComputeResult.equalityCheck) = object : AbstractSelector<S, O>() {
+        @Suppress("UNCHECKED_CAST")
+        private val computeSelector=this@ComputeResult as SelectorInput<Any, Any>
+        override val computeAndCount = fun(i: Array<out Any>):O {
+            ++_recomputations
+            @Suppress("UNCHECKED_CAST")
+            return i[0] as O
+        }
+
+        override operator fun invoke(state: S): O {
+            return memoizer.memoize(state,computeSelector)
+        }
+        override val equalityCheck: EqualityCheckFn = equalityCheckFn
+        override val memoizer: Memoizer<O> by lazy {
+            object : Memoizer<O> { //a special memoizer for the computed result
+                var lastCompute: O? = null
+                override fun memoize(state: Any, vararg inputs: SelectorInput<Any, Any>): O {
+                    val computeSelector = inputs[0]
+                    val compute = computeSelector.invoke(state)
+                    if (lastCompute != null &&
+                            equalityCheck(compute, lastCompute!!)) {
+                        return lastCompute!!
+                    }
+                    lastCompute = compute as O
+                    ++_recomputations
+                    return lastCompute!!
+                }
+            }
+        }
+    }
+}
+
 //use @JvmField annotation for avoiding generation useless getter methods
 class SelectorForP5<S:Any, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@JvmField val si0: SelectorInput<S, I0>,
                                                                          @JvmField val si1: SelectorInput<S, I1>,
@@ -169,7 +215,8 @@ class SelectorForP5<S:Any, I0 : Any, I1 : Any, I2 : Any, I3 : Any, I4 : Any>(@Jv
                                                                          @JvmField val si3: SelectorInput<S, I3>,
                                                                          @JvmField val si4: SelectorInput<S, I4>
 ) {
-    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3, I4) -> O) = object : AbstractSelector<S, O>() {
+//    fun<O> computeByValue(computeFun: (I0, I1, I2, I3, I4) -> O)=compute(byValEqualityCheck,computeFun)
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3, I4) -> O) = object : ComputeResult<S, O>() {
         override val equalityCheck: EqualityCheckFn
             get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
@@ -201,7 +248,8 @@ class SelectorForP4<S:Any, I0 : Any, I1 : Any, I2 : Any, I3 : Any>(@JvmField val
     fun<I4 : Any> withField(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn, byRefEqualityCheck))
     fun<I4 : Any> withFieldByValue(fn: S.() -> I4) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, InputField(fn, byValEqualityCheck))
     fun<I4 : Any> withSelector(si: SelectorInput<S, I4>) = SelectorForP5<S, I0, I1, I2, I3, I4>(si0, si1, si2, si3, si)
-    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3) -> O) = object : AbstractSelector<S, O>() {
+//    fun<O> computeByValue(computeFun: (I0, I1, I2, I3) -> O)=compute(byValEqualityCheck,computeFun)
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2, I3) -> O) = object : ComputeResult<S,O>() {
         override val equalityCheck: EqualityCheckFn
             get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
@@ -231,7 +279,8 @@ class SelectorForP3<S:Any, I0 : Any, I1 : Any, I2 : Any>(@JvmField val si0: Sele
     fun<I3 : Any> withField(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn, byRefEqualityCheck))
     fun<I3 : Any> withFieldByValue(fn: S.() -> I3) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, InputField(fn, byValEqualityCheck))
     fun<I3 : Any> withSelector(si: SelectorInput<S, I3>) = SelectorForP4<S, I0, I1, I2, I3>(si0, si1, si2, si)
-    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2) -> O) = object : AbstractSelector<S, O>() {
+//    fun<O> computeByValue(computeFun: (I0, I1, I2) -> O)=compute(byValEqualityCheck,computeFun)
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1, I2) -> O) = object : ComputeResult<S, O>() {
         override val equalityCheck: EqualityCheckFn
             get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
@@ -258,7 +307,8 @@ class SelectorForP2<S:Any, I0 : Any, I1 : Any>(@JvmField val si0: SelectorInput<
     fun<I2 : Any> withField(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn, byRefEqualityCheck))
     fun<I2 : Any> withFieldByValue(fn: S.() -> I2) = SelectorForP3<S, I0, I1, I2>(si0, si1, InputField(fn, byValEqualityCheck))
     fun<I2 : Any> withSelector(si: SelectorInput<S, I2>) = SelectorForP3<S, I0, I1, I2>(si0, si1, si)
-    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1) -> O) = object : AbstractSelector<S, O>() {
+//    fun<O> computeByValue(computeFun: (I0, I1) -> O)=compute(byValEqualityCheck,computeFun)
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0, I1) -> O) = object : ComputeResult<S, O>() {
         override val equalityCheck: EqualityCheckFn
             get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {
@@ -283,7 +333,8 @@ class SelectorForP1<S:Any, I0 : Any>(@JvmField val si0: SelectorInput<S, I0>) {
     fun<I1 : Any> withField(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn, byRefEqualityCheck))
     fun<I1 : Any> withFieldByValue(fn: S.() -> I1) = SelectorForP2<S, I0, I1>(si0, InputField(fn, byValEqualityCheck))
     fun<I1 : Any> withSelector(si: SelectorInput<S, I1>) = SelectorForP2<S, I0, I1>(si0, si)
-    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0) -> O) = object : AbstractSelector<S, O>() {
+//    fun<O> computeByValue(computeFun: (I0) -> O)=compute(byValEqualityCheck,computeFun)
+    fun<O> compute(equalityCheckForResult: EqualityCheckFn= byRefEqualityCheck,computeFun: (I0) -> O) = object : ComputeResult<S, O>() {
         override val equalityCheck: EqualityCheckFn
             get() = equalityCheckForResult
         override val computeAndCount = fun(i: Array<out Any>): O {

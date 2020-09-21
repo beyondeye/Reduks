@@ -287,6 +287,39 @@ class ReselectTest {
         assertThat(firstChangedA).isNull()
         assertThat(secondChangedA).isEqualTo(1)
     }
+    @Test
+    fun onChangedWithMemoizedComputeTest() {
+        val sel_sum = SelectorBuilder<State3>()
+                .withField { p1 }
+                .withField { p2 }.compute { p1, p2 ->p1+p2  }
+        val sel_sum_memoized = SelectorBuilder<State3>()
+                .withField { p1 }
+                .withField { p2 }.compute { p1, p2 ->p1+p2  }
+                .computeResultMemoizedByVal()
+
+
+        val state= State3(1.0,2.0,3.0)
+        assertThat(sel_sum(state)).isEqualTo(3.0)
+        assertThat(sel_sum_memoized(state)).isEqualTo(3.0)
+
+
+        val changedState= State3(2.0,1.0,3.0) //switched order of p1,p2 but same sum
+        var sel_sum_changed_count: Int = 0
+        sel_sum.onChangeIn(changedState) {value:Double -> sel_sum_changed_count+=1 }
+        sel_sum.onChangeIn(changedState) {value:Double ->
+            //this selector is run, because inputs are changed (changedState)
+            sel_sum_changed_count+=1
+        }
+        var sel_sum_memoized_changed_count: Int = 0
+        sel_sum_memoized.onChangeIn(changedState) {value:Double -> sel_sum_memoized_changed_count+=1 }
+        sel_sum_memoized.onChangeIn(changedState) {value:Double ->
+            //this selector is not run, because although inputs are changed (changedState) compute result is not changed
+            sel_sum_memoized_changed_count+=1
+        }
+        assertThat(sel_sum_changed_count).isEqualTo(2)
+        assertThat(sel_sum_memoized_changed_count).isEqualTo(1)
+    }
+
 
     @Test
     fun whenChangedTest() {
