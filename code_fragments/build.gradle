@@ -1,6 +1,6 @@
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
     implementation project(':reduks-core')
     implementation project(':reduks-android')
     implementation project(':reduks-async')

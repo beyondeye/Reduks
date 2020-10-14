@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.middlewares
+package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.*
 import kotlinx.coroutines.CoroutineScope

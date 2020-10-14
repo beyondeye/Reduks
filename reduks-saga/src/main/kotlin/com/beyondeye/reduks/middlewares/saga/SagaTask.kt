@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.middlewares.saga
+package com.beyondeye.reduks.middlewares.saga
 
 import kotlinx.coroutines.Deferred
 

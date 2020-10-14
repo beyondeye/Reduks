@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.middlewares.saga
+package com.beyondeye.reduks.middlewares.saga
 
 import com.beyondeye.reduks.Selector
 import com.beyondeye.reduks.SelectorBuilder
@@ -208,7 +208,7 @@ suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeEvery(noinline 
 }
 suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeEvery(handlerSaga: SagaFn1<S, B, Unit>)
 {
-    _yieldSingle(OpCode.TakeEvery<S, B>(B::class.java,handlerSaga))
+    _yieldSingle(OpCode.TakeEvery<S, B>(B::class.java, handlerSaga))
 }
 //-----------------------------------------------
 suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeLatest(noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
@@ -217,16 +217,16 @@ suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeLatest(noinline
 
 suspend inline infix fun <S:Any,reified B> SagaYeldSingle<S>.takeLatest(handlerSaga: SagaFn1<S, B, Unit>)
 {
-    _yieldSingle(OpCode.TakeLatest<S, B>(B::class.java,handlerSaga))
+    _yieldSingle(OpCode.TakeLatest<S, B>(B::class.java, handlerSaga))
 }
 //-----------------------------------------------
-suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
-    throttle(delayMs,SagaFn1(B::class.java.simpleName,handlerSaga))
+suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long, noinline handlerSaga:suspend Saga<S>.(p1:B)->Unit) {
+    throttle(delayMs, SagaFn1(B::class.java.simpleName,handlerSaga))
 }
 
-suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long,handlerSaga:SagaFn1<S, B, Unit>)
+suspend inline fun <S:Any,reified B> SagaYeldSingle<S>.throttle(delayMs:Long, handlerSaga: SagaFn1<S, B, Unit>)
 {
-    _yieldSingle(OpCode.Throttle<S, B>(B::class.java,delayMs,handlerSaga))
+    _yieldSingle(OpCode.Throttle<S, B>(B::class.java, delayMs, handlerSaga))
 }
 //-----------------------------------------------
 class Saga<S:Any>(sagaCmdProcessor: SagaCmdProcessor<S>) {
@@ -245,9 +245,9 @@ class Saga<S:Any>(sagaCmdProcessor: SagaCmdProcessor<S>) {
 }
 sealed class OpCode {
     open class OpCodeWithResult: OpCode()
-    abstract class FilterOpCode<S:Any>:OpCode() {
+    abstract class FilterOpCode<S:Any>: OpCode() {
         abstract val sagaLabel:String
-        abstract fun filterSaga(filterSagaName:String):SagaFn0<S,Unit>
+        abstract fun filterSaga(filterSagaName:String): SagaFn0<S, Unit>
     }
     class Delay(val timeMsecs: Long): OpCodeWithResult()
     class Put(val value:Any): OpCode()
@@ -319,10 +319,10 @@ sealed class OpCode {
     class JoinTasks(val tasks:List<SagaTask<out Any>>): OpCodeWithResult()
     class CancelTasks(val tasks: List<SagaTask<out Any>>): OpCode()
     class CancelSelf: OpCode()
-    class Select<S,O>(val selector: Selector<S,O>) :OpCodeWithResult()
-    class CurState<S>:OpCodeWithResult()
-    class Race :OpCodeWithResult()
-    class All:OpCodeWithResult()
+    class Select<S,O>(val selector: Selector<S,O>) : OpCodeWithResult()
+    class CurState<S>: OpCodeWithResult()
+    class Race : OpCodeWithResult()
+    class All: OpCodeWithResult()
 //    class Cancelled:OpCode()
 }
 
@@ -387,7 +387,7 @@ class SagaCmdProcessor<S:Any>(
                     }
 
                 }
-                is OpCode.Select<*,*> -> {
+                is OpCode.Select<*, *> -> {
                     sm.get()?.store?.get()?.let { store ->
                         @Suppress("UNCHECKED_CAST")
                         val selector=a.selector as Selector<S,Any>
@@ -467,7 +467,7 @@ class SagaCmdProcessor<S:Any>(
                     sm.get()?.let { sagaMiddleware ->
                         val filterSagaName = buildChildSagaName(a.sagaLabel, "")
                         @Suppress("UNCHECKED_CAST")
-                        val fs = a.filterSaga(filterSagaName) as SagaFn0<S,Unit>
+                        val fs = a.filterSaga(filterSagaName) as SagaFn0<S, Unit>
                         val childTask = sagaMiddleware._runSaga<Unit>(
                                 fs,
                                 this,

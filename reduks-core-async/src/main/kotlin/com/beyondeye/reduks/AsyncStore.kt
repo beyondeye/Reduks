@@ -1,12 +1,10 @@
-package com.beyondeye.reduks.experimental
+package com.beyondeye.reduks
 
-import com.beyondeye.reduks.*
-import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
+import com.beyondeye.reduks.middlewares.AsyncActionMiddleWare
 import com.beyondeye.reduks.middlewares.ThunkMiddleware
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import kotlinx.coroutines.*
 //import kotlinx.coroutines.experimental.newSingleThreadContext
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Store that use kotlin coroutine channels for notifying asynchronously to store subscribers about
@@ -32,7 +30,7 @@ class AsyncStore<S>(initialState: S, private var reducer: Reducer<S>,
             return if (!withStandardMiddleware)
                 res
             else
-                res.applyMiddleware(ThunkMiddleware(),AsyncActionMiddleWare())
+                res.applyMiddleware(ThunkMiddleware(), AsyncActionMiddleWare())
         }
     }
 

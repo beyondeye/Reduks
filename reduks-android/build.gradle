@@ -15,9 +15,13 @@ android {
         versionName VERSION_NAME
     }
 
+
     compileOptions {
         sourceCompatibility sourceCompatibility_
         targetCompatibility targetCompatibility_
+    }
+    kotlinOptions {
+        jvmTarget = kotlinJvmTarget
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'

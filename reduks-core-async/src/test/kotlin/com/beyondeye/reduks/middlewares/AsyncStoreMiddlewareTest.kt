@@ -2,7 +2,7 @@ package com.beyondeye.reduks.middlewares
 
 import com.beyondeye.reduks.MiddlewareFn
 import com.beyondeye.reduks.ReducerFn
-import com.beyondeye.reduks.experimental.AsyncStore
+import com.beyondeye.reduks.AsyncStore
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.newSingleThreadContext
 import org.assertj.core.api.Assertions.assertThat

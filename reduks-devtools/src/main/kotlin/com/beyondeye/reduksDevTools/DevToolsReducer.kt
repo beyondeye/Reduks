@@ -21,7 +21,7 @@ class DevToolsReducer<S>(private val appReducer: Reducer<S>) : Reducer<DevToolsS
             }
 
             DevToolsAction.PERFORM_ACTION -> {
-                val addToEnd = state.currentPosition === state.computedStates.size - 1
+                val addToEnd = state.currentPosition == state.computedStates.size - 1
 
                 return performAction(
                         state,

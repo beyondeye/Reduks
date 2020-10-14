@@ -1,12 +1,9 @@
 package com.beyondeye.reduks.middlewares
 
-import com.beyondeye.reduks.experimental.AsyncStore
+import com.beyondeye.reduks.AsyncStore
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.StoreSubscriberFn
-import com.beyondeye.reduks.experimental.middlewares.AsyncAction
-import com.beyondeye.reduks.experimental.middlewares.AsyncActionMiddleWare
 import kotlinx.coroutines.*
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
@@ -102,7 +99,7 @@ class CoroutinesAsyncActionMiddlewareTest {
     @Test
     fun test_two_async_actions_with_different_payload_type() {
         val store = AsyncStore(TestState(), reducer,GlobalScope,subscribeDispatcher = newSingleThreadContext("SubscribeThread")) //false: otherwise exception if not running on android
-        val asynmiddleware=AsyncActionMiddleWare<TestState>()
+        val asynmiddleware= AsyncActionMiddleWare<TestState>()
         store.applyMiddleware(asynmiddleware)
         val lock = CountDownLatch(1)
         //subscribe before dispatch!!

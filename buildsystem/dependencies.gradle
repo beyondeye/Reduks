@@ -14,12 +14,12 @@ allprojects {
 
 ext.versions = [
         minSdk               : 16,
-        targetSdk            : 28,
-        compileSdk           : 28,
+        targetSdk            : 29,
+        compileSdk           : 29,
 //        buildTools           : '26.0.2',
-        kotlin               : '1.3.72',
+        kotlin               : '1.4.10',
         //https://github.com/Kotlin/kotlinx.coroutines/releases
-        kotlin_coroutines    : '1.3.5',
+        kotlin_coroutines    : '1.3.9',
 
         // Reactive.
         rxJava               : '1.3.6',
@@ -40,8 +40,8 @@ ext.libraries = [
         supportMultidex         : "androidx.multidex:multidex:2.0.1",
         // UI libs. see https://developer.android.com/jetpack/androidx/migrate for migrating to androidx
         //https://developer.android.com/jetpack/androidx/versions
-        supportCompat           : "androidx.core:core:1.2.0",
-        supportAppCompat        : "androidx.appcompat:appcompat:1.1.0",
+        supportCompat           : "androidx.core:core:1.3.2",
+        supportAppCompat        : "androidx.appcompat:appcompat:1.2.0",
         supportCardView         : "androidx.cardview:cardview:1.0.0",
         supportPalette          : "androidx.palette:palette:1.0.0",
         supportGridLayout       : "androidx.gridlayout:gridlayout:1.0.0",

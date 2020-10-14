@@ -5,7 +5,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 //disable warnings when using coroutines
-kotlin { experimental { coroutines 'enable' } }
+//kotlin { experimental { coroutines 'enable' } }
 
 android {
     compileSdkVersion versions.compileSdk
@@ -18,9 +18,14 @@ android {
         versionName VERSION_NAME
     }
 
+    //see https://developer.android.com/studio/write/java8-support
+    // Keep the following configuration in order to target Java 8.
     compileOptions {
-        sourceCompatibility sourceCompatibility_
-        targetCompatibility targetCompatibility_
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'

@@ -3,8 +3,8 @@ package com.beyondeye.reduks.middlewares
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.SelectorBuilder
 import com.beyondeye.reduks.StoreSubscriberFn
-import com.beyondeye.reduks.experimental.AsyncStore
-import com.beyondeye.reduks.experimental.middlewares.saga.*
+import com.beyondeye.reduks.AsyncStore
+import com.beyondeye.reduks.middlewares.saga.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.newSingleThreadContext
@@ -57,7 +57,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(),
                 reducer, subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         val lock = CountDownLatch(1)
 
@@ -87,7 +87,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
             //wait for SagaAction.Plus type of action
@@ -126,7 +126,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(incrCounter = 0,decrCounter = 0),
                 reducer, subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("select") {
             val selb=SelectorBuilder<TestState>()
@@ -254,14 +254,14 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val totIncr=333
         val totDecr=-333
-        val childSagaIncr=SagaFn1<TestState,Int,Int>("childSagaIncr") { p1->
-            yield_ put(ActualAction.SetIncrCounter(p1))
-            totIncr-p1
+        val childSagaIncr= SagaFn1<TestState, Int, Int>("childSagaIncr") { p1 ->
+            yield_ put (ActualAction.SetIncrCounter(p1))
+            totIncr - p1
         }
         sagaMiddleware.runSaga("main") {
             val resIncr:Int= yield_ call childSagaIncr.withArgs(123)
@@ -300,7 +300,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val totIncr=333
@@ -354,7 +354,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val canceledIncr=333
@@ -402,7 +402,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val forkIncr=333
@@ -448,7 +448,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val forkIncr=333
@@ -494,7 +494,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
 
         val forkIncr=333
@@ -547,7 +547,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         val initialDelaySecs:Double=0.1
         sagaMiddleware.runSaga("main") {
@@ -596,7 +596,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
             yield_ takeLatest{ a:SagaAction.SetPlus ->
@@ -641,7 +641,7 @@ class SagaMiddlewareTest {
         val store = AsyncStore(TestState(), reducer,
                 subscribeDispatcher = newSingleThreadContext("SubscribeThread"),
                 cscope = GlobalScope) //custom subscribeDispatcher not UI: otherwise exception if not running on android
-        val sagaMiddleware = SagaMiddleWare<TestState>(store,GlobalScope)
+        val sagaMiddleware = SagaMiddleWare<TestState>(store, GlobalScope)
         store.applyMiddleware(sagaMiddleware)
         sagaMiddleware.runSaga("incr") {
             yield_.throttle(100){ a:SagaAction.SetPlus ->

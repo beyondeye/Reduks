@@ -1,4 +1,4 @@
-package com.beyondeye.reduks.experimental.middlewares.saga
+package com.beyondeye.reduks.middlewares.saga
 
 import com.beyondeye.reduks.*
 import kotlinx.coroutines.channels.SendChannel
@@ -125,7 +125,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, parent_scope: CoroutineScope, val s
             /**
              * see [SagaYeldSingle.call]
              */
-            SagaCmdProcessor.SAGATYPE_CHILD_CALL-> {
+            SagaCmdProcessor.SAGATYPE_CHILD_CALL -> {
                 newSagaRootScope = parentSagaScope
                 newSagaInputActionsChannel = null //use parent saga action channel
                 //if child call,  we are reusing the parent saga processor

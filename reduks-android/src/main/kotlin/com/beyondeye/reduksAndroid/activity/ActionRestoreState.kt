@@ -1,10 +1,10 @@
 package com.beyondeye.reduksAndroid.activity
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import com.beyondeye.reduks.Action
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.Reduks
@@ -31,7 +31,7 @@ class ActionRestoreState<S>(val restoredState:S): Action {
                 is Parcelable -> outState?.putParcelable(REDUKS_STATE, curReduksState)
                 is Serializable -> outState?.putSerializable(REDUKS_STATE, curReduksState)
                 is SavedToViewModel -> {
-                    val reduksStateViewModel = ViewModelProviders.of(activity).get(ReduksStateViewModel::class.java)
+                    val reduksStateViewModel = ViewModelProvider(activity).get(ReduksStateViewModel::class.java)
                     reduksStateViewModel.savedState = curReduksState
                 }
             }
@@ -42,7 +42,7 @@ class ActionRestoreState<S>(val restoredState:S): Action {
             val restoredState:S? = when(reduks.store.state) {
                 is Parcelable ->savedInstanceState?.getParcelable<Parcelable>(REDUKS_STATE) as? S
                 is Serializable -> savedInstanceState?.getSerializable(REDUKS_STATE) as? S
-                is SavedToViewModel -> ViewModelProviders.of(activity).get(ReduksStateViewModel::class.java).savedState as? S
+                is SavedToViewModel -> ViewModelProvider(activity).get(ReduksStateViewModel::class.java).savedState as? S
 
                 else -> null
             }

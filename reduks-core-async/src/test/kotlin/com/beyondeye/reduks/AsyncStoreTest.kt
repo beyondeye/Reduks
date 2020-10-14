@@ -1,6 +1,5 @@
 package com.beyondeye.reduks
 
-import com.beyondeye.reduks.experimental.AsyncStore
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.newSingleThreadContext
 import org.assertj.core.api.Assertions.assertThat

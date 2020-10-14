@@ -50,15 +50,15 @@ sealed class AsyncAction(val payloadTypename:String): Action {
     companion object {
         inline fun <reified PayloadType:Any > withPayload(action: Any):AsyncActionMatcher<PayloadType>? {
             if(action !is AsyncAction) return null
-            val expectedname=PayloadType::class.java.canonicalName //use Payload type name from java reflection to identify async action
+            val expectedname=PayloadType::class.java.canonicalName?:"" //use Payload type name from java reflection to identify async action
             if (action.payloadTypename !=expectedname) return null
             return AsyncActionMatcher<PayloadType>(action)
         }
         inline fun <reified  PayloadType:Any> start( promise: Promise<PayloadType, Throwable>):AsyncAction {
-            return Started<PayloadType>(PayloadType::class.java.canonicalName,promise)
+            return Started<PayloadType>(PayloadType::class.java.canonicalName?:"",promise)
         }
         inline fun <reified  PayloadType:Any> start(noinline  body: () -> PayloadType):AsyncAction {
-            return Started<PayloadType>(PayloadType::class.java.canonicalName,body)
+            return Started<PayloadType>(PayloadType::class.java.canonicalName?:"",body)
         }
     }
 }

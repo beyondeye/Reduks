@@ -1,11 +1,11 @@
-package com.beyondeye.reduks.experimental.activity
+package com.beyondeye.reduks.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.beyondeye.reduks.*
 import com.beyondeye.reduks.bus.BusStore
-import com.beyondeye.reduks.experimental.AsyncStore
-import com.beyondeye.reduks.experimental.middlewares.saga.SagaMiddleWare
+import com.beyondeye.reduks.AsyncStore
+import com.beyondeye.reduks.middlewares.saga.SagaMiddleWare
 import com.beyondeye.reduks.middlewares.applyMiddleware
 import com.beyondeye.reduksAndroid.activity.ActionRestoreState
 import com.beyondeye.reduksAndroid.activity.ReduksActivity
@@ -64,7 +64,7 @@ abstract class AsyncReduksActivity<S:Any>(
         ActionRestoreState.saveReduksState(this,reduks, outState)
         super.onSaveInstanceState(outState)
     }
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         ActionRestoreState.restoreReduksState(this,reduks, savedInstanceState)
     }
