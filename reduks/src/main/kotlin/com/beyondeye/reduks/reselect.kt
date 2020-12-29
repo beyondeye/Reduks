@@ -156,49 +156,49 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
     }
 
     /**
-     * same as regular [onChangeIn] but don't activate selector unless [StepSequence.curstep]
+     * same as regular [onChangeIn] but don't activate selector unless [StepInSequence.curstep]
      * for the specified chain matches the input [stepValue]
      * Note that in order to ensure that [onChangeAtStep] to work properly you should  also
-     * define one of the input fields of the selector itself as the [StepSequence] selected by the
-     * [selectorSequence]
+     * define one of the input fields of the selector itself as the [StepInSequence] selected by the
+     * [stepInSequenceSelector]
      */
-    fun onChangeAtStep(state:S, selectorSequence: S.() -> StepSequence, stepValue:Int,
+    fun onChangeAtStep(state:S, stepInSequenceSelector: S.() -> StepInSequence, stepValue:Int,
                        blockfn: (O) -> Unit) {
-        if(state.selectorSequence().curstep==stepValue) getIfChangedIn(state)?.let(blockfn)
+        if(state.stepInSequenceSelector().curstep==stepValue) getIfChangedIn(state)?.let(blockfn)
     }
 
     /**
      * same as [onChangeAtStep], but trigger not only when step is exactly as specified but also for
      * all later step value
      */
-    fun onChangeAtStepOrLater(state:S, selectorSequence: S.() -> StepSequence, minStepValue:Int,
+    fun onChangeAtStepOrLater(state:S, stepInSequenceSelector: S.() -> StepInSequence, minStepValue:Int,
                               blockfn: (O) -> Unit) {
-        if(state.selectorSequence().curstep>=minStepValue) getIfChangedIn(state)?.let(blockfn)
+        if(state.stepInSequenceSelector().curstep>=minStepValue) getIfChangedIn(state)?.let(blockfn)
     }
 
     /**
      * same as [onChangeAtStepOrLater] with minstepValue=0
      */
-    fun onChangeAtStepsStarted(state:S, selectorSequence: S.() -> StepSequence,
-                              blockfn: (O) -> Unit) {
-        if(state.selectorSequence().curstep>=0) getIfChangedIn(state)?.let(blockfn)
+    fun onChangeAtStepsStarted(state:S, stepInSequenceSelector: S.() -> StepInSequence,
+                               blockfn: (O) -> Unit) {
+        if(state.stepInSequenceSelector().curstep>=0) getIfChangedIn(state)?.let(blockfn)
     }
 
     /**
      * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence start
      * when browsing code
      */
-    fun onChangeAtStepFirst(state:S, selectorSequence: S.() -> StepSequence,
+    fun onChangeAtStepFirst(state:S, stepInSequenceSelector: S.() -> StepInSequence,
                             blockfn: (O) -> Unit) {
-        if(state.selectorSequence().curstep==0) getIfChangedIn(state)?.let(blockfn)
+        if(state.stepInSequenceSelector().curstep==0) getIfChangedIn(state)?.let(blockfn)
     }
     /**
      * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence end
      * when browsing code
      */
-    fun onChangeAtStepsCompleted(state:S, selectorSequence: S.() -> StepSequence,
+    fun onChangeAtStepsCompleted(state:S, stepInSequenceSelector: S.() -> StepInSequence,
                                  blockfn: (O) -> Unit) {
-        if(state.selectorSequence().isCompleted()) getIfChangedIn(state)?.let(blockfn)
+        if(state.stepInSequenceSelector().isCompleted()) getIfChangedIn(state)?.let(blockfn)
     }
 
 }
