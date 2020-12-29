@@ -185,14 +185,6 @@ abstract class AbstractSelector<S, O> : Selector<S, O> {
     }
 
     /**
-     * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence start
-     * when browsing code
-     */
-    fun onChangeAtStepFirst(state:S, stepInSequenceSelector: S.() -> StepInSequence,
-                            blockfn: (O) -> Unit) {
-        if(state.stepInSequenceSelector().curstep==0) getIfChangedIn(state)?.let(blockfn)
-    }
-    /**
      * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence end
      * when browsing code
      */

@@ -17,7 +17,7 @@ class StepInSequence(val nsteps:Int=1000, val curstep:Int=-1) {
     /**
      * use this method in State reducer, to restart the [StepInSequence]
      */
-    fun restarted(startStep:Int=-1) = StepInSequence(nsteps,startStep)
+    fun restarted(startStep:Int=0) = StepInSequence(nsteps,startStep)
     /**
      * use this method in State reducer, to set the  [StepInSequence] as completed
      */
@@ -26,6 +26,7 @@ class StepInSequence(val nsteps:Int=1000, val curstep:Int=-1) {
      * use this method in State reducer, to advance to next step in the [StepInSequence]
      */
     fun withNextStep() = StepInSequence(nsteps,(curstep+1).coerceAtMost(nsteps))
+    fun withStep(newstep:Int)=StepInSequence(nsteps,newstep.coerceAtMost(nsteps))
     fun isStarted() = curstep>=0
     fun isCompleted()= curstep==nsteps
     fun isRunning()= curstep>=0 && curstep<nsteps
