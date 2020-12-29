@@ -92,13 +92,46 @@ class InputField<S, I>(val fn: S.() -> I,override val equalityCheck: EqualityChe
  */
 interface Selector<S, O> : SelectorInput<S, O> {
     val recomputations: Long
-    fun isChanged(): Boolean
+}
+
+/**
+ * same as [AbstractSelector.onChangeIn], but as extension function of state:
+ * it checks if the specified selector value  is changed for the input state and if so, call [blockfn]
+ * with the updated selector value
+ */
+fun <S,O> S.whenChangeOf(selector:AbstractSelector<S,O>,blockfn: (O) -> Unit) {
+    selector.getIfChangedIn(this)?.let(blockfn)
+}
+
+/**
+ * abstract base class for all selectors
+ */
+abstract class AbstractSelector<S, O> : Selector<S, O> {
+    @JvmField protected var recomputationsLastChanged = 0L
+    @JvmField protected var _recomputations = 0L
+    override val recomputations: Long get() = _recomputations
+
     /**
      * by calling this method, you will force the next call to [getIfChangedIn] to succeed,
      * as if the actual value of the selector was changed, but no actual recomputation is performed
      */
-    fun signalChanged()
-    fun resetChanged()
+    fun signalChanged() {
+        ++_recomputations
+    }
+
+    fun isChanged(): Boolean = _recomputations != recomputationsLastChanged
+    fun resetChanged() {
+        recomputationsLastChanged = _recomputations
+    }
+
+
+    protected abstract val computeAndCount: (i: Array<out Any>) -> O
+    /**
+     * 'lazy' because computeandcount is abstract. Cannot reference to it before it is initialized in concrete selectors
+     * 'open' because we can provide a custom memoizer if needed
+     */
+    open val memoizer by lazy { computationMemoizer(computeAndCount) }
+
     fun getIfChangedIn(state: S): O? {
         val res = invoke(state)
         if (isChanged()) {
@@ -121,44 +154,52 @@ interface Selector<S, O> : SelectorInput<S, O> {
     fun onChangeIn(state: S, condition:Boolean,blockfn: (O) -> Unit) {
         if(condition) getIfChangedIn(state)?.let(blockfn)
     }
-}
-
-/**
- * same as [Selector.onChangeIn], but as extension function of state:
- * it checks if the specified selector value  is changed for the input state and if so, call [blockfn]
- * with the updated selector value
- */
-fun <S,O> S.whenChangeOf(selector:Selector<S,O>,blockfn: (O) -> Unit) {
-    selector.getIfChangedIn(this)?.let(blockfn)
-}
-
-/**
- * abstract base class for all selectors
- */
-abstract class AbstractSelector<S, O> : Selector<S, O> {
-    @JvmField protected var recomputationsLastChanged = 0L
-    @JvmField protected var _recomputations = 0L
-    override val recomputations: Long get() = _recomputations
 
     /**
-     * see documentation to [Selector.signalChanged]
+     * same as regular [onChangeIn] but don't activate selector unless [StepSequence.curstep]
+     * for the specified chain matches the input [stepValue]
+     * Note that in order to ensure that [onChangeAtStep] to work properly you should  also
+     * define one of the input fields of the selector itself as the [StepSequence] selected by the
+     * [selectorSequence]
      */
-    override fun signalChanged() {
-        ++_recomputations
+    fun onChangeAtStep(state:S, selectorSequence: S.() -> StepSequence, stepValue:Int,
+                       blockfn: (O) -> Unit) {
+        if(state.selectorSequence().curstep==stepValue) getIfChangedIn(state)?.let(blockfn)
     }
 
-    override fun isChanged(): Boolean = _recomputations != recomputationsLastChanged
-    override fun resetChanged() {
-        recomputationsLastChanged = _recomputations
-    }
-
-
-    protected abstract val computeAndCount: (i: Array<out Any>) -> O
     /**
-     * 'lazy' because computeandcount is abstract. Cannot reference to it before it is initialized in concrete selectors
-     * 'open' because we can provide a custom memoizer if needed
+     * same as [onChangeAtStep], but trigger not only when step is exactly as specified but also for
+     * all later step value
      */
-    open val memoizer by lazy { computationMemoizer(computeAndCount) }
+    fun onChangeAtStepOrLater(state:S, selectorSequence: S.() -> StepSequence, minStepValue:Int,
+                              blockfn: (O) -> Unit) {
+        if(state.selectorSequence().curstep>=minStepValue) getIfChangedIn(state)?.let(blockfn)
+    }
+
+    /**
+     * same as [onChangeAtStepOrLater] with minstepValue=0
+     */
+    fun onChangeAtStepsStarted(state:S, selectorSequence: S.() -> StepSequence,
+                              blockfn: (O) -> Unit) {
+        if(state.selectorSequence().curstep>=0) getIfChangedIn(state)?.let(blockfn)
+    }
+
+    /**
+     * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence start
+     * when browsing code
+     */
+    fun onChangeAtStepFirst(state:S, selectorSequence: S.() -> StepSequence,
+                            blockfn: (O) -> Unit) {
+        if(state.selectorSequence().curstep==0) getIfChangedIn(state)?.let(blockfn)
+    }
+    /**
+     * equivalent to [onChangeAtStep] with stepValue=0, make it easier to identify sequence end
+     * when browsing code
+     */
+    fun onChangeAtStepsCompleted(state:S, selectorSequence: S.() -> StepSequence,
+                                 blockfn: (O) -> Unit) {
+        if(state.selectorSequence().isCompleted()) getIfChangedIn(state)?.let(blockfn)
+    }
 
 }
 
