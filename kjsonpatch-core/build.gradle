@@ -3,6 +3,29 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
+//disable warnings when using coroutines
+//kotlin { experimental { coroutines 'enable' } }
+
+compileKotlin {
+//        sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = sourceCompatibility_
+    //I want this library to be linkable from android projects
+//        targetCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = targetCompatibility_
+    //I want this library to be linkable from android projects
+//        kotlinOptions.jvmTarget = "1.8"
+}
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+}
+javadoc.dependsOn dokka
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+}
+
 dependencies {
     implementation libraries.gson
 }
