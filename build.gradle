@@ -14,9 +14,8 @@ ext {
 
 allprojects {
    repositories {
-       jcenter() //for coroutines
-//       mavenCentral()
        google()
+       mavenCentral()
        maven { url "https://jitpack.io" }
    }
     configurations {
@@ -130,9 +129,8 @@ configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-de
 }
 buildscript {
     repositories {
-        jcenter()
         google()
-//        mavenCentral()
+        mavenCentral()
     }
     rootProject.ext.versions = [
             kotlin: '1.4.10',
@@ -141,7 +139,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:4.1.3'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"

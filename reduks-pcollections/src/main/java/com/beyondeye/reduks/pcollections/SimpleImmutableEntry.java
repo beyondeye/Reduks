@@ -8,7 +8,7 @@ import java.util.Map.Entry;
  * (Taken from Java 6 code, so pcollections can be Java 5-compatible.)
  * <p>
  * An Entry maintaining an immutable key and value.  This class
- * does not support method <tt>setValue</tt>.  This class may be
+ * does not support method setValue.  This class may be
  * convenient in methods that return thread-safe snapshots of
  * key-value mappings.
  *

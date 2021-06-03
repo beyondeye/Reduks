@@ -1,7 +1,7 @@
 allprojects {
     repositories {
         mavenLocal()
-        jcenter()
+        mavenCentral()
         maven {
             url 'https://plugins.gradle.org/m2/'
         }
@@ -17,9 +17,9 @@ ext.versions = [
         targetSdk            : 29,
         compileSdk           : 29,
 //        buildTools           : '26.0.2',
-        kotlin               : '1.4.10',
+        kotlin               : '1.5.10',
         //https://github.com/Kotlin/kotlinx.coroutines/releases
-        kotlin_coroutines    : '1.3.9',
+        kotlin_coroutines    : '1.5.0',
 
         // Reactive.
         rxJava               : '1.3.6',
@@ -68,7 +68,7 @@ ext.libraries = [
 
         // Others.
         //https://github.com/google/gson/releases
-        gson                    : "com.google.code.gson:gson:2.8.6",
+        gson                    : "com.google.code.gson:gson:2.8.7",
         kotlinStdLib            : "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin",
         kotlinCoroutinesCore    : "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.kotlin_coroutines",
         kotlinCoroutinesAndroid : "org.jetbrains.kotlinx:kotlinx-coroutines-android:$versions.kotlin_coroutines",
