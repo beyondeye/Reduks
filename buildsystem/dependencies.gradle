@@ -55,10 +55,15 @@ ext.libraries = [
         supportAnnotations      : "androidx.annotation:annotation:1.1.0",
         supportViewPager        : "androidx.viewpager:viewpager:1.0.0",
         //https://github.com/material-components/material-components-android/releases
-        supportDesign           : "com.google.android.material:material:1.1.0",
-        //https://developer.android.com/jetpack/androidx/releases/lifecycle
-        archExtensions              : "androidx.lifecycle:lifecycle-extensions:2.2.0",
-
+        supportMaterial           : "com.google.android.material:material:1.1.0",
+        //lifecycle: see https://developer.android.com/jetpack/androidx/releases/lifecycle
+        //latest updated deps on 3/6/2021
+        archLifecycleLiveData        : "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1",
+        archLifecycleProcess         : "androidx.lifecycle:lifecycle-process:2.3.1",
+        archLifecycleViewModel        : "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1",
+        archLifecycleViewModelSavedState        : "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.1",
+        archLifecycleRunTime        : "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1",
+        archLifecycleCompiler       : "androidx.lifecycle:lifecycle-compiler:2.3.1",
         //dario libs
         kjsonpatch             : "com.github.beyondeye:kjsonpatch:0.3.22",
 

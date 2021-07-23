@@ -12,6 +12,6 @@ dependencies {
     implementation project(':reduks-saga')
 //    implementation project(':reduks-rx')
     implementation libraries.supportAppCompat
-    implementation libraries.supportDesign
+    implementation libraries.supportMaterial
 //    implementation "com.android.support:design:$support_version"
 }
