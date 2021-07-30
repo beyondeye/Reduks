@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 

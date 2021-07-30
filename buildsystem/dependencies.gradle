@@ -17,7 +17,7 @@ ext.versions = [
         targetSdk            : 29,
         compileSdk           : 29,
 //        buildTools           : '26.0.2',
-        kotlin               : '1.5.10',
+        kotlin               : '1.5.21',
         //https://github.com/Kotlin/kotlinx.coroutines/releases
         kotlin_coroutines    : '1.5.0',
 

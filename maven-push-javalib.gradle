@@ -1,14 +1,12 @@
-apply plugin: 'maven'
+// see https://developer.android.com/studio/build/maven-publish-plugin
+// see https://docs.gradle.org/current/userguide/publishing_maven.html
+// see https://docs.gradle.org/current/userguide/publishing_setup.html#sec:basic_publishing
+// see https://docs.gradle.org/current/userguide/publishing_customization.html#sec:publishing_custom_artifacts_to_maven
 
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            group GROUP_MAVEN_PUSH
-            artifactId POM_ARTIFACT_ID
-            version VERSION_NAME
-        }
-    }
-}
+//apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
+
+
 
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
@@ -29,7 +27,86 @@ def getDestUrl() {
       return "s3://plensee-maven/android/snapshots"
   }
 }
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn:javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task kotlinJavadocJar(type: Jar, dependsOn:javadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
+}
+
+
+artifacts {
+    archives sourcesJar
+    archives kotlinJavadocJar
+}
+
+
 afterEvaluate { project ->
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId GROUP_MAVEN_PUSH
+                artifactId POM_ARTIFACT_ID
+                version VERSION_NAME
+
+                from components.java
+                artifact sourcesJar
+                //artifact dokkaJar
+                pom {
+                    name = POM_NAME
+                    description = POM_DESCRIPTION
+//                    url = 'http://www.example.com/library'
+//                    properties = [
+//                            myProp: "value",
+//                            "prop.with.dots": "anotherValue"
+//                    ]
+//                    licenses {
+//                        license {
+//                            name = 'The Apache License, Version 2.0'
+//                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                        }
+//                    }
+//                    developers {
+//                        developer {
+//                            id = 'johnd'
+//                            name = 'John Doe'
+//                            email = 'john.doe@example.com'
+//                        }
+//                    }
+//                    scm {
+//                        connection = 'scm:git:git://example.com/my-library.git'
+//                        developerConnection = 'scm:git:ssh://example.com/my-library.git'
+//                        url = 'http://example.com/my-library/'
+//                    }
+
+//                    def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+//                    def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+//                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                }
+
+            }
+        }
+        repositories {
+            maven {
+                name = 'myRepo'
+//                url = "file:///" + getOutputDir() ////can also be used to copy to local file
+//                url = getDestUrl() //for copying directly to S3
+                def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+                def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
+    }
+    /*
     uploadArchives {
         repositories {
             mavenDeployer {
@@ -48,30 +125,13 @@ afterEvaluate { project ->
             }
         }
     }
-    task sourcesJar(type: Jar, dependsOn:classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn:javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
-
-    task kotlinJavadocJar(type: Jar, dependsOn:javadoc) {
-        classifier = 'javadoc'
-        from "$buildDir/javadoc"
-    }
+    */
 
 
-    artifacts {
-        archives sourcesJar
-        archives kotlinJavadocJar
-    }
 
     task copyToS3(type: Exec) {
         commandLine 'aws', 's3', 'cp', '--recursive', getOutputDir(), getDestUrl()
     }
 
-    copyToS3.dependsOn uploadArchives
+    copyToS3.dependsOn publish
 }

@@ -1,6 +1,6 @@
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 // disable warnings when using coroutines

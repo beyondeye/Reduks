@@ -1,15 +1,14 @@
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'maven'
+// see https://developer.android.com/studio/build/maven-publish-plugin
+// see https://docs.gradle.org/current/userguide/publishing_maven.html
+// see https://docs.gradle.org/current/userguide/publishing_setup.html#sec:basic_publishing
+// see https://docs.gradle.org/current/userguide/publishing_customization.html#sec:publishing_custom_artifacts_to_maven
 
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            group GROUP_MAVEN_PUSH
-            artifactId POM_ARTIFACT_ID
-            version VERSION_NAME
-        }
-    }
-}
+
+//apply plugin: 'com.github.dcendents.android-maven'
+
+apply plugin: 'maven-publish'
+
+
 
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
@@ -30,7 +29,109 @@ def getDestUrl() {
       return "s3://plensee-maven/android/snapshots"
   }
 }
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += configurations.javadocDeps
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
+    failOnError false //don't stop build if error in building javadocs
+}
+
+
+
+task dokkaJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from dokka.outputDirectory
+}
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.source
+}
+
+artifacts {
+    archives dokkaJar
+    archives sourcesJar
+}
+
 afterEvaluate { project ->
+
+    publishing {
+        publications {
+            debug(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.debug
+                artifact sourcesJar
+//                artifact dokkaJar
+
+                groupId GROUP_MAVEN_PUSH
+                artifactId POM_ARTIFACT_ID
+                version VERSION_NAME
+
+                //artifact sourcesJar
+                //artifact dokkaJar
+                pom {
+                    name = POM_NAME
+                    description = POM_DESCRIPTION
+              }
+            }
+
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+                artifact sourcesJar
+
+                groupId GROUP_MAVEN_PUSH
+                artifactId POM_ARTIFACT_ID
+                version VERSION_NAME
+
+                //artifact sourcesJar
+                //artifact dokkaJar
+                pom {
+                    name = POM_NAME
+                    description = POM_DESCRIPTION
+//                    url = 'http://www.example.com/library'
+//                    properties = [
+//                            myProp: "value",
+//                            "prop.with.dots": "anotherValue"
+//                    ]
+//                    licenses {
+//                        license {
+//                            name = 'The Apache License, Version 2.0'
+//                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                        }
+//                    }
+//                    developers {
+//                        developer {
+//                            id = 'johnd'
+//                            name = 'John Doe'
+//                            email = 'john.doe@example.com'
+//                        }
+//                    }
+//                    scm {
+//                        connection = 'scm:git:git://example.com/my-library.git'
+//                        developerConnection = 'scm:git:ssh://example.com/my-library.git'
+//                        url = 'http://example.com/my-library/'
+//                    }
+
+//                    def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+//                    def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+//                    url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = 'myRepo'
+//                url = "file:///" + getOutputDir() ////can also be used to copy to local file
+//                url = getDestUrl() //for copying directly to S3
+                def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+                def snapshotsRepoUrl = layout.buildDirectory.dir('repos/snapshots')
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            }
+        }
+    }
+    /*
     uploadArchives {
         repositories {
             mavenDeployer {
@@ -49,30 +150,8 @@ afterEvaluate { project ->
             }
         }
     }
-    task androidJavadocs(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += configurations.javadocDeps
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-        exclude '**/BuildConfig.java'
-        exclude '**/R.java'
-        failOnError false //don't stop build if error in building javadocs
-    }
+    */
 
-
-
-    task dokkaJar(type: Jar, dependsOn: dokka) {
-        classifier = 'javadoc'
-        from dokka.outputDirectory
-    }
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from android.sourceSets.main.java.source
-    }
-
-    artifacts {
-        archives dokkaJar
-        archives sourcesJar
-    }
 
     // build a jar with javadoc
 //    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
@@ -95,5 +174,5 @@ afterEvaluate { project ->
         commandLine 'aws', 's3', 'cp', '--recursive', getOutputDir(), getDestUrl()
     }
 
-    copyToS3.dependsOn uploadArchives
+    copyToS3.dependsOn publish
 }
