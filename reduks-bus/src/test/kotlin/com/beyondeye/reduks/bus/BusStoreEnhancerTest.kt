@@ -26,20 +26,25 @@ val testReducerNBD = ReducerFn<TestStateWithoutBusData> { state, action ->
         else -> state
     }
 }
+val ctx_TestStateWithBusData=ReduksContext("ctx1")
 data class TestStateWithBusData(val a:Int, val b:Int, override val busData: BusData = BusData.empty): StateWithBusData {
     override fun copyWithNewBusData(newBusData: BusData) = copy(busData=newBusData)
 }
+
+val ctx_TestStateWithoutBusData=ReduksContext("ctx2")
 data class TestStateWithoutBusData(val a:Int,val b:Int)
 
 val initialTestState= TestStateWithBusData(0,0)
 val initialTestStateNBD=TestStateWithoutBusData(0,0)
 
 val mdef1= ModuleDef(
+        ctx_TestStateWithBusData,
         storeCreator = SimpleStore.Creator<TestStateWithBusData>().enhancedWith(BusStoreEnhancer()),
         initialState = initialTestState,
         stateReducer = testReducer
 )
 val mdef2= ModuleDef(
+        ctx_TestStateWithoutBusData,
         storeCreator = SimpleStore.Creator<TestStateWithoutBusData>(),
         initialState = initialTestStateNBD,
         stateReducer = testReducerNBD
@@ -277,7 +282,7 @@ class BusStoreEnhancerTest {
         val mr = ReduksModule(multidef)
         assert(mr.busStoreSubscriptionsByTag.size==0)
         //-------WHEN
-        val busStore=mr.subStore<TestStateWithBusData>() as? BusStore
+        val busStore=mr.subStore<TestStateWithBusData>(ctx_TestStateWithBusData) as? BusStore
         //-------THEN
         assert(busStore!=null)
         //------AND WHEN

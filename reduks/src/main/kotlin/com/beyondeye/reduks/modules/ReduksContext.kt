@@ -76,17 +76,23 @@ open class ReduksContext(val moduleId:String,val modulePath:List<String>?=null):
 
 
     companion object {
+
         /**
          * default ReduksContext for some state type is the state class simple name
+         *
          */
+        @Deprecated("don't use default() context, explicitely define context with constructor with context name",level = DeprecationLevel.ERROR)
         inline fun<reified S:Any> default() = ReduksContext(defaultModuleId<S>())
+
         /**
          * default ReduksContext for some state type is the state class simple name and
          * the action type for that context
          *
          */
+        @Deprecated("don't use defaultTyped() context, explicitely define context with constructor with context name",level = DeprecationLevel.ERROR)
         inline fun<reified S:Any,ActionType:Any> defaultTyped() =ReduksContextTyped<ActionType>(defaultModuleId<S>())
 
+        @Deprecated("don't use defaultModuleId(), explicitely define it",level = DeprecationLevel.WARNING)
         inline fun<reified S:Any> defaultModuleId() =S::class.java.simpleName
     }
 }

@@ -39,11 +39,18 @@ abstract class MultiStore(@JvmField val ctx: ReduksContext) {
         return selectedStore.dispatch(action.action)
     }
 }
-inline fun <reified SB : Any> MultiStore.subStore_(subctx: ReduksContext?):Store<SB>? {
+
+/**
+ * note that undefined (null) subctx is no more allowed, because
+ * [ReduksContext.defaultModuleId] is deprecated
+ */
+inline fun <reified SB : Any> MultiStore.subStore_(subctx: ReduksContext):Store<SB>? {
     val res: Store<out Any>? =
-            if (subctx == null) {
-                storeMap[ReduksContext.defaultModuleId<SB>()]
-            } else if (subctx.hasEmptyPath()) {
+//            if (subctx == null) {
+//                storeMap[ReduksContext.defaultModuleId<SB>()]
+//            }
+//            else
+                if (subctx.hasEmptyPath()) {
                 storeMap[subctx.moduleId]
             } else {
                 lateinit var lst: MultiStore

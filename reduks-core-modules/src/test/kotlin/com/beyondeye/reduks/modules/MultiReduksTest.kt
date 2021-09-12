@@ -107,9 +107,11 @@ class MultiReduksTest {
     var nStateChanges1 = 0
     var nStateChangeCalls1 = 0
     val ctx1 = ReduksContext("m1")
-    val ctx1Default= ReduksContext.default<TestState1>()
+    //Todo: now that default module context is deprecated this test should be rewritted
+    val ctx1Default= ReduksContext("ts1") //ReduksContext.default<TestState1>()
     val ctx2 = ReduksContext("m2")
-    val ctx2Default= ReduksContext.default<TestState2>()
+    //Todo: now that default module context is deprecated this test should be rewritted
+    val ctx2Default= ReduksContext("ts2") //ReduksContext.default<TestState2>()
     val mdef1 = ReduksModule.Def<TestState1>(
             ctx = ctx1,
             storeCreator = SimpleStore.Creator(),
@@ -119,6 +121,7 @@ class MultiReduksTest {
             subscriberBuilder = sub1
     )
     val mdef1DefaultCtx = ModuleDef<TestState1>(
+            ctx1Default,
             storeCreator = SimpleStore.Creator(),
             initialState = TestState1(),
             startAction = TestAction1("start1"),
@@ -136,6 +139,7 @@ class MultiReduksTest {
             subscriberBuilder = sub2
     )
     val mdef2DefaultCtx = ModuleDef<TestState2>(
+            ctx=ctx2Default,
             storeCreator = SimpleStore.Creator(),
             initialState = TestState2(),
             startAction = TestAction2("start2"),
@@ -209,8 +213,8 @@ class MultiReduksTest {
     fun test_multireduks2_from_multidefNoCtx_dispatch() {
         val multidef=ReduksModule.MultiDef(mdef1DefaultCtx, mdef2DefaultCtx)
         val mr = ReduksModule(multidef)
-        assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("start1") //check that start action dispatched
-        assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("start2") //check that start action dispatched
+        assertThat(mr.subState<TestState1>(ctx1Default)!!.lastActionType).isEqualTo("start1") //check that start action dispatched
+        assertThat(mr.subState<TestState2>(ctx2Default)!!.lastActionType).isEqualTo("start2") //check that start action dispatched
 //        assertThat(nStateChanges2).isEqualTo(1) //start action
 //        assertThat(nStateChangeCalls2).isEqualTo(1) //start action
         //-----AND WHEN
@@ -220,8 +224,8 @@ class MultiReduksTest {
         nStateChangeCalls2=0
         mr.dispatch(ctx2Default/TestAction2("2"))
         //-----THEN
-        assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("start1") //check that start action dispatched
-        assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
+        assertThat(mr.subState<TestState1>(ctx1Default)!!.lastActionType).isEqualTo("start1") //check that start action dispatched
+        assertThat(mr.subState<TestState2>(ctx2Default)!!.lastActionType).isEqualTo("2")
         assertThat(nStateChanges1).isEqualTo(0)
         assertThat(nStateChangeCalls1).isEqualTo(0)
         assertThat(nStateChanges2).isEqualTo(1)
@@ -229,8 +233,8 @@ class MultiReduksTest {
         //-----AND WHEN
         mr.dispatch(ctx1Default/TestAction1("1"))
         //------THEN
-        assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("1") //check that start action dispatched
-        assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
+        assertThat(mr.subState<TestState1>(ctx1Default)!!.lastActionType).isEqualTo("1") //check that start action dispatched
+        assertThat(mr.subState<TestState2>(ctx2Default)!!.lastActionType).isEqualTo("2")
 
         assertThat(nStateChangeCalls1).isEqualTo(1) //start action and one additional dispatch
         assertThat(nStateChanges1).isEqualTo(1)
@@ -241,8 +245,8 @@ class MultiReduksTest {
         //-----AND WHEN
         mr.dispatch(ctx2Default/"unknown action")
         //-----THEN
-        assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("1")
-        assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
+        assertThat(mr.subState<TestState1>(ctx1Default)!!.lastActionType).isEqualTo("1")
+        assertThat(mr.subState<TestState2>(ctx2Default)!!.lastActionType).isEqualTo("2")
         assertThat(nStateChanges1).isEqualTo(1)
         assertThat(nStateChangeCalls1).isEqualTo(1)
         assertThat(nStateChanges2).isEqualTo(1)
@@ -287,8 +291,8 @@ class MultiReduksTest {
         //-----AND WHEN
         mr.dispatch(ctx2Default/"unknown action")
         //-----THEN
-        assertThat(mr.subState<TestState1>()!!.lastActionType).isEqualTo("1")
-        assertThat(mr.subState<TestState2>()!!.lastActionType).isEqualTo("2")
+        assertThat(mr.subState<TestState1>(ctx1Default)!!.lastActionType).isEqualTo("1")
+        assertThat(mr.subState<TestState2>(ctx2Default)!!.lastActionType).isEqualTo("2")
         assertThat(nStateChanges1).isEqualTo(1)
         assertThat(nStateChangeCalls1).isEqualTo(1)
         assertThat(nStateChanges2).isEqualTo(1)

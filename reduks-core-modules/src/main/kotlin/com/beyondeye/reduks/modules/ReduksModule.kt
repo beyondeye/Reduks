@@ -4,9 +4,10 @@ import com.beyondeye.reduks.*
 
 /**
  * a builder function for [ReduksModule.Def] that set the context to the default context for the state
+ * NOTE that [ctx] must be always specified, because [ReduksContext.default] is deprecated
  */
 inline fun <reified S:Any> ModuleDef(
-        ctx: ReduksContext = ReduksContext.default<S>(),
+        ctx: ReduksContext, // = ReduksContext.default<S>(),
         storeCreator:StoreCreator<S>,
         initialState: S,
         startAction: Any=INIT(),

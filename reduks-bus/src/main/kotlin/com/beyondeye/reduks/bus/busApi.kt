@@ -6,6 +6,11 @@ import com.beyondeye.reduks.StoreSubscription
 import com.beyondeye.reduks.modules.MultiStore
 //--------------------
 //some basic utility extension methods
+/**
+ * note that using BusDataType::class.java.name as key should be safe also when using something like proguard
+ * because the full qualified class name should be unique anyway
+ * see https://stackoverflow.com/questions/15202997/what-is-the-difference-between-canonical-name-simple-name-and-class-name-in-jav
+ */
 inline fun <reified BusDataType:Any> Store<out Any>.busDataKey(key:String?=null):String =key?:BusDataType::class.java.name
 inline fun <reified BusDataType:Any> Reduks<out Any>.busDataKey(key:String?=null):String =store.busDataKey<BusDataType>(key)
 
@@ -87,7 +92,7 @@ inline fun <reified BusDataType:Any> Store<out Any>.addBusDataHandler(key:String
     return getBusStore()?.addBusDataHandler(key,fn)
 }
 
-inline fun <reified BusDataType:Any> BusStore<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription?{
+inline fun <reified BusDataType:Any> BusStore<out StateWithBusData>.addBusDataHandler(key:String?=null, noinline fn: (bd: BusDataType?) -> Unit) : StoreSubscription{
     return addBusDataHandler_busstore<BusDataType>(this.busDataKey<BusDataType>(key),fn)
 }
 
