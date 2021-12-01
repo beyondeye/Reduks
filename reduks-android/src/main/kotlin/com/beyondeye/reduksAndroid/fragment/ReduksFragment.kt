@@ -24,6 +24,7 @@ abstract class ReduksFragment<S: StateWithFragmentStatusData>:Fragment() {
      */
     override fun onDestroyView() {
         reduksUnsubscribe()
+        reduksResetFragmentCurAtPos()
         super.onDestroyView()
     }
 
@@ -75,7 +76,20 @@ abstract class ReduksFragment<S: StateWithFragmentStatusData>:Fragment() {
 
 /**
  * mark this fragment as the current fragment shown at the position defined by [ReduksFragment.positionTag]
+ * you should add call to this method in your overridden [ReduksFragment.onViewCreated]
  */
 fun <S: StateWithFragmentStatusData> ReduksFragment<S>.reduksSetFragmentCurAtPos() {
     reduks?.setFragmentCurAtPos(tag,positionTag)
+}
+/**
+ * remove this fragment as the current fragment shown at the position defined by [ReduksFragment.positionTag]
+ * if it is currently defined as such
+ * this method is automatically called in [ReduksFragment.onDestroyView]
+ */
+fun <S: StateWithFragmentStatusData> ReduksFragment<S>.reduksResetFragmentCurAtPos() {
+    if(positionTag.isEmpty()) return
+    val ftag=tag ?:return
+    if(ftag.isEmpty()) return
+    if(reduks?.fragmentCurAtPos(positionTag)!=tag) return
+    reduks?.resetFragmentCurAtPos(positionTag)
 }

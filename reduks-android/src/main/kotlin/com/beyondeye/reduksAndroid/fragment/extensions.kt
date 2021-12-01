@@ -84,7 +84,7 @@ fun  Reduks<out Any>.fragmentActiveStatus(fragmentTag:String):FragmentActiveStat
 /**
  * return the fragment tag for the [positionTag] as defined in [ReduksFragment.positionTag]
  */
-fun  Reduks<out Any>.fragmentCurAtPos(positionTag:String):String?=store.fragmentCurAtPos(positionTag)
+fun  Reduks<out Any>.fragmentCurAtPos(positionTag:String):String=store.fragmentCurAtPos(positionTag)
 
 //-----------
 fun  MultiStore.setFragmentActiveStatus(fragmentTag:String, fragmentStatus:FragmentActiveStatus) {
@@ -125,6 +125,9 @@ fun  Reduks<out Any>.setFragmentActiveStatus(fragmentTag:String?, newStatus: Fra
 fun  Reduks<out Any>.setFragmentCurAtPos( newfragmentTag:String?,positionTag: String) {
     requireFragmentTagNotNull(newfragmentTag)
     store.setFragmentCurAtPos(newfragmentTag!!,positionTag)
+}
+fun  Reduks<out Any>.resetFragmentCurAtPos(positionTag: String) {
+    store.setFragmentCurAtPos("",positionTag)
 }
 //--------------------
 //some general utility extension methods
