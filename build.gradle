@@ -133,7 +133,7 @@ buildscript {
         mavenCentral()
     }
     rootProject.ext.versions = [
-            kotlin: '1.5.30',
+            kotlin: '1.6.10',
             dokka: '0.10.1'
     ]
 
