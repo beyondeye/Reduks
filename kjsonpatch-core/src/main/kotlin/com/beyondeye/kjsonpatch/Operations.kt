@@ -34,7 +34,7 @@ internal open class Operations {
             TEST to TEST_name)
 
     fun opFromName(rfcName: String): Int {
-        val res=OPS.get(rfcName.toLowerCase())
+        val res=OPS.get(rfcName.lowercase())
         if(res==null) throw InvalidJsonPatchException("unknown / unsupported operation $rfcName")
         return res
     }
