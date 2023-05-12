@@ -16,6 +16,7 @@ import java.util.concurrent.CancellationException
  * NOTE: [root_scope] is assumed be a [supervisorScope] so that if some its children fails, it is not automatically cancelled, see coroutine docs
  * Created by daely on 12/15/2017.
  */
+@OptIn(ObsoleteCoroutinesApi::class)
 class SagaMiddleWare<S:Any>(store_:Store<S>, parent_scope: CoroutineScope, val sagaMiddlewareDispatcher:CoroutineDispatcher= Dispatchers.Default) : Middleware<S> {
     private val dispatcherActor: SendChannel<Any>
     private val incomingActionsDistributionActor: SendChannel<Any>
@@ -119,8 +120,8 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, parent_scope: CoroutineScope, val s
             parentSagaScope = CoroutineScope(parentSagaCmdProcessor.linkedSagaJob!!+sagaMiddlewareDispatcher)
         }
         val newSagaRootScope:CoroutineScope
-        var newSagaInputActionsChannel: SendChannel<Any>?=null
-        var newSagaCmdProcessor: SagaCmdProcessor<S>?=null
+        var newSagaInputActionsChannel: SendChannel<Any>?
+        var newSagaCmdProcessor: SagaCmdProcessor<S>?
         when(childType) {
             /**
              * see [SagaYeldSingle.call]
@@ -301,7 +302,7 @@ class SagaMiddleWare<S:Any>(store_:Store<S>, parent_scope: CoroutineScope, val s
         }
     }
     private fun deleteSagaData(sagaName:String): SagaData<S, Any>? {
-        var deletedSaga: SagaData<S, Any>?=null
+        var deletedSaga: SagaData<S, Any>?
         synchronized(this) {
             val newSagaMap= sagaMap.toMutableMap()
             deletedSaga=newSagaMap.remove(sagaName)

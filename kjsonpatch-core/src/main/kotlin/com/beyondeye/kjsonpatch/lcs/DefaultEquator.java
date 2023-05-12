@@ -76,6 +76,10 @@ public class DefaultEquator<T> implements Equator<T>, Serializable {
         return o == null ? HASHCODE_NULL : o.hashCode();
     }
 
+    /**
+     *  TODO write docs
+     * @return INSTANCE
+     */
     private Object readResolve() {
         return INSTANCE;
     }

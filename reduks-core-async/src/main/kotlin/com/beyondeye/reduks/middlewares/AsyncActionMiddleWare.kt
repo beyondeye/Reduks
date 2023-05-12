@@ -3,6 +3,7 @@ package com.beyondeye.reduks.middlewares
 import com.beyondeye.reduks.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
@@ -35,6 +36,7 @@ sealed class AsyncAction(val payloadTypename:String): Action {
             AsyncAction(payloadTypename) {
         constructor(type:String, cscope: CoroutineScope,body: () -> PayloadType):this(type, cscope.async { body() })
         suspend fun asCompleted() = Completed(payloadTypename, promise.await())
+        @OptIn(ExperimentalCoroutinesApi::class)
         fun asFailed() = Failed(payloadTypename, promise.getCompletionExceptionOrNull()!!)
         /**
          * block until we get back the result from the promise

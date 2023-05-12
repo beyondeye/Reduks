@@ -1,6 +1,7 @@
 package com.beyondeye.reduks.middlewares.saga
 
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Created by daely on 12/20/2017.
@@ -43,6 +44,7 @@ interface SagaTask<R> {
 }
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SagaTaskFromDeferred<R>(override val name:String,val d:Deferred<R>): SagaTask<R> {
     override fun isRunning():Boolean = !d.isCompleted
 

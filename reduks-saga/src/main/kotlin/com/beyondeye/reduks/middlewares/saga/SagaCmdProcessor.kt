@@ -4,6 +4,7 @@ import com.beyondeye.reduks.Selector
 import com.beyondeye.reduks.SelectorBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
@@ -326,7 +327,7 @@ sealed class OpCode {
 //    class Cancelled:OpCode()
 }
 
-class SagaCmdProcessor<S:Any>(
+class SagaCmdProcessor<S:Any> @OptIn(ObsoleteCoroutinesApi::class) constructor(
         val sagaName:String,
         sagaMiddleWare: SagaMiddleWare<S>,
 

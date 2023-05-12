@@ -6,6 +6,7 @@ import com.beyondeye.reduks.logger.logformatter.LogFormatter
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import kotlin.math.roundToInt
 
 /**
  * Reduks Logger middleware
@@ -13,7 +14,6 @@ import com.google.gson.JsonParser
  */
 class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) : Middleware<S> {
     private val jsonDiffer = JsonDiff
-    private val jsonParser = JsonParser()
     /**
      * gson instance used to serialize reduks State and Actions
      */
@@ -27,7 +27,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
         val prevState = store.state
         if (!config.filter(prevState, action)) return nextDispatcher(action)
         val started = System.nanoTime()
-        val logEntry = LogEntry<S>(started, config.stateTransformer(prevState), action)
+        val logEntry = LogEntry(started, config.stateTransformer(prevState), action)
         logBuffer.add(logEntry)
 
         var returnedValue: Any? = null
@@ -125,8 +125,8 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
     }
 
     private fun diffLogger(prevStateJsonStr: String, nextStateJsonStr: String, collapsed: Boolean, diffStateLogLevel: Int) {
-        val prevStateJson=jsonParser.parse(prevStateJsonStr)
-        val nextStateJson=jsonParser.parse(nextStateJsonStr)
+        val prevStateJson=JsonParser.parseString(prevStateJsonStr)
+        val nextStateJson=JsonParser.parseString(nextStateJsonStr)
         val stateDiff_ = jsonDiffer.asJson(prevStateJson, nextStateJson)
         val stateDiff: JsonElement =
                 if (stateDiff_.size() == 1) //single element diff: print it, not the array
@@ -136,7 +136,7 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
                     stateDiff_
                 }
         if (collapsed) {
-            logger.groupCollapsed("state diff"+stateDiff.toString(), diffStateLogLevel)
+            logger.groupCollapsed("state diff$stateDiff", diffStateLogLevel)
         } else {
             val stateDiffPretty=logger.getPrettyPrintedJson("state diff",stateDiff.toString())
             logger.group(stateDiffPretty, diffStateLogLevel)
@@ -152,6 +152,6 @@ class ReduksLogger<S>(val config: ReduksLoggerConfig<S> = ReduksLoggerConfig()) 
     }
     companion object {
         //TODO move to Helper class
-        fun nano2ms(start:Long,end:Long):Double = Math.round((end - start) / 10000.0) / 100.0 //in ms rounded to max two decimals
+        fun nano2ms(start:Long,end:Long):Double = ((end - start) / 10000.0).roundToInt() / 100.0 //in ms rounded to max two decimals
     }
 }
