@@ -10,14 +10,13 @@ compileKotlin {
 //        targetCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = targetCompatibility_
     //I want this library to be linkable from android projects
-//        kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
+compileTestKotlin {
+    kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-javadoc.dependsOn dokka
 
+//the following would not be needed if we would move kotlin code to src/main/java
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
     test.java.srcDirs += 'src/test/kotlin'
@@ -33,7 +32,7 @@ dependencies {
 
     implementation project(':reduks-core-modules')
     implementation project(':reduks-pcollections')
-    apiElements project(':reduks-pcollections') //pcollections are part of reduks-bus api
+    api project(':reduks-pcollections') //pcollections are part of reduks-bus api
     implementation project(':reduks-core') //core dep is not exposed to consumer, that must include core explicitely
 
 }

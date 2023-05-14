@@ -3,24 +3,20 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
-//disable warnings when using coroutines
-//kotlin { experimental { coroutines 'enable' } }
-
 compileKotlin {
-//        sourceCompatibility = JavaVersion.VERSION_1_8
     sourceCompatibility = sourceCompatibility_
     //I want this library to be linkable from android projects
-//        targetCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = targetCompatibility_
     //I want this library to be linkable from android projects
-//        kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
+// important to set compileTestKotlin jvmTarget otherwise tests will not run
+// see https://kotlinlang.org/docs/gradle-configure-project.html#check-for-jvm-target-compatibility-of-related-compile-tasks
+compileTestKotlin {
+    kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-javadoc.dependsOn dokka
 
+//the following would not be needed if we would move kotlin code to src/main/java
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
     test.java.srcDirs += 'src/test/kotlin'
@@ -28,15 +24,11 @@ sourceSets {
 
 dependencies {
     implementation libraries.kotlinStdLib
-    apiElements libraries.kotlinStdLib
+    api libraries.kotlinStdLib
     testImplementation libraries.junit
     testImplementation libraries.assertJ
     testImplementation libraries.rxJava
 
-//    implementation libraries.kotlinCoroutinesCore
-//    apiElements libraries.kotlinCoroutinesCore //coroutines are part of the library api
-//    implementation libraries.kotlinCoroutinesAndroid
-//    apiElements libraries.kotlinCoroutinesAndroid //coroutines are part of the library api
 }
 
 

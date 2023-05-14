@@ -5,6 +5,7 @@ apply plugin: 'org.jetbrains.dokka' //make sure this is after apply plugin: 'com
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 android {
+    namespace 'com.beyondeye.reduks_logger'
     compileSdkVersion versions.compileSdk
 //        buildToolsVersion androidBuildToolsVersion
 
@@ -22,6 +23,7 @@ android {
     kotlinOptions {
         jvmTarget = kotlinJvmTarget
     }
+    //the following would not be needed if we would move kotlin code to src/main/java
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
@@ -29,10 +31,6 @@ android {
     lintOptions {
         abortOnError false
     }
-}
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/documentation"
 }
 
 repositories {

@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 33
     buildToolsVersion "24.0.2"
 
     defaultConfig {
         applicationId "com.beyondeye.reduks.example"
         minSdkVersion 16
-        targetSdkVersion 24
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -19,6 +19,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //the following would not be needed if we would move kotlin code to src/main/java
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }

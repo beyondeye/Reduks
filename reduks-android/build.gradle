@@ -5,17 +5,23 @@ apply plugin: 'org.jetbrains.dokka' //make sure this is AFTER apply plugin: 'com
 group = GROUP_MAVEN_PUSH //required by jitpack
 
 android {
-    compileSdkVersion versions.compileSdk
-//        buildToolsVersion androidBuildToolsVersion
+    namespace 'com.beyondeye.reduks_android'
+    compileSdk versions.compileSdk
 
     defaultConfig {
-        minSdkVersion versions.minSdk
-        targetSdkVersion versions.targetSdk
+        minSdk versions.minSdk
+        targetSdk versions.targetSdk
         versionCode = 1
         versionName VERSION_NAME
     }
 
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
 
+    }
     compileOptions {
         sourceCompatibility sourceCompatibility_
         targetCompatibility targetCompatibility_
@@ -23,6 +29,7 @@ android {
     kotlinOptions {
         jvmTarget = kotlinJvmTarget
     }
+    //the following would not be needed if we would move kotlin code to src/main/java
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
@@ -31,17 +38,17 @@ android {
         abortOnError false
     }
 }
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/documentation"
-    configuration {
-        //the following is needed for solving the following issue
-        //https://github.com/Kotlin/dokka/issues/213#issuecomment-528997962
-        noAndroidSdkLink = true
-        noJdkLink = true
-        noStdlibLink = true
-    }
-}
+//dokka {
+//    outputFormat = 'html'
+//    outputDirectory = "$buildDir/documentation"
+//    configuration {
+//        //the following is needed for solving the following issue
+//        //https://github.com/Kotlin/dokka/issues/213#issuecomment-528997962
+//        noAndroidSdkLink = true
+//        noJdkLink = true
+//        noStdlibLink = true
+//    }
+//}
 
 
 dependencies {

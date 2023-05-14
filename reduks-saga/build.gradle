@@ -7,20 +7,20 @@ group = GROUP_MAVEN_PUSH //required by jitpack
 //kotlin { experimental { coroutines 'enable' } }
 
 compileKotlin {
-//        sourceCompatibility = JavaVersion.VERSION_1_8
     sourceCompatibility = sourceCompatibility_
     //I want this library to be linkable from android projects
-//        targetCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = targetCompatibility_
     //I want this library to be linkable from android projects
-//        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/javadoc"
+// important to set compileTestKotlin jvmTarget otherwise tests will not run
+// see https://kotlinlang.org/docs/gradle-configure-project.html#check-for-jvm-target-compatibility-of-related-compile-tasks
+compileTestKotlin {
+    kotlinOptions.jvmTarget = kotlinJvmTarget
 }
-javadoc.dependsOn dokka
 
+
+//the following would not be needed if we would move kotlin code to src/main/java
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
     test.java.srcDirs += 'src/test/kotlin'
@@ -34,10 +34,10 @@ dependencies {
     testImplementation libraries.assertJ
 //    testImplementation libraries.rxJava
 
-    apiElements project(':reduks-core')
+    api project(':reduks-core')
     implementation project(':reduks-core')
     implementation libraries.kotlinCoroutinesCore
-    apiElements libraries.kotlinCoroutinesCore //coroutines are part of the library api
+    api libraries.kotlinCoroutinesCore //coroutines are part of the library api
     testImplementation project(':reduks-core-async')
    // implementation libraries.kotlinCoroutinesAndroid
    // apiElements libraries.kotlinCoroutinesAndroid

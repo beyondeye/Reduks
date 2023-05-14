@@ -4,10 +4,9 @@ apply plugin: 'org.jetbrains.dokka' //make sure this is after apply plugin: 'com
 //apply plugin: 'com.github.dcendents.android-maven'
 group = GROUP_MAVEN_PUSH //required by jitpack
 
-//disable warnings when using coroutines
-//kotlin { experimental { coroutines 'enable' } }
 
 android {
+    namespace 'com.beyondeye.reduks_async'
     compileSdkVersion versions.compileSdk
 //        buildToolsVersion androidBuildToolsVersion
 
@@ -25,8 +24,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = kotlinJvmTarget
     }
+    //the following would not be needed if we would move kotlin code to src/main/java
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
@@ -34,10 +34,6 @@ android {
     lintOptions {
         abortOnError false
     }
-}
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/documentation"
 }
 
 
