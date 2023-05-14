@@ -15,13 +15,14 @@
  }
 
 ext.versions = [
-        minSdk               : 24,
+        minSdk               : 18,
         targetSdk            : 33,
         compileSdk           : 33,
 //        buildTools           : '26.0.2',
         kotlin               : '1.8.20',
         dokka                : '1.8.10',
-        android_gradle_plugin: '7.4.2',
+        // see https://developer.android.com/build/releases/gradle-plugin
+        android_gradle_plugin: '8.0.1',
         //https://github.com/Kotlin/kotlinx.coroutines/releases
         kotlin_coroutines    : '1.7.1',
 

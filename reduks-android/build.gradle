@@ -37,6 +37,13 @@ android {
     lintOptions {
         abortOnError false
     }
+    // see https://developer.android.com/build/publish-library/configure-pub-variants
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 //dokka {
 //    outputFormat = 'html'

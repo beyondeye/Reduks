@@ -104,8 +104,9 @@ afterEvaluate { project ->
                 artifactId POM_ARTIFACT_ID
                 version VERSION_NAME
 
-                artifact sourcesJar
-                artifact javadocJar
+// artifacts are automatically configured by the   publishing {} block in android {} gradle block
+//                artifact sourcesJar
+//                artifact javadocJar
                 pom {
                     name = POM_NAME
                     description = POM_DESCRIPTION
