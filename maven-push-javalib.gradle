@@ -1,15 +1,18 @@
-// see https://developer.android.com/studio/build/maven-publish-plugin
+// maven publish configuration of a kotlin (non-android) library
+
 // see https://docs.gradle.org/current/userguide/publishing_maven.html
 // see https://docs.gradle.org/current/userguide/publishing_setup.html#sec:basic_publishing
 // see https://docs.gradle.org/current/userguide/publishing_customization.html#sec:publishing_custom_artifacts_to_maven
 
+
 //apply plugin: 'com.github.dcendents.android-maven'
+
 apply plugin: 'maven-publish'
 
 
 
 def isReleaseBuild() {
-    return VERSION_NAME.contains("SNAPSHOT") == false
+    return !VERSION_NAME.contains("SNAPSHOT")
 }
 
 def getOutputDir() {
@@ -20,6 +23,7 @@ def getOutputDir() {
   }
 }
 
+// used onlu if developing to s3: currently unused
 def getDestUrl() {
   if (isReleaseBuild()) {
       return "s3://plensee-maven/android/releases"
@@ -28,24 +32,25 @@ def getDestUrl() {
   }
 }
 task sourcesJar(type: Jar, dependsOn:classes) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from sourceSets.main.allSource
 }
-
-task javadocJar(type: Jar, dependsOn:javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
+    pluginsMapConfiguration.set(
+            ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
+    )
 }
 
-task kotlinJavadocJar(type: Jar, dependsOn:javadoc) {
-    classifier = 'javadoc'
-    from "$buildDir/javadoc"
+// see https://kotlinlang.org/docs/dokka-gradle.html#build-javadoc-jar
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set('javadoc')
+    from dokkaJavadoc.outputDirectory
 }
 
 
 artifacts {
+    archives javadocJar
     archives sourcesJar
-    archives kotlinJavadocJar
 }
 
 
@@ -54,13 +59,13 @@ afterEvaluate { project ->
     publishing {
         publications {
             maven(MavenPublication) {
+                from components.java
                 groupId GROUP_MAVEN_PUSH
                 artifactId POM_ARTIFACT_ID
                 version VERSION_NAME
 
-                from components.java
                 artifact sourcesJar
-                //artifact dokkaJar
+                artifact javadocJar
                 pom {
                     name = POM_NAME
                     description = POM_DESCRIPTION

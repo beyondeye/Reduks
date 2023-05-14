@@ -1,6 +1,5 @@
-// maven publish configuration of a kotlin ANDROID library
+// maven publish configuration of a java (non-android) library
 
-// see https://developer.android.com/studio/build/maven-publish-plugin
 // see https://docs.gradle.org/current/userguide/publishing_maven.html
 // see https://docs.gradle.org/current/userguide/publishing_setup.html#sec:basic_publishing
 // see https://docs.gradle.org/current/userguide/publishing_customization.html#sec:publishing_custom_artifacts_to_maven
@@ -32,40 +31,19 @@ def getDestUrl() {
       return "s3://plensee-maven/android/snapshots"
   }
 }
-task sourcesJar(type: Jar) {
+task sourcesJar(type: Jar, dependsOn:classes) {
     archiveClassifier.set('sources')
-    if (project.plugins.findPlugin("com.android.library")) {
-        from android.sourceSets.main.java.srcDirs
-        from android.sourceSets.main.kotlin.srcDirs
-    } else {
-        from sourceSets.main.java.srcDirs
-        from sourceSets.main.kotlin.srcDirs
-    }
+    from sourceSets.main.allSource
 }
-
-tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
-    pluginsMapConfiguration.set(
-            ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
-    )
-}
-
-
-
-//task androidJavadocs(type: Javadoc) {
-//    source = android.sourceSets.main.java.srcDirs
-//    classpath += configurations.javadocDeps
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    exclude '**/BuildConfig.java'
-//    exclude '**/R.java'
-//    failOnError false //don't stop build if error in building javadocs
-//}
-
-// see https://kotlinlang.org/docs/dokka-gradle.html#build-javadoc-jar
-task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+task javadocJar(type: Jar, dependsOn:javadoc) {
     archiveClassifier.set('javadoc')
-    from dokkaJavadoc.outputDirectory
+    from javadoc.destinationDir
 }
 
+//task javadocJar(type: Jar, dependsOn:javadoc) {
+//    archiveClassifier.set('javadoc')
+//    from "$buildDir/javadoc"
+// }
 
 artifacts {
     archives javadocJar
@@ -77,29 +55,8 @@ afterEvaluate { project ->
 
     publishing {
         publications {
-//            debug(MavenPublication) {
-//                // Applies the component for the debug build variant.
-//                from components.debug
-//                artifact sourcesJar
-//                artifact javadocJar
-//
-//                groupId GROUP_MAVEN_PUSH
-//                artifactId POM_ARTIFACT_ID
-//                version VERSION_NAME
-//
-//                //artifact sourcesJar
-//                //artifact dokkaJar
-//                pom {
-//                    name = POM_NAME
-//                    description = POM_DESCRIPTION
-//              }
-//            }
-
-            release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
-
+            maven(MavenPublication) {
+                from components.java
                 groupId GROUP_MAVEN_PUSH
                 artifactId POM_ARTIFACT_ID
                 version VERSION_NAME
