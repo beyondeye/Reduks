@@ -1,8 +1,24 @@
+//pluginManagement {
+//    repositories {
+//        google()
+//        mavenCentral()
+//        gradlePluginPortal()
+//    }
+//}
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        maven { url "https://jitpack.io" }
+//    }
+//}
+
 include ':reduks'
 include ':reduks-core-async'
 include ':reduks-core-modules'
 include ':reduks-android'
-include ':reduks-devtools'
+//include ':reduks-devtools'
 //include ':reduks-rx'
 //include ':reduks-kovenant'
 include ':reduks-async'
@@ -10,8 +26,8 @@ include ':reduks-logger'
 include ':reduks-pcollections'
 include ':reduks-bus'
 include ':reduks-saga'
-include ':knit'
-include ':code_fragments'
+//include ':knit'
+//include ':code_fragments'
 include ':kjsonpatch-core'
 //include ':example/counter'
 //include ':example/counter-android'
