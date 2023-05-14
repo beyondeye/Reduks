@@ -1,3 +1,19 @@
+ allprojects {
+     repositories {
+         mavenLocal()
+         google()
+         mavenCentral()
+         maven { url "https://jitpack.io" }
+         maven {
+             url 'https://plugins.gradle.org/m2/'
+         }
+
+         maven {
+             url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+         }
+     }
+ }
+
 ext.versions = [
         minSdk               : 24,
         targetSdk            : 33,
