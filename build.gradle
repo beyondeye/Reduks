@@ -1,4 +1,21 @@
 apply from: 'buildsystem/dependencies.gradle'
+
+buildscript {
+    apply from: 'buildsystem/dependencies.gradle'
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
+        classpath "com.android.tools.build:gradle:${versions.android_gradle_plugin}"
+        classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:${versions.dexcount_gradle_plugin}"
+//        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$versions.dokka"
+    }
+}
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 //COMMON BUILD TOOL AND SDK VERSION FOR ALL MODULES
@@ -12,21 +29,18 @@ ext {
     kotlinJvmTarget=1.8
 }
 
-allprojects {
-   repositories {
-       google()
-       mavenCentral()
-       maven { url "https://jitpack.io" }
-   }
-    configurations {
-        javadocDeps
-    }
 
+allprojects {
     //Test Logging
     tasks.withType(Test) {
         testLogging {
             events "started", "passed", "skipped", "failed"
         }
+    }
+
+    // disable javadoc for kotlin projects
+    tasks.withType(Javadoc).all {
+        enabled = false
     }
 }
 //generic configuration for kotlin subprojects (not used any more: now each subprojects contains its configuration)
@@ -38,17 +52,15 @@ configure(subprojects.findAll{it.name =='some-kotlin-module' ||it.name =='some-o
     group = 'com.github.beyondeye.reduks' //required by jitpack
 
     compileKotlin {
-//        sourceCompatibility = JavaVersion.VERSION_1_8
         sourceCompatibility = sourceCompatibility_ //I want this library to be linkable from android projects
-//        targetCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = targetCompatibility_ //I want this library to be linkable from android projects
-//        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = kotlinJvmTarget
     }
-    dokka {
-        outputFormat = 'html'
-        outputDirectory = "$buildDir/javadoc"
+    // important to set compileTestKotlin jvmTarget otherwise tests will not run
+    // see https://kotlinlang.org/docs/gradle-configure-project.html#check-for-jvm-target-compatibility-of-related-compile-tasks
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = kotlinJvmTarget
     }
-    javadoc.dependsOn dokka
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -105,6 +117,7 @@ configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-de
             sourceCompatibility sourceCompatibility_
             targetCompatibility targetCompatibility_
         }
+        //the following would not be needed if we would move kotlin code to src/main/java
         sourceSets {
             main.java.srcDirs += 'src/main/kotlin'
             test.java.srcDirs += 'src/test/kotlin'
@@ -112,10 +125,6 @@ configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-de
         lintOptions {
             abortOnError false
         }
-    }
-    dokka {
-        outputFormat = 'html'
-        outputDirectory = "$buildDir/documentation"
     }
     dependencies {
         implementation libraries.kotlinStdLib
@@ -127,30 +136,8 @@ configure(subprojects.findAll{it.name =='code_fragments' || it.name =='reduks-de
         testImplementation libraries.equalsverifier
     }
 }
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    rootProject.ext.versions = [
-            kotlin: '1.6.10',
-            dokka: '0.10.1'
-    ]
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$rootProject.versions.kotlin"
-        classpath 'com.android.tools.build:gradle:7.0.0'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
-//        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$rootProject.versions.dokka"
-    }
-}
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-////task for updating gradle
-//task wrapper(type: Wrapper) {
-//    gradleVersion = '4.10.1'
-//}
