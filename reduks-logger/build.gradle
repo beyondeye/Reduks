@@ -38,6 +38,12 @@ android {
             withJavadocJar()
         }
     }
+    //config for robolectric
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 repositories {

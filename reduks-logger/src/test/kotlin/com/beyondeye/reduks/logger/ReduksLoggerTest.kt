@@ -1,27 +1,22 @@
 package com.beyondeye.reduks.logger
 
-import android.os.Build
 import com.beyondeye.reduks.ReducerFn
 import com.beyondeye.reduks.SimpleStore
 import com.beyondeye.reduks.logger.logformatter.LogFormatterSettings
 import com.beyondeye.reduks.middlewares.applyMiddleware
-import com.beyondeye.reduks_logger.BuildConfig
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions
 import org.junit.Before
 
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 /**
  * Created by daely on 7/27/2016.
  * use robolectric because LogFormatterPrinter depends from org.json in android sdk
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class,sdk = intArrayOf(Build.VERSION_CODES.M))
 class ReduksLoggerTest {
 
     @Before
