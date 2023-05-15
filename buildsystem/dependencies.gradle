@@ -47,7 +47,7 @@ ext.libraries = [
         // UI libs. see https://developer.android.com/jetpack/androidx/migrate for migrating to androidx
         //https://developer.android.com/jetpack/androidx/versions
         supportCompat           : "androidx.core:core:1.6.0",
-        supportAppCompat        : "androidx.appcompat:appcompat:1.3.1",
+        supportAppCompat        : "androidx.appcompat:appcompat:1.6.1",
         supportCardView         : "androidx.cardview:cardview:1.0.0",
         supportPalette          : "androidx.palette:palette:1.0.0",
         supportGridLayout       : "androidx.gridlayout:gridlayout:1.0.0",
@@ -63,13 +63,13 @@ ext.libraries = [
         //https://github.com/material-components/material-components-android/releases
         supportMaterial           : "com.google.android.material:material:1.4.0",
         //lifecycle: see https://developer.android.com/jetpack/androidx/releases/lifecycle
-        //latest updated deps on 3/6/2021
-        archLifecycleLiveData        : "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1",
-        archLifecycleProcess         : "androidx.lifecycle:lifecycle-process:2.3.1",
-        archLifecycleViewModel        : "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1",
-        archLifecycleViewModelSavedState        : "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.1",
-        archLifecycleRunTime        : "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1",
-        archLifecycleCompiler       : "androidx.lifecycle:lifecycle-compiler:2.3.1",
+        //latest updated deps on 15/5/2023
+        archLifecycleLiveData        : "androidx.lifecycle:lifecycle-livedata-ktx:2.6.1",
+        archLifecycleProcess         : "androidx.lifecycle:lifecycle-process:2.6.1",
+        archLifecycleViewModel        : "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1",
+        archLifecycleViewModelSavedState        : "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1",
+        archLifecycleRunTime        : "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1",
+        archLifecycleCompiler       : "androidx.lifecycle:lifecycle-compiler:2.6.1",
         //dario libs
         kjsonpatch             : "com.github.beyondeye:kjsonpatch:0.3.22",
 
