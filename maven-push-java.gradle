@@ -98,6 +98,16 @@ afterEvaluate { project ->
             }
         }
         repositories {
+            // configuration to publish to github packages:
+            // see https://docs.github.com/en/actions/publishing-packages/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/beyondeye/reduks")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
             maven {
                 name = 'myRepo'
 //                url = "file:///" + getOutputDir() ////can also be used to copy to local file
