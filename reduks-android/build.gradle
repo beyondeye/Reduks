@@ -77,4 +77,4 @@ dependencies {
     //kapt libraries.archLifecycleCompiler
 }
 
-apply from: '../maven-push.gradle'
+apply from: '../maven-push-android.gradle'

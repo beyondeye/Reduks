@@ -3,4 +3,4 @@ dependencies {
     testImplementation libraries.rxJava
 }
 
-apply from: '../maven-push.gradle'
+apply from: '../maven-push-android.gradle'

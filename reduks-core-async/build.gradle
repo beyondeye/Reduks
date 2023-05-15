@@ -40,5 +40,5 @@ dependencies {
 //    apiElements libraries.kotlinCoroutinesAndroid //coroutines are part of the library api
 }
 
-apply from: '../maven-push-javalib.gradle'
+apply from: '../maven-push-kotlin.gradle'
 

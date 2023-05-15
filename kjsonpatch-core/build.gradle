@@ -27,4 +27,4 @@ dependencies {
     testImplementation libraries.junit
 }
 
-apply from: '../maven-push-javalib.gradle'
+apply from: '../maven-push-kotlin.gradle'

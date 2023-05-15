@@ -11,5 +11,5 @@ dependencies {
     testImplementation libraries.assertJ
 }
 
-apply from: '../maven-push-javalib-java.gradle'
+apply from: '../maven-push-java.gradle'
 

@@ -34,5 +34,5 @@ dependencies {
     implementation project(':reduks-core')
 }
 
-apply from: '../maven-push-javalib.gradle'
+apply from: '../maven-push-kotlin.gradle'
 
