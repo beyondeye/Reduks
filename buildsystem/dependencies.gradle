@@ -46,7 +46,7 @@ ext.libraries = [
         supportMultidex         : "androidx.multidex:multidex:2.0.1",
         // UI libs. see https://developer.android.com/jetpack/androidx/migrate for migrating to androidx
         //https://developer.android.com/jetpack/androidx/versions
-        supportCompat           : "androidx.core:core:1.6.0",
+        supportCompat           : "androidx.core:core:1.10.1",
         supportAppCompat        : "androidx.appcompat:appcompat:1.6.1",
         supportCardView         : "androidx.cardview:cardview:1.0.0",
         supportPalette          : "androidx.palette:palette:1.0.0",
