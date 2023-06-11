@@ -2,8 +2,9 @@ package com.beyondeye.reduks.bus
 
 import com.beyondeye.reduks.pcollections.HashTreePMap
 import com.beyondeye.reduks.pcollections.PMap
+import java.io.Serializable
 
-class BusData(val data: PMap<String, Any>) {
+class BusData(val data: PMap<String, Any>):Serializable {
     companion object {
         val empty = BusData(HashTreePMap.empty())
     }

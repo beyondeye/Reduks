@@ -3,8 +3,9 @@ package com.beyondeye.reduksAndroid.fragment
 import androidx.fragment.app.Fragment
 import com.beyondeye.reduks.pcollections.HashTreePMap
 import com.beyondeye.reduks.pcollections.PMap
+import java.io.Serializable
 
-class FragmentActiveStatus(val mode:Int){
+class FragmentActiveStatus(val mode:Int): Serializable {
     fun isActive()=(mode and CODE_FRAGMENT_ACTIVESTATUS_ACTIVE)!=0
     fun isInactive()=(mode and CODE_FRAGMENT_ACTIVESTATUS_INACTIVE)!=0
     fun isNotCreated()=(mode and CODE_FRAGMENT_ACTIVESTATUS_NOT_CREATED)!=0
@@ -24,7 +25,7 @@ class FragmentActiveStatus(val mode:Int){
         val fragmentStatusInactive =FragmentActiveStatus(CODE_FRAGMENT_ACTIVESTATUS_INACTIVE)
     }
 }
-class FragmentStatusData(val fsdata: PMap<String,FragmentActiveStatus>, val fpdata:PMap<String,String>){
+class FragmentStatusData(val fsdata: PMap<String,FragmentActiveStatus>, val fpdata:PMap<String,String>):Serializable {
     companion object {
         val empty:FragmentStatusData=FragmentStatusData(HashTreePMap.empty(),HashTreePMap.empty())
     }
