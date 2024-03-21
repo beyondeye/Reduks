@@ -28,6 +28,7 @@ dependencies {
     testImplementation libraries.junit
     testImplementation libraries.assertJ
     testImplementation libraries.rxJava
+    testImplementation project(':reduks-pcollections')
 
 }
 
